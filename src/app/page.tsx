@@ -1,12 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
-import { createWorker } from "tesseract.js";
+import { ChangeEvent, useEffect, useState } from "react";
+import { createWorker, ImageLike } from "tesseract.js";
 
 export default function Home() {
-  const [file, setFile] = useState("");
+  const [file, setFile] = useState<ImageLike | File>("");
 
-  function handleChange(event: any) {
-    setFile(event.target.files[0]);
+  function handleChange(event: ChangeEvent) {
+    const target = event.target as HTMLInputElement;
+    const file: File = (target.files as FileList)[0];
+    if (file) {
+      setFile(file);
+    }
   }
 
   const getImageText = async () => {
@@ -29,7 +33,10 @@ export default function Home() {
         Teseracto
         <form>
           <h1>React File Upload</h1>
-          <input type="file" onChange={handleChange} />
+          <input
+            type="file"
+            onChange={handleChange}
+          />
           <button type="submit">Upload</button>
         </form>
       </main>
