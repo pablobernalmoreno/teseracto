@@ -1,6 +1,6 @@
 "use client";
 import { ChangeEvent, useEffect, useState } from "react";
-import { createWorker, ImageLike } from "tesseract.js";
+import { createWorker } from "tesseract.js";
 
 export default function Home() {
   const [files, setFiles] = useState<FileList>();
