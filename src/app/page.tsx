@@ -1,13 +1,64 @@
 "use client";
 import { ChangeEvent, useEffect, useState } from "react";
 import { createWorker } from "tesseract.js";
+import { parseDates } from "./utils/data";
+
+const expectedArray = [
+  {
+    date: "13 abril 2025",
+    money: "61.500,00",
+    id: 0,
+  },
+  {
+    date: "06/04/2025",
+    money: "144.000,00",
+    id: 1,
+  },
+  {
+    date: "16 de abril de 2025",
+    money: "117.000,00",
+    id: 2,
+  },
+  {
+    date: "16 de abril de 2025",
+    money: "65.000,00",
+    id: 3,
+  },
+  {
+    date: "20 Abr 2025",
+    money: "46.500",
+    id: 4,
+  },
+  {
+    date: "20 Abr 2025",
+    money: "96.000",
+    id: 5,
+  },
+  {
+    date: "20 Abr 2025",
+    money: "17.000",
+    id: 6,
+  },
+  {
+    date: "20 Abr 2025",
+    money: "55.500",
+    id: 7,
+  },
+  {
+    date: "20 Abr 2025",
+    money: "33.000",
+    id: 8,
+  },
+];
+
 
 export default function Home() {
   const [files, setFiles] = useState<FileList>();
+  const [filePath, setFilePath] = useState(expectedArray);
 
   function handleChange(event: ChangeEvent) {
     const target = event.target as HTMLInputElement;
-    const file = (target.files as FileList);
+    const file = target.files as FileList;
     if (file) {
       setFiles(file);
     }
@@ -15,13 +66,18 @@ export default function Home() {
 
   const getImageText = async () => {
     const worker = await createWorker("eng");
+    const paths = [];
     if (files?.length) {
       for (let i = 0; i < files?.length; ++i) {
         const file = files[i];
         const ret = await worker.recognize(file);
         const ocrText = ret.data.text;
-        console.log(ocrText);
-    }
+        paths.push(ocrText);
+      }
+      setFilePath([]);
+      const expectedDatesArray = parseDates(paths);
+
+      console.log({ paths, expectedDatesArray, filePath });
     }
     await worker.terminate();
   };
@@ -38,11 +94,7 @@ export default function Home() {
         Teseracto
         <form>
           <h1>React File Upload</h1>
-          <input
-            type="file"
-            multiple
-            onChange={handleChange}
-          />
+          <input type="file" multiple onChange={handleChange} />
           <button type="submit">Upload</button>
         </form>
       </main>
