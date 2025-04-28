@@ -1,60 +1,21 @@
 "use client";
 import { ChangeEvent, useEffect, useState } from "react";
 import { createWorker } from "tesseract.js";
-import { parseDates } from "./utils/data";
+import {
+  combineDatesAndCurrency,
+  extractCurrencyValues,
+  parseDates,
+} from "./utils/data";
 
-const expectedArray = [
-  {
-    date: "13 abril 2025",
-    money: "61.500,00",
-    id: 0,
-  },
-  {
-    date: "06/04/2025",
-    money: "144.000,00",
-    id: 1,
-  },
-  {
-    date: "16 de abril de 2025",
-    money: "117.000,00",
-    id: 2,
-  },
-  {
-    date: "16 de abril de 2025",
-    money: "65.000,00",
-    id: 3,
-  },
-  {
-    date: "20 Abr 2025",
-    money: "46.500",
-    id: 4,
-  },
-  {
-    date: "20 Abr 2025",
-    money: "96.000",
-    id: 5,
-  },
-  {
-    date: "20 Abr 2025",
-    money: "17.000",
-    id: 6,
-  },
-  {
-    date: "20 Abr 2025",
-    money: "55.500",
-    id: 7,
-  },
-  {
-    date: "20 Abr 2025",
-    money: "33.000",
-    id: 8,
-  },
-];
-
+interface mainData {
+  date: string;
+  money: string;
+  id: number;
+}
 
 export default function Home() {
   const [files, setFiles] = useState<FileList>();
-  const [filePath, setFilePath] = useState(expectedArray);
+  const [pathData, setPathData] = useState<mainData[]>([]);
 
   function handleChange(event: ChangeEvent) {
     const target = event.target as HTMLInputElement;
@@ -74,10 +35,14 @@ export default function Home() {
         const ocrText = ret.data.text;
         paths.push(ocrText);
       }
-      setFilePath([]);
       const expectedDatesArray = parseDates(paths);
+      const expectedCurrencyArray = extractCurrencyValues(paths);
+      const result = combineDatesAndCurrency(
+        expectedDatesArray,
+        expectedCurrencyArray
+      );
 
-      console.log({ paths, expectedDatesArray, filePath });
+      setPathData(result);
     }
     await worker.terminate();
   };
