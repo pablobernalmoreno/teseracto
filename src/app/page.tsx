@@ -17,13 +17,16 @@ export default function Home() {
   const [files, setFiles] = useState<FileList>();
   const [pathData, setPathData] = useState<mainData[]>([]);
 
-  function handleChange(event: ChangeEvent) {
+  const handleChange = (event: ChangeEvent) => {
     const target = event.target as HTMLInputElement;
     const file = target.files as FileList;
     if (file) {
       setFiles(file);
     }
   }
+
+  console.log({pathData});
+  
 
   const getImageText = async () => {
     const worker = await createWorker("eng");
