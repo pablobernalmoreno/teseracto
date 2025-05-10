@@ -4,6 +4,8 @@ import { createWorker } from "tesseract.js";
 import {
   combineDatesAndCurrency,
   extractCurrencyValues,
+  findInvalidEntries,
+  isCombinedDataValid,
   parseDates,
 } from "./utils/data";
 
@@ -23,10 +25,9 @@ export default function Home() {
     if (file) {
       setFiles(file);
     }
-  }
+  };
 
-  console.log({pathData});
-  
+  console.log({ pathData });
 
   const getImageText = async () => {
     const worker = await createWorker("eng");
@@ -44,6 +45,13 @@ export default function Home() {
         expectedDatesArray,
         expectedCurrencyArray
       );
+
+      if (!isCombinedDataValid(result)) {
+        console.warn("Some entries are missing date or currency. Prompt user.");
+        console.log(findInvalidEntries(result));
+      } else {
+        console.log("All good. Proceed with:", result);
+      }
 
       setPathData(result);
     }
