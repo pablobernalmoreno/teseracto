@@ -3,7 +3,7 @@ import { es } from "date-fns/locale";
 
 export const parseDates = (pathsArray: string[]): (string | null)[] => {
   return pathsArray.map((entry) => {
-    let match =
+    const match =
       entry.match(/(\d{1,2})\s+de\s+([a-zA-ZñÑ]+)\s+de\s+(2025)/i) ||
       entry.match(/(\d{1,2})\s+([a-zA-ZñÑ]+)\s+(2025)/i);
 
