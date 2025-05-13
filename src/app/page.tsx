@@ -18,6 +18,7 @@ interface mainData {
 export default function Home() {
   const [files, setFiles] = useState<FileList>();
   const [pathData, setPathData] = useState<mainData[]>([]);
+  const [sources, setSources] = useState<string[]>([''])
 
   const handleChange = (event: ChangeEvent) => {
     const target = event.target as HTMLInputElement;
@@ -27,18 +28,21 @@ export default function Home() {
     }
   };
 
-  console.log({ pathData });
 
   const getImageText = async () => {
     const worker = await createWorker("eng");
     const paths = [];
+    const sources = ['']
     if (files?.length) {
       for (let i = 0; i < files?.length; ++i) {
-        const file = files[i];
+        const file = files[i];     
         const ret = await worker.recognize(file);
         const ocrText = ret.data.text;
+        sources.push(URL.createObjectURL(file))
         paths.push(ocrText);
       }
+      sources.shift()
+      setSources(sources)   
       const expectedDatesArray = parseDates(paths);
       const expectedCurrencyArray = extractCurrencyValues(paths);
       const result = combineDatesAndCurrency(
@@ -58,11 +62,14 @@ export default function Home() {
     await worker.terminate();
   };
 
+  
+  console.log({ pathData, files, sources });
   useEffect(() => {
     if (files?.length !== 0) {
       getImageText();
     }
   }, [files]);
+  
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -73,6 +80,7 @@ export default function Home() {
           <input type="file" multiple onChange={handleChange} />
           <button type="submit">Upload</button>
         </form>
+        {}
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         Pablo Bernal Moreno
