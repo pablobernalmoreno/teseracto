@@ -8,6 +8,9 @@ import {
   isCombinedDataValid,
   parseDates,
 } from "./utils/data";
+import { AppBarMenu } from "./components/AppBarMenu";
+import { Box, Button, Typography } from "@mui/material";
+import './page.css';
 
 interface mainData {
   date: string;
@@ -18,7 +21,7 @@ interface mainData {
 export default function Home() {
   const [files, setFiles] = useState<FileList>();
   const [pathData, setPathData] = useState<mainData[]>([]);
-  const [sources, setSources] = useState<string[]>([''])
+  const [sources, setSources] = useState<string[]>([""]);
 
   const handleChange = (event: ChangeEvent) => {
     const target = event.target as HTMLInputElement;
@@ -28,21 +31,20 @@ export default function Home() {
     }
   };
 
-
   const getImageText = async () => {
     const worker = await createWorker("eng");
     const paths = [];
-    const sources = ['']
+    const sources = [""];
     if (files?.length) {
       for (let i = 0; i < files?.length; ++i) {
-        const file = files[i];     
+        const file = files[i];
         const ret = await worker.recognize(file);
         const ocrText = ret.data.text;
-        sources.push(URL.createObjectURL(file))
+        sources.push(URL.createObjectURL(file));
         paths.push(ocrText);
       }
-      sources.shift()
-      setSources(sources)   
+      sources.shift();
+      setSources(sources);
       const expectedDatesArray = parseDates(paths);
       const expectedCurrencyArray = extractCurrencyValues(paths);
       const result = combineDatesAndCurrency(
@@ -62,29 +64,55 @@ export default function Home() {
     await worker.terminate();
   };
 
-  
-  console.log({ pathData, files, sources });
   useEffect(() => {
     if (files?.length !== 0) {
       getImageText();
     }
   }, [files]);
-  
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        Teseracto
-        <form>
-          <h1>React File Upload</h1>
-          <input type="file" multiple onChange={handleChange} />
-          <button type="submit">Upload</button>
-        </form>
-        {}
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        Pablo Bernal Moreno
-      </footer>
-    </div>
+    <>
+      <AppBarMenu />
+      <Box className="mainBox">
+        <section
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "50%",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="h3"
+            sx={{
+              color: "#2E2E2E",
+              fontWeight: "bold",
+            }}
+          >
+            Titulo!
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{
+              color: "#2E2E2E",
+            }}
+          >
+            Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui
+            lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat.
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "row" }}>
+            <Button
+              variant="contained"
+              sx={{ background: "#464033", textTransform: "none" }}
+            >
+              Empecemos
+            </Button>
+            <Button sx={{ color: "#2E2E2E", textTransform: "none" }}>
+              Más info
+            </Button>
+          </Box>
+        </section>
+      </Box>
+    </>
   );
 }
