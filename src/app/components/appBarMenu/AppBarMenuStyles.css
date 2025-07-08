@@ -1,0 +1,19 @@
+.appbar_container {
+  flex-grow: 1;
+}
+
+.appbar {
+  background: none;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.appbar_buttons {
+  text-transform: none;
+  color: #2e2e2e;
+  font-weight: bold;
+  font-size: 18px;
+}

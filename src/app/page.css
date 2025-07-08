@@ -1,7 +1,38 @@
-.mainBox {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.main_box {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  align-items: center;
+}
+
+.title {
+  color: #2e2e2e;
+  font-weight: bold;
+}
+
+.description {
+  color: #2e2e2e;
+}
+
+.main_buttons_container {
+  display: flex;
+  flex-direction: row;
+}
+
+.get_started {
+  background: #464033 !important;
+  text-transform: none !important;
+}
+
+.more_info {
+  color: #2e2e2e !important;
+  text-transform: none !important;
 }

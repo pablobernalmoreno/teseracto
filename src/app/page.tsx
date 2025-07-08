@@ -8,9 +8,9 @@ import {
   isCombinedDataValid,
   parseDates,
 } from "./utils/data";
-import { AppBarMenu } from "./components/AppBarMenu";
+import { AppBarMenu } from "./components/appBarMenu/AppBarMenu";
 import { Box, Button, Typography } from "@mui/material";
-import './page.css';
+import "./page.css";
 
 interface mainData {
   date: string;
@@ -73,41 +73,23 @@ export default function Home() {
   return (
     <>
       <AppBarMenu />
-      <Box className="mainBox">
-        <section
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            width: "50%",
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            variant="h3"
-            sx={{
-              color: "#2E2E2E",
-              fontWeight: "bold",
-            }}
-          >
+      <Box className="main_box">
+        <section>
+          <Typography className="title" variant="h3">
             Titulo!
           </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: "#2E2E2E",
-            }}
-          >
+          <Typography variant="h6" className="description">
             Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui
             lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat.
           </Typography>
-          <Box sx={{ display: "flex", flexDirection: "row" }}>
+          <Box className="main_buttons_container">
             <Button
+              className="get_started"
               variant="contained"
-              sx={{ background: "#464033", textTransform: "none" }}
             >
               Empecemos
             </Button>
-            <Button sx={{ color: "#2E2E2E", textTransform: "none" }}>
+            <Button className="more_info">
               Más info
             </Button>
           </Box>
