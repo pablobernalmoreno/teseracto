@@ -1,5 +1,5 @@
 "use client";
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Button, Divider, TextField, Typography } from "@mui/material";
 import React from "react";
 import "./loginStyles.css";
 import Image from "next/image";
@@ -13,26 +13,33 @@ const page = () => {
       <Box className="login_form_container">
         <form className="login_form">
           <Box mb={2}>
-            <input
+            <TextField
+              fullWidth
               type="email"
               name="email"
-              placeholder="Correo electrónico"
-              className="login_input"
+              label="Correo electrónico"
+              variant="outlined"
               required
             />
           </Box>
           <Box mb={2}>
-            <input
+            <TextField
+              fullWidth
               type="password"
               name="password"
-              placeholder="Contraseña"
-              className="login_input"
+              label="Contraseña"
+              variant="outlined"
               required
             />
           </Box>
-          <button type="submit" className="login_button">
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            className="get_started"
+          >
             Iniciar Sesión
-          </button>
+          </Button>
         </form>
         <Box my={2}>
           <Divider>
@@ -43,14 +50,36 @@ const page = () => {
         </Box>
 
         <Box className="sso_buttons">
-          <button className="sso_button google_button">
-            <Image src="/login/google_login.png" alt="Google" width={50} height={50}/>
+          <Button
+            fullWidth
+            variant="outlined"
+            className="sso_button"
+            startIcon={
+              <Image
+                src="/login/google_login.png"
+                alt="Google"
+                width={24}
+                height={24}
+              />
+            }
+          >
             Continuar con Google
-          </button>
-          <button className="sso_button facebook_button">
-            <Image src="/login/facebook_login.png" alt="Facebook" width={50} height={50}/>
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            className="sso_button"
+            startIcon={
+              <Image
+                src="/login/facebook_login.png"
+                alt="Facebook"
+                width={24}
+                height={24}
+              />
+            }
+          >
             Continuar con Facebook
-          </button>
+          </Button>
         </Box>
       </Box>
     </div>

@@ -15,8 +15,13 @@
 
 .login_form_container {
   margin: 2rem;
+  padding: 3rem;
   background-color: #ffffff;
   width: 30rem;
-  height: 35rem;
+  height: 25rem;
   border-radius: 5%;
+}
+
+.sso_button{
+  margin: 0.5rem !important;
 }
