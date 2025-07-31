@@ -1,5 +1,5 @@
 "use client";
-import { Box, Button, Divider, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material";
 import React from "react";
 import "./loginStyles.css";
 import Image from "next/image";
@@ -80,6 +80,14 @@ const page = () => {
           >
             Continuar con Facebook
           </Button>
+        </Box>
+        <Box mt={2} textAlign="center">
+          <Typography variant="body2" color="textSecondary">
+            ¿No tienes una cuenta?
+            <Link href="/register" underline="hover">
+              Crear cuenta
+            </Link>
+          </Typography>
         </Box>
       </Box>
     </div>
