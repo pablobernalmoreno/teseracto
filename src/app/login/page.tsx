@@ -1,10 +1,19 @@
 "use client";
-import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Divider,
+  Link,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React from "react";
 import "./loginStyles.css";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const page = () => {
+  const router = useRouter();
   return (
     <div className="login_container">
       <Typography className="login_title" variant="h4">
@@ -37,6 +46,7 @@ const page = () => {
             variant="contained"
             fullWidth
             className="get_started"
+            onClick={() => router.push("/main")}
           >
             Iniciar Sesión
           </Button>
