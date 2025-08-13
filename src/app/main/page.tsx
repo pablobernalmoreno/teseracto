@@ -1,9 +1,13 @@
-import React from 'react'
+import React from "react";
+import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <>
+      <AppBarMenu isLogged />
+      page
+    </>
+  );
+};
 
-export default page
+export default page;
