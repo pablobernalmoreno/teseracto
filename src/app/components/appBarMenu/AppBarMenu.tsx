@@ -2,7 +2,7 @@
 import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import React from "react";
 import "./AppBarMenuStyles.css";
 
@@ -35,6 +35,9 @@ const loggedInButtons = () => {
       <Box>
         <Button className="appbar_buttons" href="/login">
           <NotificationsIcon />
+        </Button>
+        <Button className="appbar_buttons" href="/login">
+          <AccountCircleIcon />
         </Button>
       </Box>
     </>
