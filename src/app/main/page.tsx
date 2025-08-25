@@ -14,6 +14,9 @@ const page = () => {
       description: "Chameleons are known for their color-changing abilities",
     },
   ];
+
+  const newItem = { id: 4, name: "newItemCard", description: "" };
+  mappedItems.unshift(newItem);
   return (
     <>
       <AppBarMenu isLogged />
