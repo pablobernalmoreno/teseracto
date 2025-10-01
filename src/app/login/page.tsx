@@ -7,11 +7,49 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import "./loginStyles.css";
 import Image from "next/image";
+import supabase from "@/config/supabaseClient";
+import { redirect } from "next/navigation";
+
+interface User {
+  email: string;
+  password: string;
+}
+
+const initialUserState: User = {
+  email: "",
+  password: "",
+};
+
+const errorMessageInitialState: string = "";
 
 const page = () => {
+  const [user, setUser] = useState<User>(initialUserState);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log({ user });
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: user.password,
+    });
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      setErrorMessage(errorMessageInitialState);
+      redirect("/main");
+    }
+  };
+
   return (
     <div className="login_container">
       <Typography className="login_title" variant="h4">
@@ -27,6 +65,8 @@ const page = () => {
               label="Correo electrónico"
               variant="outlined"
               required
+              onChange={handleInputChange}
+              error={!!errorMessage}
             />
           </Box>
           <Box mb={2}>
@@ -37,6 +77,9 @@ const page = () => {
               label="Contraseña"
               variant="outlined"
               required
+              onChange={handleInputChange}
+              error={!!errorMessage}
+              helperText={errorMessage}
             />
           </Box>
           <Button
@@ -44,7 +87,8 @@ const page = () => {
             variant="contained"
             fullWidth
             className="get_started"
-            href="/main"
+            onClick={onSubmit}
+            // href="/main"
           >
             Iniciar Sesión
           </Button>

@@ -17,6 +17,7 @@ const page = () => {
 
   const newItem = { id: 4, name: "newItemCard", description: "" };
   mappedItems.unshift(newItem);
+
   return (
     <>
       <AppBarMenu isLogged />
