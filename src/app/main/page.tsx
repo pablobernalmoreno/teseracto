@@ -1,8 +1,15 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, Paper, Typography } from "@mui/material";
 import { ItemCard } from "../components/dashboard/ItemCard";
+import supabase from "@/config/supabaseClient";
 import "./mainStyles.css";
+
+const getData = async () => {
+  const { data, error } = await supabase.from("user_profile").select();
+  console.log({ data, error });
+};
 
 const page = () => {
   const mappedItems = [
@@ -17,6 +24,10 @@ const page = () => {
 
   const newItem = { id: 4, name: "newItemCard", description: "" };
   mappedItems.unshift(newItem);
+
+  // useEffect(() => {
+    getData()
+  // }, []);
 
   return (
     <>
