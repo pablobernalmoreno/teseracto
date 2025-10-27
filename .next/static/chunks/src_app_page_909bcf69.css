@@ -1,0 +1,42 @@
+/* [project]/src/app/page.css [app-client] (css) */
+.main_box {
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+section {
+  flex-direction: column;
+  align-items: center;
+  width: 50%;
+  display: flex;
+}
+
+.title {
+  color: #2e2e2e;
+  font-weight: bold;
+}
+
+.description {
+  color: #2e2e2e;
+}
+
+.main_buttons_container {
+  flex-direction: row;
+  display: flex;
+}
+
+.get_started {
+  text-transform: none !important;
+  background: #464033 !important;
+}
+
+.more_info {
+  color: #2e2e2e !important;
+  text-transform: none !important;
+}
+
+
+/*# sourceMappingURL=src_app_page_909bcf69.css.map*/

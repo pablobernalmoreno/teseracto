@@ -1,9 +1,17 @@
 "use client";
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import "../login/loginStyles.css";
+import { initialUserState, User } from "../login/page";
 
 const page = () => {
+  const [user, setUser] = useState<User>(initialUserState);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+  };
+
   return (
     <div className="login_container">
       <Typography className="login_title" variant="h4">

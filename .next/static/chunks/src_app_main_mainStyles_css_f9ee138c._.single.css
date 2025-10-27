@@ -1,0 +1,27 @@
+/* [project]/src/app/main/mainStyles.css [app-client] (css) */
+.dashboard_header {
+  padding: 1rem;
+}
+
+.dashboard_background {
+  background-color: #c9c9c9;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.dashboard_container {
+  background-color: #fff;
+  border-radius: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  width: 90%;
+  height: 90%;
+  display: flex;
+}
+
+/*# sourceMappingURL=src_app_main_mainStyles_css_f9ee138c._.single.css.map*/

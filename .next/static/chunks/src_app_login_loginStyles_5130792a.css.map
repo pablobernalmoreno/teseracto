@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file://C%3A/Users/pbm19/Documents/teseracto/src/app/login/loginStyles.css"],"sourcesContent":[".login_container {\r\n  width: 100vw;\r\n  height: 100vh;\r\n  background-color: #e1e1e1;\r\n  display: flex;\r\n  flex-direction: column;\r\n  justify-content: center;\r\n  align-items: center;\r\n}\r\n\r\n.login_title {\r\n  font-weight: bold;\r\n  color: #434343;\r\n}\r\n\r\n.login_form_container {\r\n  margin: 2rem;\r\n  padding: 3rem;\r\n  background-color: #ffffff;\r\n  width: 30rem;\r\n  height: 25rem;\r\n  border-radius: 5%;\r\n}\r\n\r\n.register_form_container {\r\n  margin: 2rem;\r\n  padding: 3rem;\r\n  background-color: #ffffff;\r\n  width: 30rem;\r\n  height: 22rem;\r\n  border-radius: 5%;\r\n}\r\n\r\n\r\n.sso_button{\r\n  margin: 0.5rem !important;\r\n}"],"names":[],"mappings":"AAAA;;;;;;;;;;AAUA;;;;;AAKA;;;;;;;;;AASA;;;;;;;;;AAUA","debugId":null}}]
+}

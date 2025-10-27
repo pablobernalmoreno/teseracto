@@ -13,12 +13,12 @@ import Image from "next/image";
 import supabase from "@/config/supabaseClient";
 import { redirect } from "next/navigation";
 
-interface User {
+export interface User {
   email: string;
   password: string;
 }
 
-const initialUserState: User = {
+export const initialUserState: User = {
   email: "",
   password: "",
 };
@@ -88,7 +88,7 @@ const page = () => {
             fullWidth
             className="get_started"
             onClick={onSubmit}
-            // href="/main"
+            href="/main"
           >
             Iniciar Sesión
           </Button>
