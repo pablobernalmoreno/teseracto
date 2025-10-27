@@ -27,7 +27,7 @@ const errorMessageInitialState: string = "";
 
 const page = () => {
   const [user, setUser] = useState<User>(initialUserState);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>(errorMessageInitialState);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
