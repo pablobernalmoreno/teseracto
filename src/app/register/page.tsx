@@ -2,10 +2,20 @@
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import "../login/loginStyles.css";
-import { initialUserState, User } from "../login/page";
+import { User } from "../login/page";
+
+interface NewUser extends User {
+  confirm_password: string;
+}
+
+const initialNewUserState: NewUser = {
+  email: "",
+  password: "",
+  confirm_password: "",
+};
 
 const page = () => {
-  const [user, setUser] = useState<User>(initialUserState);
+  const [user, setUser] = useState<NewUser>(initialNewUserState);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,6 +36,7 @@ const page = () => {
               name="email"
               label="Correo electrónico"
               variant="outlined"
+              onChange={handleInputChange}
               required
             />
           </Box>
@@ -36,6 +47,7 @@ const page = () => {
               name="password"
               label="Contraseña"
               variant="outlined"
+              onChange={handleInputChange}
               required
             />
           </Box>
@@ -46,6 +58,7 @@ const page = () => {
               name="confirm_password"
               label="Confirmar Contraseña"
               variant="outlined"
+              onChange={handleInputChange}
               required
             />
           </Box>

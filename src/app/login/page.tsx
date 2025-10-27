@@ -18,7 +18,7 @@ export interface User {
   password: string;
 }
 
-export const initialUserState: User = {
+const initialUserState: User = {
   email: "",
   password: "",
 };
