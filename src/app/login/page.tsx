@@ -88,7 +88,6 @@ const page = () => {
             fullWidth
             className="get_started"
             onClick={onSubmit}
-            href="/main"
           >
             Iniciar Sesión
           </Button>

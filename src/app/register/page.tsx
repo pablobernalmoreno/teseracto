@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import "../login/loginStyles.css";
 import { User } from "../login/page";
 import supabase from "@/config/supabaseClient";
+import { redirect } from "next/navigation";
 
 interface NewUser extends User {
   confirm_password: string;
@@ -38,7 +39,7 @@ const page = () => {
     } else {
       setErrorMessage("");
     }
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: user.email,
       password: user.confirm_password,
     });
@@ -46,7 +47,7 @@ const page = () => {
       setErrorMessage(error.message);
     } else {
       setErrorMessage("");
-      console.log("User registered:", data);
+      redirect("/account_confirmation");
     }
   };
 
