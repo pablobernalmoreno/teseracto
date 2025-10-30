@@ -5,6 +5,7 @@ import "../login/loginStyles.css";
 import { User } from "../login/page";
 import supabase from "@/config/supabaseClient";
 import { redirect } from "next/navigation";
+import { encryptData } from "../utils/crypto";
 
 interface NewUser extends User {
   confirm_password: string;
@@ -47,7 +48,22 @@ const page = () => {
       setErrorMessage(error.message);
     } else {
       setErrorMessage("");
-      redirect("/account_confirmation");
+      try {
+        const { encrypted, iv } = await encryptData(user.email);
+        if (!encrypted || !iv) {
+          throw new Error('Encryption failed');
+        }
+        sessionStorage.setItem("registered_email", encrypted);
+        sessionStorage.setItem("email_iv", iv);
+        
+        // Handle redirect separately from the try-catch
+        window.location.href = "/account_confirmation";
+      } catch (encryptError) {
+        if (encryptError instanceof Error && encryptError.message !== 'NEXT_REDIRECT') {
+          console.error('Encryption error:', encryptError);
+          setErrorMessage("Error de encriptación: " + encryptError.message);
+        }
+      }
     }
   };
 
