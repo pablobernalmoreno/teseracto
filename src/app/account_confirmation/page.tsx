@@ -1,5 +1,5 @@
 "use client";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Link, Typography } from "@mui/material";
 import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import React, { useEffect, useState } from "react";
 import "../login/loginStyles.css";
@@ -64,7 +64,8 @@ const page = () => {
         <Typography className="account_confirmation_subtitle" variant="h6">
           Hemos enviado un email a {registeredEmail} para confirmar tu cuenta.
           Por favor, revisa tu bandeja de entrada y sigue las instrucciones
-          proporcionadas.
+          proporcionadas. Una vez que hayas confirmado tu cuenta, podrás {" "} 
+          <Link href="/login" underline="hover">iniciar sesión</Link>.
         </Typography>
       </Box>
       <Box textAlign="center">

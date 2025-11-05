@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import "../login/loginStyles.css";
 import { User } from "../login/page";
 import supabase from "@/config/supabaseClient";
-import { redirect } from "next/navigation";
 import { encryptData } from "../utils/crypto";
 
 interface NewUser extends User {
@@ -70,7 +69,7 @@ const page = () => {
   return (
     <div className="login_container">
       <Typography className="login_title" variant="h4">
-        Iniciar Sesión
+        Crear Cuenta
       </Typography>
       <Box className="register_form_container">
         <form className="login_form">
