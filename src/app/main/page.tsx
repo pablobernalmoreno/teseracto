@@ -5,19 +5,21 @@ import { Box, Paper, Typography } from "@mui/material";
 import { ItemCard } from "../components/dashboard/ItemCard";
 import supabase from "@/config/supabaseClient";
 import "./mainStyles.css";
-
 const getData = async () => {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
-
-  const { data, error } = await supabase
-    .from("user_profile")
-    .insert([{ id: sessionData?.session?.user.id }])
-    .select();
   const { data: userData, error: userError } = await supabase
     .from("user_profile")
     .select();
-
+  if (
+    sessionData.session!.user.role === "authenticated" &&
+    userData?.length === 0
+  ) {
+    await supabase
+      .from("user_profile")
+      .insert([{ id: sessionData?.session?.user.id }])
+      .select();
+  }
   console.log({ sessionData, sessionError, userData, userError });
 };
 
