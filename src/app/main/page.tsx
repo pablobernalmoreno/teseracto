@@ -7,8 +7,18 @@ import supabase from "@/config/supabaseClient";
 import "./mainStyles.css";
 
 const getData = async () => {
-  const { data, error } = await supabase.from("user_profile").select();
-  console.log({ data, error });
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
+
+  const { data, error } = await supabase
+    .from("user_profile")
+    .insert([{ id: sessionData?.session?.user.id }])
+    .select();
+  const { data: userData, error: userError } = await supabase
+    .from("user_profile")
+    .select();
+
+  console.log({ sessionData, sessionError, userData, userError });
 };
 
 const page = () => {
@@ -26,7 +36,7 @@ const page = () => {
   mappedItems.unshift(newItem);
 
   // useEffect(() => {
-    getData()
+  getData();
   // }, []);
 
   return (

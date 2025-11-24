@@ -100,7 +100,7 @@ const page = () => {
           </Divider>
         </Box>
 
-        <Box className="sso_buttons">
+        {/* <Box className="sso_buttons">
           <Button
             fullWidth
             variant="outlined"
@@ -131,7 +131,7 @@ const page = () => {
           >
             Continuar con Facebook
           </Button>
-        </Box>
+        </Box> */}
         <Box mt={2} textAlign="center">
           <Typography variant="body2" color="textSecondary">
             ¿No tienes una cuenta?
