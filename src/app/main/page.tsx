@@ -15,9 +15,12 @@ const getData = async () => {
     sessionData.session!.user.role === "authenticated" &&
     userData?.length === 0
   ) {
+    console.log('entre');
+    
+    const uuid = crypto.randomUUID();
     await supabase
       .from("user_profile")
-      .insert([{ id: sessionData?.session?.user.id }])
+      .insert([{ id: sessionData?.session?.user.id, book_id: uuid }])
       .select();
   }
   console.log({ sessionData, sessionError, userData, userError });

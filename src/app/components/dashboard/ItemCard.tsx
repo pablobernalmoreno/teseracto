@@ -3,16 +3,27 @@ import {
   CardActionArea,
   CardContent,
   CardMedia,
-  IconButton,
   Typography,
 } from "@mui/material";
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
+import supabase from "@/config/supabaseClient";
 
 interface ItemCardProps {
   name: string;
   description: string;
 }
+
+const getBookData = async () => {
+  const { data: userData, error: userDataError } = await supabase
+    .from("user_profile")
+    .select();
+  const { data: bookData, error: bookDataError } = await supabase
+    .from("user_books")
+    .select();
+
+  console.log({ userData, bookData });
+};
 
 const NewItemCard = () => {
   return (
@@ -26,7 +37,12 @@ const NewItemCard = () => {
         alignItems: "center",
       }}
     >
-      <CardActionArea>
+      <CardActionArea
+        onClick={() => {
+          console.log("Add new item clicked");
+          getBookData();
+        }}
+      >
         <CardContent
           sx={{
             display: "flex",

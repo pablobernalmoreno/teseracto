@@ -36,8 +36,6 @@ const page = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ user });
-
     const { error } = await supabase.auth.signInWithPassword({
       email: user.email,
       password: user.password,
