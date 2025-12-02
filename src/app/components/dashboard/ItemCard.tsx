@@ -1,11 +1,18 @@
+"use client";
 import {
+  Button,
   Card,
   CardActionArea,
   CardContent,
   CardMedia,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import supabase from "@/config/supabaseClient";
 
@@ -14,18 +21,42 @@ interface ItemCardProps {
   description: string;
 }
 
-const getBookData = async () => {
-  const { data: userData, error: userDataError } = await supabase
-    .from("user_profile")
-    .select();
-  const { data: bookData, error: bookDataError } = await supabase
-    .from("user_books")
-    .select();
-
-  console.log({ userData, bookData });
+const InputDialog = ({ open, handleInputDialogClose }: any) => {
+  return (
+    <Dialog open={open} onClose={handleInputDialogClose}>
+      <DialogTitle id="alert-dialog-title">
+        Use Google's location service?
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Let Google help apps determine location. This means sending anonymous
+          location data to Google, even when no apps are running.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleInputDialogClose}>Disagree</Button>
+        <Button onClick={handleInputDialogClose} autoFocus>
+          Agree
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
 const NewItemCard = () => {
+  const [open, setOpen] = useState(false);
+
+  const handleInputDialogOpen = () => {
+    setOpen(true);
+  }
+  const handleInputDialogClose = () => {
+    setOpen(false);
+  }
+
+  const InputDialogProps = {
+    open,
+    handleInputDialogClose,
+  }
   return (
     <Card
       sx={{
@@ -40,7 +71,7 @@ const NewItemCard = () => {
       <CardActionArea
         onClick={() => {
           console.log("Add new item clicked");
-          getBookData();
+          handleInputDialogOpen();
         }}
       >
         <CardContent
@@ -53,6 +84,7 @@ const NewItemCard = () => {
           <AddIcon sx={{ fontSize: 50 }} />
         </CardContent>
       </CardActionArea>
+      <InputDialog {...InputDialogProps}/>
     </Card>
   );
 };
