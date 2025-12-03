@@ -1,0 +1,19 @@
+.file_upload_container {
+    height: 250px;
+    width: 500px;
+    border: dashed 2px gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    margin: 2rem;
+}
+
+.file_upload_container:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.file_upload_hidden_input {
+    display: none;
+}

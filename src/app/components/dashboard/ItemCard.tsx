@@ -8,35 +8,59 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import supabase from "@/config/supabaseClient";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import "./dashboardStyles.css";
 
 interface ItemCardProps {
   name: string;
   description: string;
 }
 
-const InputDialog = ({ open, handleInputDialogClose }: any) => {
+const InputDialog: React.FC<{ open: boolean; handleInputDialogClose: () => void }> = ({
+  open,
+  handleInputDialogClose,
+}) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const onContentClick = () => {
+    inputRef.current?.click();
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // TODO: handle selected files (upload, preview, etc.)
+      console.log('Selected files:', files);
+    }
+  };
+
   return (
     <Dialog open={open} onClose={handleInputDialogClose}>
-      <DialogTitle id="alert-dialog-title">
-        Use Google's location service?
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          Let Google help apps determine location. This means sending anonymous
-          location data to Google, even when no apps are running.
-        </DialogContentText>
+      <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
+      <DialogContent
+        className="file_upload_container"
+        onClick={onContentClick}
+        style={{ cursor: "pointer" }}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          className="file_upload_hidden_input"
+          onChange={onFileChange}
+        />
+        <Button role={undefined} variant="text" tabIndex={-1} startIcon={<CloudUploadIcon />}>
+          Subir Archivos
+        </Button>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleInputDialogClose}>Disagree</Button>
+        <Button onClick={handleInputDialogClose}>Cancelar</Button>
         <Button onClick={handleInputDialogClose} autoFocus>
-          Agree
+          Guardar
         </Button>
       </DialogActions>
     </Dialog>
@@ -48,15 +72,15 @@ const NewItemCard = () => {
 
   const handleInputDialogOpen = () => {
     setOpen(true);
-  }
+  };
   const handleInputDialogClose = () => {
     setOpen(false);
-  }
+  };
 
   const InputDialogProps = {
     open,
     handleInputDialogClose,
-  }
+  };
   return (
     <Card
       sx={{
@@ -84,7 +108,7 @@ const NewItemCard = () => {
           <AddIcon sx={{ fontSize: 50 }} />
         </CardContent>
       </CardActionArea>
-      <InputDialog {...InputDialogProps}/>
+      <InputDialog {...InputDialogProps} />
     </Card>
   );
 };

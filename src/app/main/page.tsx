@@ -5,6 +5,7 @@ import { Box, Paper, Typography } from "@mui/material";
 import { ItemCard } from "../components/dashboard/ItemCard";
 import supabase from "@/config/supabaseClient";
 import "./mainStyles.css";
+
 const getData = async () => {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
