@@ -31,8 +31,6 @@ const getBookData = async () => {
   const { data: bookData, error: bookDataError } = await supabase
     .from("user_books")
     .select();
-
-  console.log({ userData, bookData });
 };
 
 const page = () => {

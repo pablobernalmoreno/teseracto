@@ -11,20 +11,31 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createWorker } from "tesseract.js";
 import AddIcon from "@mui/icons-material/Add";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import "./dashboardStyles.css";
+import { combineDatesAndCurrency, extractCurrencyValues, findInvalidEntries, isCombinedDataValid, parseDates } from "@/app/utils/data";
 
 interface ItemCardProps {
   name: string;
   description: string;
 }
 
-const InputDialog: React.FC<{ open: boolean; handleInputDialogClose: () => void }> = ({
-  open,
-  handleInputDialogClose,
-}) => {
+interface mainData {
+  date: string;
+  money: string;
+  id: number;
+}
+
+const InputDialog: React.FC<{
+  open: boolean;
+  handleInputDialogClose: () => void;
+}> = ({ open, handleInputDialogClose }) => {
+  const [files, setFiles] = useState<FileList>();
+  const [pathData, setPathData] = useState<mainData[]>([]);
+  const [sources, setSources] = useState<string[]>([""]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const onContentClick = () => {
@@ -32,12 +43,51 @@ const InputDialog: React.FC<{ open: boolean; handleInputDialogClose: () => void 
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      // TODO: handle selected files (upload, preview, etc.)
-      console.log('Selected files:', files);
+    const target = e.target as HTMLInputElement;
+    const file = target.files as FileList;
+    if (file) {
+      setFiles(file);
     }
   };
+
+  const getImageText = async () => {
+    const worker = await createWorker("eng");
+    const paths = [];
+    const sources = [""];
+    if (files?.length) {
+      for (let i = 0; i < files?.length; ++i) {
+        const file = files[i];
+        const ret = await worker.recognize(file);
+        const ocrText = ret.data.text;
+        sources.push(URL.createObjectURL(file));
+        paths.push(ocrText);
+      }
+      sources.shift();
+      setSources(sources);
+      const expectedDatesArray = parseDates(paths);
+      const expectedCurrencyArray = extractCurrencyValues(paths);
+      const result = combineDatesAndCurrency(
+        expectedDatesArray,
+        expectedCurrencyArray
+      );
+
+      if (!isCombinedDataValid(result)) {
+        console.warn("Some entries are missing date or currency. Prompt user.");
+        console.log(findInvalidEntries(result));
+      } else {
+        console.log("All good. Proceed with:", result);
+      }
+
+      setPathData(result);
+    }
+    await worker.terminate();
+  };
+
+  useEffect(() => {
+    if (files?.length !== 0) {
+      getImageText();
+    }
+  }, [files]);
 
   return (
     <Dialog open={open} onClose={handleInputDialogClose}>
@@ -50,10 +100,17 @@ const InputDialog: React.FC<{ open: boolean; handleInputDialogClose: () => void 
         <input
           ref={inputRef}
           type="file"
+          multiple
+          accept="image/*,application/pdf"
           className="file_upload_hidden_input"
           onChange={onFileChange}
         />
-        <Button role={undefined} variant="text" tabIndex={-1} startIcon={<CloudUploadIcon />}>
+        <Button
+          role={undefined}
+          variant="text"
+          tabIndex={-1}
+          startIcon={<CloudUploadIcon />}
+        >
           Subir Archivos
         </Button>
       </DialogContent>
