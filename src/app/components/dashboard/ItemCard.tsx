@@ -1,10 +1,12 @@
 "use client";
 import {
+  Box,
   Button,
   Card,
   CardActionArea,
   CardContent,
   CardMedia,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -16,7 +18,14 @@ import { createWorker } from "tesseract.js";
 import AddIcon from "@mui/icons-material/Add";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import "./dashboardStyles.css";
-import { combineDatesAndCurrency, extractCurrencyValues, findInvalidEntries, isCombinedDataValid, parseDates } from "@/app/utils/data";
+import {
+  combineDatesAndCurrency,
+  extractCurrencyValues,
+  findInvalidEntries,
+  isCombinedDataValid,
+  parseDates,
+} from "@/app/utils/data";
+import { set } from "date-fns";
 
 interface ItemCardProps {
   name: string;
@@ -34,6 +43,7 @@ const InputDialog: React.FC<{
   handleInputDialogClose: () => void;
 }> = ({ open, handleInputDialogClose }) => {
   const [files, setFiles] = useState<FileList>();
+  const [loader, setLoader] = useState<boolean>(false);
   const [pathData, setPathData] = useState<mainData[]>([]);
   const [sources, setSources] = useState<string[]>([""]);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -55,6 +65,7 @@ const InputDialog: React.FC<{
     const paths = [];
     const sources = [""];
     if (files?.length) {
+      setLoader(true);
       for (let i = 0; i < files?.length; ++i) {
         const file = files[i];
         const ret = await worker.recognize(file);
@@ -74,13 +85,12 @@ const InputDialog: React.FC<{
       if (!isCombinedDataValid(result)) {
         console.warn("Some entries are missing date or currency. Prompt user.");
         console.log(findInvalidEntries(result));
-      } else {
-        console.log("All good. Proceed with:", result);
       }
 
       setPathData(result);
     }
     await worker.terminate();
+    setLoader(false);
   };
 
   useEffect(() => {
@@ -97,22 +107,30 @@ const InputDialog: React.FC<{
         onClick={onContentClick}
         style={{ cursor: "pointer" }}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept="image/*,application/pdf"
-          className="file_upload_hidden_input"
-          onChange={onFileChange}
-        />
-        <Button
-          role={undefined}
-          variant="text"
-          tabIndex={-1}
-          startIcon={<CloudUploadIcon />}
-        >
-          Subir Archivos
-        </Button>
+        {loader ? (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            <input
+              ref={inputRef}
+              type="file"
+              multiple
+              accept="image/*,application/pdf"
+              className="file_upload_hidden_input"
+              onChange={onFileChange}
+            />
+            <Button
+              role={undefined}
+              variant="text"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Subir Archivos
+            </Button>
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleInputDialogClose}>Cancelar</Button>
@@ -151,7 +169,6 @@ const NewItemCard = () => {
     >
       <CardActionArea
         onClick={() => {
-          console.log("Add new item clicked");
           handleInputDialogOpen();
         }}
       >
