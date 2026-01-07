@@ -11,12 +11,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Fade,
   Typography,
 } from "@mui/material";
 import React, { useState, useRef, useEffect } from "react";
 import { createWorker } from "tesseract.js";
 import AddIcon from "@mui/icons-material/Add";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import "./dashboardStyles.css";
 import {
   combineDatesAndCurrency,
@@ -44,12 +46,20 @@ const InputDialog: React.FC<{
 }> = ({ open, handleInputDialogClose }) => {
   const [files, setFiles] = useState<FileList>();
   const [loader, setLoader] = useState<boolean>(false);
+  const [successLoad, setSuccessLoad] = useState<boolean>(false);
   const [pathData, setPathData] = useState<mainData[]>([]);
   const [sources, setSources] = useState<string[]>([""]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const onContentClick = () => {
     inputRef.current?.click();
+  };
+
+  const handleDialogClose = () => {
+    setSuccessLoad(false);
+    setPathData([]);
+    setFiles(undefined);
+    handleInputDialogClose();
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,28 +101,60 @@ const InputDialog: React.FC<{
     }
     await worker.terminate();
     setLoader(false);
+    setSuccessLoad(true);
   };
 
   useEffect(() => {
-    if (files?.length !== 0) {
+    if (files?.length && files?.length !== 0) {
       getImageText();
     }
   }, [files]);
 
+  console.log({successLoad});
+  
+
   return (
-    <Dialog open={open} onClose={handleInputDialogClose}>
+    <Dialog
+      open={open}
+      onClose={handleDialogClose}
+    >
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
       <DialogContent
         className="file_upload_container"
         onClick={onContentClick}
         style={{ cursor: "pointer" }}
       >
-        {loader ? (
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Fade in={loader} timeout={500}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              position: "absolute",
+            }}
+          >
             <CircularProgress />
           </Box>
-        ) : (
-          <>
+        </Fade>
+        <Fade in={successLoad} timeout={500}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              position: "absolute",
+            }}
+          >
+            <CheckCircleIcon style={{ fontSize: 80, color: "#4caf50" }} />
+          </Box>
+        </Fade>
+        <Fade in={!loader && !successLoad} timeout={500}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
             <input
               ref={inputRef}
               type="file"
@@ -129,12 +171,12 @@ const InputDialog: React.FC<{
             >
               Subir Archivos
             </Button>
-          </>
-        )}
+          </Box>
+        </Fade>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleInputDialogClose}>Cancelar</Button>
-        <Button onClick={handleInputDialogClose} autoFocus>
+        <Button onClick={handleDialogClose}>Cancelar</Button>
+        <Button onClick={handleDialogClose} autoFocus>
           Guardar
         </Button>
       </DialogActions>
