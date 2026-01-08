@@ -13,7 +13,11 @@ import {
   DialogTitle,
   Fade,
   Typography,
+  TextField,
+  IconButton,
 } from "@mui/material";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import React, { useState, useRef, useEffect } from "react";
 import { createWorker } from "tesseract.js";
 import AddIcon from "@mui/icons-material/Add";
@@ -27,7 +31,7 @@ import {
   isCombinedDataValid,
   parseDates,
 } from "@/app/utils/data";
-import { set } from "date-fns";
+import Image from "next/image";
 
 interface ItemCardProps {
   name: string;
@@ -40,6 +44,86 @@ interface mainData {
   id: number;
 }
 
+interface InvalidEntry {
+  index: number;
+  id: number;
+  date?: string;
+  money?: string;
+}
+
+const InvalidEntryCarousel: React.FC<{
+  invalidEntries: any[];
+  sources: string[];
+  currentIndex: number;
+  onPrev: () => void;
+  onNext: () => void;
+  onDateChange: (value: string) => void;
+  onMoneyChange: (value: string) => void;
+}> = ({
+  invalidEntries,
+  sources,
+  currentIndex,
+  onPrev,
+  onNext,
+  onDateChange,
+  onMoneyChange,
+}) => {
+  if (!invalidEntries.length) return null;
+  const entry = invalidEntries[currentIndex];
+  const source = sources[entry?.id];
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        width: "100%",
+      }}
+    >
+      <Typography variant="h6">
+        Entrada {currentIndex + 1} de {invalidEntries.length}
+      </Typography>
+      {source && (
+        <Image src={source} alt="Invalid Entry" width={150} height={150} />
+      )}
+      <Box sx={{ display: "flex", gap: 1, width: "100%" }}>
+        <TextField
+          label="Fecha"
+          type="date"
+          variant="outlined"
+          size="small"
+          defaultValue={entry?.date || ""}
+          onChange={(e) => onDateChange(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ flex: 1 }}
+        />
+        <TextField
+          label="Dinero"
+          type="number"
+          variant="outlined"
+          size="small"
+          defaultValue={entry?.money || ""}
+          onChange={(e) => onMoneyChange(e.target.value)}
+          sx={{ flex: 1 }}
+        />
+      </Box>
+      <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+        <IconButton onClick={onPrev} disabled={currentIndex === 0}>
+          <NavigateBeforeIcon />
+        </IconButton>
+        <IconButton
+          onClick={onNext}
+          disabled={currentIndex === invalidEntries.length - 1}
+        >
+          <NavigateNextIcon />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+};
+
 const InputDialog: React.FC<{
   open: boolean;
   handleInputDialogClose: () => void;
@@ -48,7 +132,10 @@ const InputDialog: React.FC<{
   const [loader, setLoader] = useState<boolean>(false);
   const [successLoad, setSuccessLoad] = useState<boolean>(false);
   const [pathData, setPathData] = useState<mainData[]>([]);
-  const [sources, setSources] = useState<string[]>([""]);
+  const [sources, setSources] = useState<string[]>([]);
+  const [invalidEntries, setInvalidEntries] = useState<any[]>([]);
+  const [carouselIndex, setCarouselIndex] = useState<number>(0);
+  const [editedValues, setEditedValues] = useState<Map<number, { date: string; money: string }>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const onContentClick = () => {
@@ -59,6 +146,8 @@ const InputDialog: React.FC<{
     setSuccessLoad(false);
     setPathData([]);
     setFiles(undefined);
+    setCarouselIndex(0);
+    setEditedValues(new Map());
     handleInputDialogClose();
   };
 
@@ -72,19 +161,18 @@ const InputDialog: React.FC<{
 
   const getImageText = async () => {
     const worker = await createWorker("eng");
-    const paths = [];
-    const sources = [""];
+    const paths: string[] = [];
+    const newSources: string[] = [];
     if (files?.length) {
       setLoader(true);
       for (let i = 0; i < files?.length; ++i) {
         const file = files[i];
         const ret = await worker.recognize(file);
         const ocrText = ret.data.text;
-        sources.push(URL.createObjectURL(file));
+        newSources.push(URL.createObjectURL(file));
         paths.push(ocrText);
       }
-      sources.shift();
-      setSources(sources);
+      setSources(newSources);
       const expectedDatesArray = parseDates(paths);
       const expectedCurrencyArray = extractCurrencyValues(paths);
       const result = combineDatesAndCurrency(
@@ -93,8 +181,7 @@ const InputDialog: React.FC<{
       );
 
       if (!isCombinedDataValid(result)) {
-        console.warn("Some entries are missing date or currency. Prompt user.");
-        console.log(findInvalidEntries(result));
+        setInvalidEntries(findInvalidEntries(result));
       }
 
       setPathData(result);
@@ -110,19 +197,13 @@ const InputDialog: React.FC<{
     }
   }, [files]);
 
-  console.log({successLoad});
-  
-
   return (
-    <Dialog
-      open={open}
-      onClose={handleDialogClose}
-    >
+    <Dialog open={open} onClose={handleDialogClose}>
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
       <DialogContent
         className="file_upload_container"
         onClick={onContentClick}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: successLoad ? "default" : "pointer" }}
       >
         <Fade in={loader} timeout={500}>
           <Box
@@ -143,7 +224,35 @@ const InputDialog: React.FC<{
               position: "absolute",
             }}
           >
-            <CheckCircleIcon style={{ fontSize: 80, color: "#4caf50" }} />
+            {invalidEntries.length ? (
+              <InvalidEntryCarousel
+                invalidEntries={invalidEntries}
+                sources={sources}
+                currentIndex={carouselIndex}
+                onPrev={() => setCarouselIndex(Math.max(0, carouselIndex - 1))}
+                onNext={() => setCarouselIndex(Math.min(invalidEntries.length - 1, carouselIndex + 1))}
+                onDateChange={(value) => {
+                  const newEdited = new Map(editedValues);
+                  const entry = invalidEntries[carouselIndex];
+                  newEdited.set(carouselIndex, {
+                    date: value,
+                    money: newEdited.get(carouselIndex)?.money || "",
+                  });
+                  setEditedValues(newEdited);
+                }}
+                onMoneyChange={(value) => {
+                  const newEdited = new Map(editedValues);
+                  const entry = invalidEntries[carouselIndex];
+                  newEdited.set(carouselIndex, {
+                    date: newEdited.get(carouselIndex)?.date || "",
+                    money: value,
+                  });
+                  setEditedValues(newEdited);
+                }}
+              />
+            ) : (
+              <CheckCircleIcon style={{ fontSize: 80, color: "#4caf50" }} />
+            )}
           </Box>
         </Fade>
         <Fade in={!loader && !successLoad} timeout={500}>
