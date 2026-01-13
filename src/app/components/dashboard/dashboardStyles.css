@@ -1,6 +1,6 @@
 .file_upload_container {
-    height: 250px;
-    width: 500px;
+    min-height: 250px;
+    min-width: 500px;
     border: dashed 2px gray;
     display: flex;
     align-items: center;

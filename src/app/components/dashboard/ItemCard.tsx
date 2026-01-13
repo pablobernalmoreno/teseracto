@@ -138,17 +138,36 @@ const InputDialog: React.FC<{
   const [editedValues, setEditedValues] = useState<Map<number, { date: string; money: string }>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  console.log({pathData, sources, invalidEntries, editedValues});
+  
+
   const onContentClick = () => {
     inputRef.current?.click();
   };
 
   const handleDialogClose = () => {
     setSuccessLoad(false);
-    setPathData([]);
     setFiles(undefined);
     setCarouselIndex(0);
     setEditedValues(new Map());
     handleInputDialogClose();
+  };
+
+  const handleSave = () => {
+    // Update pathData with edited values
+    const updatedPathData = [...pathData];
+    editedValues.forEach((value, carouselIdx) => {
+      const entry = invalidEntries[carouselIdx];
+      if (entry) {
+        updatedPathData[entry.id] = {
+          ...updatedPathData[entry.id],
+          date: value.date || updatedPathData[entry.id].date,
+          money: value.money || updatedPathData[entry.id].money,
+        };
+      }
+    });
+    setPathData(updatedPathData);
+    handleDialogClose();
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,30 +217,39 @@ const InputDialog: React.FC<{
   }, [files]);
 
   return (
-    <Dialog open={open} onClose={handleDialogClose}>
+    <Dialog 
+      open={open} 
+      onClose={handleDialogClose}
+      maxWidth="sm"
+      fullWidth
+    >
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
       <DialogContent
         className="file_upload_container"
-        onClick={onContentClick}
-        style={{ cursor: successLoad ? "default" : "pointer" }}
+        onClick={!loader && !successLoad ? onContentClick : undefined}
+        style={{ cursor: !loader && !successLoad ? "pointer" : "default" }}
+        sx={{ overflow: "visible" }}
       >
-        <Fade in={loader} timeout={500}>
+        {loader ? (
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
-              position: "absolute",
+              alignItems: "center",
+              minHeight: 200,
             }}
           >
             <CircularProgress />
           </Box>
-        </Fade>
-        <Fade in={successLoad} timeout={500}>
+        ) : successLoad ? (
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
-              position: "absolute",
+              alignItems: "center",
+              minHeight: 200,
+              flexDirection: "column",
+              gap: 2,
             }}
           >
             {invalidEntries.length ? (
@@ -254,8 +282,7 @@ const InputDialog: React.FC<{
               <CheckCircleIcon style={{ fontSize: 80, color: "#4caf50" }} />
             )}
           </Box>
-        </Fade>
-        <Fade in={!loader && !successLoad} timeout={500}>
+        ) : (
           <Box
             sx={{
               display: "flex",
@@ -281,11 +308,11 @@ const InputDialog: React.FC<{
               Subir Archivos
             </Button>
           </Box>
-        </Fade>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleDialogClose}>Cancelar</Button>
-        <Button onClick={handleDialogClose} autoFocus>
+        <Button onClick={handleSave} autoFocus>
           Guardar
         </Button>
       </DialogActions>
