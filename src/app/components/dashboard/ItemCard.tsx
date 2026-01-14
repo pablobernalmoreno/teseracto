@@ -44,15 +44,8 @@ interface mainData {
   id: number;
 }
 
-interface InvalidEntry {
-  index: number;
-  id: number;
-  date?: string;
-  money?: string;
-}
-
 const InvalidEntryCarousel: React.FC<{
-  invalidEntries: any[];
+  invalidEntries: mainData[];
   sources: string[];
   currentIndex: number;
   onPrev: () => void;
@@ -85,30 +78,36 @@ const InvalidEntryCarousel: React.FC<{
       <Typography variant="h6">
         Entrada {currentIndex + 1} de {invalidEntries.length}
       </Typography>
-      {source && (
-        <Image src={source} alt="Invalid Entry" width={150} height={150} />
-      )}
-      <Box sx={{ display: "flex", gap: 1, width: "100%" }}>
-        <TextField
-          label="Fecha"
-          type="date"
-          variant="outlined"
-          size="small"
-          defaultValue={entry?.date || ""}
-          onChange={(e) => onDateChange(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-          sx={{ flex: 1 }}
-        />
-        <TextField
-          label="Dinero"
-          type="number"
-          variant="outlined"
-          size="small"
-          defaultValue={entry?.money || ""}
-          onChange={(e) => onMoneyChange(e.target.value)}
-          sx={{ flex: 1 }}
-        />
-      </Box>
+      <Fade in={true} timeout={500}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", alignItems: "center" }}>
+          {source && (
+            <Image src={source} alt="Invalid Entry" width={150} height={150} />
+          )}
+          <Box sx={{ display: "flex", gap: 1, width: "100%" }}>
+            <TextField
+              key={`date-${currentIndex}`}
+              label="Fecha"
+              type="date"
+              variant="outlined"
+              size="small"
+              defaultValue={entry?.date || ""}
+              onChange={(e) => onDateChange(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              sx={{ flex: 1 }}
+            />
+            <TextField
+              key={`money-${currentIndex}`}
+              label="Dinero"
+              type="number"
+              variant="outlined"
+              size="small"
+              defaultValue={entry?.money || ""}
+              onChange={(e) => onMoneyChange(e.target.value)}
+              sx={{ flex: 1 }}
+            />
+          </Box>
+        </Box>
+      </Fade>
       <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
         <IconButton onClick={onPrev} disabled={currentIndex === 0}>
           <NavigateBeforeIcon />
@@ -148,6 +147,7 @@ const InputDialog: React.FC<{
   const handleDialogClose = () => {
     setSuccessLoad(false);
     setFiles(undefined);
+    setInvalidEntries([]);
     setCarouselIndex(0);
     setEditedValues(new Map());
     handleInputDialogClose();
@@ -157,12 +157,25 @@ const InputDialog: React.FC<{
     // Update pathData with edited values
     const updatedPathData = [...pathData];
     editedValues.forEach((value, carouselIdx) => {
-      const entry = invalidEntries[carouselIdx];
-      if (entry) {
-        updatedPathData[entry.id] = {
-          ...updatedPathData[entry.id],
-          date: value.date || updatedPathData[entry.id].date,
-          money: value.money || updatedPathData[entry.id].money,
+      const entryId = invalidEntries[carouselIdx]?.id;
+      if (entryId !== undefined) {
+        // Format date from YYYY-MM-DD to DD/MM/YYYY
+        const formattedDate = value.date
+          ? value.date.split("-").reverse().join("/")
+          : updatedPathData[entryId].date;
+        
+        // Format money to Colombian currency format
+        const formattedMoney = value.money
+          ? parseFloat(value.money).toLocaleString("es-CO", {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 2,
+            })
+          : updatedPathData[entryId].money;
+        
+        updatedPathData[entryId] = {
+          ...updatedPathData[entryId],
+          date: formattedDate,
+          money: formattedMoney,
         };
       }
     });
@@ -261,7 +274,6 @@ const InputDialog: React.FC<{
                 onNext={() => setCarouselIndex(Math.min(invalidEntries.length - 1, carouselIndex + 1))}
                 onDateChange={(value) => {
                   const newEdited = new Map(editedValues);
-                  const entry = invalidEntries[carouselIndex];
                   newEdited.set(carouselIndex, {
                     date: value,
                     money: newEdited.get(carouselIndex)?.money || "",
@@ -270,7 +282,6 @@ const InputDialog: React.FC<{
                 }}
                 onMoneyChange={(value) => {
                   const newEdited = new Map(editedValues);
-                  const entry = invalidEntries[carouselIndex];
                   newEdited.set(carouselIndex, {
                     date: newEdited.get(carouselIndex)?.date || "",
                     money: value,
@@ -279,7 +290,9 @@ const InputDialog: React.FC<{
                 }}
               />
             ) : (
-              <CheckCircleIcon style={{ fontSize: 80, color: "#4caf50" }} />
+              <Fade in={true} timeout={500}>
+                <CheckCircleIcon style={{ fontSize: 80, color: "#4caf50" }} />
+              </Fade>
             )}
           </Box>
         ) : (
