@@ -1,5 +1,31 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 🏗️ Architecture
+
+This project follows the **Model-View-Presenter (MVP)** architecture pattern for clean code organization and scalability.
+
+### MVP Pattern Overview
+
+- **Model** - Business logic and state management (custom hooks in `src/modules/{feature}/model/`)
+- **View** - Pure presentational components (in `src/modules/{feature}/views/`)
+- **Presenter** - Bridge connecting model to view (in `src/modules/{feature}/presenters/`)
+
+For detailed information about the MVP pattern used in this project, see [START_HERE.md](START_HERE.md) and [MVP_ARCHITECTURE.md](MVP_ARCHITECTURE.md).
+
+### Project Structure
+
+```
+src/
+├── app/               # Next.js pages and components
+├── modules/           # Feature modules following MVP pattern
+│   └── dashboard/
+│       ├── model/     # Business logic hooks
+│       ├── views/     # Pure UI components
+│       └── presenters/ # Bridge components
+├── config/            # Configuration files
+└── utils/             # Utility functions
+```
+
 ## Getting Started
 
 First, run the development server:

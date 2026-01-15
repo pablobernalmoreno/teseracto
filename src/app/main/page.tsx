@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, Paper, Typography } from "@mui/material";
-import { ItemCard } from "../components/dashboard/ItemCard";
+import { ItemCardPresenter } from "@/modules/dashboard/presenters";
 import supabase from "@/config/supabaseClient";
 import "./mainStyles.css";
 
@@ -61,7 +61,7 @@ const page = () => {
       <Box className="dashboard_background">
         <Box className="dashboard_container">
           {mappedItems.map((item) => (
-            <ItemCard key={item.id} {...item} />
+            <ItemCardPresenter key={item.id} {...item} />
           ))}
         </Box>
       </Box>
