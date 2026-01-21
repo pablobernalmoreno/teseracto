@@ -1,4 +1,3 @@
-"use client";
 import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import NotificationsIcon from "@mui/icons-material/Notifications";

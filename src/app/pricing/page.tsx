@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, Button, Paper, Typography } from "@mui/material";
