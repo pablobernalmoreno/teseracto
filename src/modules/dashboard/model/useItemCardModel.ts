@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createWorker } from "tesseract.js";
 import {
   combineDatesAndCurrency,
@@ -32,11 +32,14 @@ interface ItemCardModelActions {
   getImageText: () => Promise<void>;
   handleSave: () => void;
   setCarouselIndex: (index: number) => void;
-  onDateChange: (value: string) => void;
-  onMoneyChange: (value: string) => void;
+  onDateChange: (entryId: number, value: string) => void;
+  onMoneyChange: (entryId: number, value: string) => void;
 }
 
-export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] => {
+export const useItemCardModel = (): [
+  ItemCardModelState,
+  ItemCardModelActions,
+] => {
   const [files, setFiles] = useState<FileList>();
   const [loader, setLoader] = useState<boolean>(false);
   const [successLoad, setSuccessLoad] = useState<boolean>(false);
@@ -47,7 +50,6 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   const [editedValues, setEditedValues] = useState<
     Map<number, { date: string; money: string }>
   >(new Map());
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDialogClose = () => {
     setSuccessLoad(false);
@@ -83,7 +85,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       const expectedCurrencyArray = extractCurrencyValues(paths);
       const result = combineDatesAndCurrency(
         expectedDatesArray,
-        expectedCurrencyArray
+        expectedCurrencyArray,
       );
 
       if (!isCombinedDataValid(result)) {
@@ -100,8 +102,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   const handleSave = () => {
     // Update pathData with edited values
     const updatedPathData = [...pathData];
-    editedValues.forEach((value, carouselIdx) => {
-      const entryId = invalidEntries[carouselIdx]?.id;
+    editedValues.forEach((value, entryId) => {
       if (entryId !== undefined) {
         // Format date from YYYY-MM-DD to DD/MM/YYYY
         const formattedDate = value.date
@@ -127,19 +128,19 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     handleDialogClose();
   };
 
-  const onDateChange = (value: string) => {
+  const onDateChange = (entryId: number, value: string) => {
     const newEdited = new Map(editedValues);
-    newEdited.set(carouselIndex, {
+    newEdited.set(entryId, {
       date: value,
-      money: newEdited.get(carouselIndex)?.money || "",
+      money: newEdited.get(entryId)?.money || "",
     });
     setEditedValues(newEdited);
   };
 
-  const onMoneyChange = (value: string) => {
+  const onMoneyChange = (entryId: number, value: string) => {
     const newEdited = new Map(editedValues);
-    newEdited.set(carouselIndex, {
-      date: newEdited.get(carouselIndex)?.date || "",
+    newEdited.set(entryId, {
+      date: newEdited.get(entryId)?.date || "",
       money: value,
     });
     setEditedValues(newEdited);

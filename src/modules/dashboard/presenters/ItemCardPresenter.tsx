@@ -33,6 +33,12 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   };
 
   if (name.includes("newItemCard")) {
+    // Convert Map to object for carouselValues prop
+    const carouselValues: { [entryId: number]: { date: string; money: string } } = {};
+    state.editedValues.forEach((value, entryId) => {
+      carouselValues[entryId] = value;
+    });
+
     const dialogProps = {
       open,
       loader: state.loader,
@@ -40,6 +46,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
       invalidEntries: state.invalidEntries,
       sources: state.sources,
       carouselIndex: state.carouselIndex,
+      carouselValues,
       onClose: handleInputDialogClose,
       onSave: () => {
         actions.handleSave();

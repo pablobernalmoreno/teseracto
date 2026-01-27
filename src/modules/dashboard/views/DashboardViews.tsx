@@ -33,16 +33,18 @@ interface InvalidEntryCarouselProps {
   invalidEntries: MainData[];
   sources: string[];
   currentIndex: number;
+  carouselValues: CarouselValues;
   onPrev: () => void;
   onNext: () => void;
-  onDateChange: (value: string) => void;
-  onMoneyChange: (value: string) => void;
+  onDateChange: (entryId: number, value: string) => void;
+  onMoneyChange: (entryId: number, value: string) => void;
 }
 
 export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
   invalidEntries,
   sources,
   currentIndex,
+  carouselValues,
   onPrev,
   onNext,
   onDateChange,
@@ -51,6 +53,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
   if (!invalidEntries.length) return null;
   const entry = invalidEntries[currentIndex];
   const source = sources[entry?.id];
+  const currentValues = carouselValues[entry.id] || { date: "", money: "" };
 
   return (
     <Box
@@ -85,9 +88,9 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
               type="date"
               variant="outlined"
               size="small"
-              defaultValue={entry?.date || ""}
-              onChange={(e) => onDateChange(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              value={currentValues.date}
+              onChange={(e) => onDateChange(entry.id, e.target.value)}
+              slotProps={{ inputLabel: { shrink: true } }}
               sx={{ flex: 1 }}
             />
             <TextField
@@ -96,8 +99,8 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
               type="number"
               variant="outlined"
               size="small"
-              defaultValue={entry?.money || ""}
-              onChange={(e) => onMoneyChange(e.target.value)}
+              value={currentValues.money}
+              onChange={(e) => onMoneyChange(entry.id, e.target.value)}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -118,6 +121,13 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
   );
 };
 
+interface CarouselValues {
+  [entryId: number]: {
+    date: string;
+    money: string;
+  };
+}
+
 interface InputDialogViewProps {
   open: boolean;
   loader: boolean;
@@ -125,13 +135,14 @@ interface InputDialogViewProps {
   invalidEntries: MainData[];
   sources: string[];
   carouselIndex: number;
+  carouselValues: CarouselValues;
   onClose: () => void;
   onSave: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPrev: () => void;
   onNext: () => void;
-  onDateChange: (value: string) => void;
-  onMoneyChange: (value: string) => void;
+  onDateChange: (entryId: number, value: string) => void;
+  onMoneyChange: (entryId: number, value: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
   onContentClick: () => void;
 }
@@ -143,6 +154,7 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
   invalidEntries,
   sources,
   carouselIndex,
+  carouselValues,
   onClose,
   onSave,
   onFileChange,
@@ -153,6 +165,8 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
   inputRef,
   onContentClick,
 }) => {
+  const currentEntry = invalidEntries[carouselIndex];
+  const currentValues = currentEntry ? carouselValues[currentEntry.id] || { date: "", money: "" } : { date: "", money: "" };
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
@@ -189,6 +203,7 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
                 invalidEntries={invalidEntries}
                 sources={sources}
                 currentIndex={carouselIndex}
+                carouselValues={carouselValues}
                 onPrev={onPrev}
                 onNext={onNext}
                 onDateChange={onDateChange}
@@ -230,7 +245,11 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button onClick={onSave} autoFocus>
+        <Button 
+          onClick={onSave} 
+          autoFocus
+          disabled={invalidEntries.length > 0 && (!currentValues.date || !currentValues.money)}
+        >
           Guardar
         </Button>
       </DialogActions>
@@ -278,7 +297,11 @@ export const NormalItemCardView: React.FC<NormalItemCardViewProps> = ({
 
 interface NewItemCardViewProps {
   onAddClick: () => void;
-  dialogProps: InputDialogViewProps;
+  dialogProps: Omit<InputDialogViewProps, "carouselValues" | "onDateChange" | "onMoneyChange"> & {
+    carouselValues: CarouselValues;
+    onDateChange: (entryId: number, value: string) => void;
+    onMoneyChange: (entryId: number, value: string) => void;
+  };
 }
 
 export const NewItemCardView: React.FC<NewItemCardViewProps> = ({

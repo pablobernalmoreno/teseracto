@@ -70,7 +70,7 @@ const page = () => {
       </Box>
       <Box textAlign="center">
         <Typography variant="body2" color="textSecondary">
-          ¿No te llegó el correo?{" "}
+          ¿No te llegó el correo?
           <Button 
             onClick={resendConfirmationEmail} 
             disabled={isResendDisabled}
