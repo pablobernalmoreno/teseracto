@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import "./loginStyles.css";
-import Image from "next/image";
 import supabase from "@/config/supabaseClient";
 import { redirect } from "next/navigation";
 

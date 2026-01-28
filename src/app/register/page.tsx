@@ -3,8 +3,7 @@ import { Box, Button, Link, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import "../login/loginStyles.css";
 import { User } from "../login/page";
-import supabase from "@/config/supabaseClient";
-import { encryptData } from "../utils/crypto";
+import { loginService } from "@/modules/login/model/loginService";
 
 interface NewUser extends User {
   confirm_password: string;
@@ -25,44 +24,26 @@ const page = () => {
     setUser({ ...user, [name]: value });
   };
 
-  const validatePassword = (
-    password: string,
-    confirmPassword: string
-  ): boolean => {
-    return password === confirmPassword && password.length > 0;
-  };
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validatePassword(user.password, user.confirm_password)) {
+
+    if (!loginService.validatePassword(user.password, user.confirm_password)) {
       setErrorMessage("Las contraseñas no coinciden");
-    } else {
-      setErrorMessage("");
+      return;
     }
-    const { error } = await supabase.auth.signUp({
+
+    setErrorMessage("");
+    const result = await loginService.signUp({
       email: user.email,
-      password: user.confirm_password,
+      password: user.password,
+      confirm_password: user.confirm_password,
     });
-    if (error) {
-      setErrorMessage(error.message);
+
+    if (result.error) {
+      setErrorMessage(result.error.message);
     } else {
       setErrorMessage("");
-      try {
-        const { encrypted, iv } = await encryptData(user.email);
-        if (!encrypted || !iv) {
-          throw new Error('Encryption failed');
-        }
-        sessionStorage.setItem("registered_email", encrypted);
-        sessionStorage.setItem("email_iv", iv);
-        
-        // Handle redirect separately from the try-catch
-        window.location.href = "/account_confirmation";
-      } catch (encryptError) {
-        if (encryptError instanceof Error && encryptError.message !== 'NEXT_REDIRECT') {
-          console.error('Encryption error:', encryptError);
-          setErrorMessage("Error de encriptación: " + encryptError.message);
-        }
-      }
+      window.location.href = "/account_confirmation";
     }
   };
 

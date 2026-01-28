@@ -4,6 +4,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import React from "react";
 import "./AppBarMenuStyles.css";
+import { loginService } from "@/modules/login/model/loginService";
 
 const notLoggedInButtons = () => {
   return (
@@ -27,7 +28,7 @@ const loggedInButtons = () => {
   return (
     <>
       <Box>
-        <Button className="appbar_buttons">
+        <Button className="appbar_buttons" onClick={loginService.signOut} href="/">
           Salir
         </Button>
       </Box>

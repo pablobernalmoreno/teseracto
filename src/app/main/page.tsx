@@ -1,37 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
+import { redirect } from "next/navigation";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, Paper, Typography } from "@mui/material";
 import { ItemCardPresenter } from "@/modules/dashboard/presenters";
-import supabase from "@/config/supabaseClient";
+import { dashboardService } from "@/modules/dashboard/model/dashboardService";
 import "./mainStyles.css";
-
-const getData = async () => {
-  const { data: sessionData, error: sessionError } =
-    await supabase.auth.getSession();
-  const { data: userData, error: userError } = await supabase
-    .from("user_profile")
-    .select();
-  if (
-    sessionData.session!.user.role === "authenticated" &&
-    userData?.length === 0
-  ) {
-    const uuid = crypto.randomUUID();
-    await supabase
-      .from("user_profile")
-      .insert([{ id: sessionData?.session?.user.id, book_id: uuid }])
-      .select();
-  }
-};
-
-const getBookData = async () => {
-  const { data: userData, error: userDataError } = await supabase
-    .from("user_profile")
-    .select();
-  const { data: bookData, error: bookDataError } = await supabase
-    .from("user_books")
-    .select();
-};
 
 const page = () => {
   const mappedItems = [
@@ -48,8 +22,17 @@ const page = () => {
   mappedItems.unshift(newItem);
 
   useEffect(() => {
-    getData();
-    getBookData();
+    const loadData = async () => {
+      const { data } = await dashboardService.getSession();
+
+      if (!data.session) {
+        redirect("/");
+      }
+
+      await dashboardService.fetchUserData();
+      await dashboardService.fetchBookData();
+    };
+    loadData();
   }, []);
 
   return (
