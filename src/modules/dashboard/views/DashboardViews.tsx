@@ -248,7 +248,11 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
         <Button 
           onClick={onSave} 
           autoFocus
-          disabled={invalidEntries.length > 0 && (!currentValues.date || !currentValues.money)}
+          disabled={
+            loader || 
+            !successLoad || 
+            (invalidEntries.length > 0 && (!currentValues.date || !currentValues.money))
+          }
         >
           Guardar
         </Button>
