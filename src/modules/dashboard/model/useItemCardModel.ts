@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createWorker } from "tesseract.js";
+import { dashboardService } from "./dashboardService";
 import {
   combineDatesAndCurrency,
   extractCurrencyValues,
@@ -8,7 +9,7 @@ import {
   parseDates,
 } from "@/app/utils/data";
 
-interface MainData {
+export interface MainData {
   date: string;
   money: string;
   id: number;
@@ -99,33 +100,68 @@ export const useItemCardModel = (): [
     setSuccessLoad(true);
   };
 
-  const handleSave = () => {
-    // Update pathData with edited values
-    const updatedPathData = [...pathData];
-    editedValues.forEach((value, entryId) => {
-      if (entryId !== undefined) {
-        // Format date from YYYY-MM-DD to DD/MM/YYYY
-        const formattedDate = value.date
-          ? value.date.split("-").reverse().join("/")
-          : updatedPathData[entryId].date;
+  const handleSave = async () => {
+    try {
+      // Update pathData with edited values
+      const updatedPathData = [...pathData];
+      editedValues.forEach((value, entryId) => {
+        if (entryId !== undefined) {
+          // Format date from YYYY-MM-DD to DD/MM/YYYY
+          const formattedDate = value.date
+            ? value.date.split("-").reverse().join("/")
+            : updatedPathData[entryId].date;
 
-        // Format money to Colombian currency format
-        const formattedMoney = value.money
-          ? parseFloat(value.money).toLocaleString("es-CO", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 2,
-            })
-          : updatedPathData[entryId].money;
+          // Format money to Colombian currency format
+          const formattedMoney = value.money
+            ? parseFloat(value.money).toLocaleString("es-CO", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })
+            : updatedPathData[entryId].money;
 
-        updatedPathData[entryId] = {
-          ...updatedPathData[entryId],
-          date: formattedDate,
-          money: formattedMoney,
-        };
+          updatedPathData[entryId] = {
+            ...updatedPathData[entryId],
+            date: formattedDate,
+            money: formattedMoney,
+          };
+        }
+      });
+      setPathData(updatedPathData);
+
+      // Get session data to validate user
+      const { data: sessionData } = await dashboardService.getSession();
+      const sessionUserId = sessionData?.session?.user?.id;
+
+      if (!sessionUserId) {
+        throw new Error("No authenticated user found");
       }
-    });
-    setPathData(updatedPathData);
-    handleDialogClose();
+
+      // Fetch user data to get book_id
+      const { data: userData } = await dashboardService.fetchUserData();
+      if (!userData || userData.length === 0) {
+        throw new Error("User profile not found");
+      }
+
+      const userProfile = userData[0];
+      const bookId = userProfile.book_id;
+
+      // Validate that the user ID from profile matches the session user ID
+      if (userProfile.id !== sessionUserId) {
+        throw new Error("User ID mismatch - unauthorized access attempt");
+      }
+
+      // Save the book data with unencrypted content
+      await dashboardService.insertBookData(
+        bookId,
+        "New Book",
+        updatedPathData
+      );
+    } catch (error) {
+      console.error("Error saving book data:", error);
+      throw error;
+    } finally {
+      handleDialogClose();
+    }
   };
 
   const onDateChange = (entryId: number, value: string) => {

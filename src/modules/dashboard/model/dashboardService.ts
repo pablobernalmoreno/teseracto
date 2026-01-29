@@ -1,5 +1,6 @@
 import supabase from "@/config/supabaseClient";
 import crypto from "crypto";
+import { MainData } from "./useItemCardModel";
 
 export interface UserData {
   id: string;
@@ -23,6 +24,13 @@ export const dashboardService = {
 
   async fetchBookData() {
     return await supabase.from("user_books").select();
+  },
+
+  async insertBookData(bookId: string, title: string, content: MainData[]) {
+    return await supabase
+      .from("user_books")
+      .insert([{ id: bookId, title, content }])
+      .select();
   },
 
   async createUserProfile(userId: string) {
