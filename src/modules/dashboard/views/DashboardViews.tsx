@@ -167,6 +167,10 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
 }) => {
   const currentEntry = invalidEntries[carouselIndex];
   const currentValues = currentEntry ? carouselValues[currentEntry.id] || { date: "", money: "" } : { date: "", money: "" };
+  const allInvalidEntriesFilled = invalidEntries.every((entry) => {
+    const v = carouselValues[entry.id] || { date: "", money: "" };
+    return Boolean(v.date) && Boolean(v.money);
+  });
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
@@ -245,14 +249,10 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button 
-          onClick={onSave} 
+        <Button
+          onClick={onSave}
           autoFocus
-          disabled={
-            loader || 
-            !successLoad || 
-            (invalidEntries.length > 0 && (!currentValues.date || !currentValues.money))
-          }
+          disabled={loader || !successLoad || !allInvalidEntriesFilled}
         >
           Guardar
         </Button>
@@ -261,7 +261,7 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
   );
 };
 
-interface NormalItemCardViewProps {
+interface NormalItemCardViewProps { 
   name: string;
   description: string;
 }

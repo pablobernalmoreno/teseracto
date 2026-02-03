@@ -26,10 +26,10 @@ export const dashboardService = {
     return await supabase.from("user_books").select();
   },
 
-  async insertBookData(bookId: string, title: string, content: MainData[]) {
+  async insertBookData(bookId: string, ownerId: string, title: string, content: MainData[]) {
     return await supabase
       .from("user_books")
-      .insert([{ id: bookId, title, content }])
+      .insert([{ id: bookId, owner_id: ownerId, title, content }])
       .select();
   },
 

@@ -100,62 +100,117 @@ export const useItemCardModel = (): [
     setSuccessLoad(true);
   };
 
+  const formatUpdatedPathData = (
+    originalPathData: MainData[],
+    edits: Map<number, { date: string; money: string }>,
+  ): MainData[] => {
+    const updated = [...originalPathData];
+    edits.forEach((value, entryId) => {
+      if (entryId !== undefined) {
+        const formattedDate = value.date
+          ? value.date.split("-").reverse().join("/")
+          : updated[entryId].date;
+
+        const formattedMoney = value.money
+          ? parseFloat(value.money).toLocaleString("es-CO", {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 2,
+            })
+          : updated[entryId].money;
+
+        updated[entryId] = {
+          ...updated[entryId],
+          date: formattedDate,
+          money: formattedMoney,
+        };
+      }
+    });
+    return updated;
+  };
+
+  const computeTitleFromPathData = (updatedPathData: MainData[]): string => {
+    const dateStrings = updatedPathData.map((d) => d.date).filter(Boolean) as string[];
+
+    const toDate = (s: string): Date | null => {
+      if (!s) return null;
+      const ymd = /^\d{4}-\d{2}-\d{2}$/;
+      const dmy = /^\d{2}\/\d{2}\/\d{4}$/;
+      if (ymd.test(s)) {
+        const [y, m, day] = s.split("-");
+        return new Date(Number(y), Number(m) - 1, Number(day));
+      } else if (dmy.test(s)) {
+        const [day, month, year] = s.split("/");
+        return new Date(Number(year), Number(month) - 1, Number(day));
+      } else {
+        const parsed = new Date(s);
+        return isNaN(parsed.getTime()) ? null : parsed;
+      }
+    };
+
+    const dates = dateStrings
+      .map(toDate)
+      .filter((d): d is Date => d instanceof Date && !isNaN(d.getTime()));
+
+    if (!dates.length) return "Sin fechas";
+
+    const times = dates.map((d) => d.getTime());
+    const min = new Date(Math.min(...times));
+    const max = new Date(Math.max(...times));
+    const fmt = (d: Date) =>
+      [
+        String(d.getDate()).padStart(2, "0"),
+        String(d.getMonth() + 1).padStart(2, "0"),
+        String(d.getFullYear()),
+      ].join("/");
+    return `Del ${fmt(min)} al ${fmt(max)}`;
+  };
+
+  const validateAllEntriesPresent = (updatedPathData: MainData[]): boolean => {
+    const invalid = updatedPathData.filter((d) => !d.date || !d.money);
+    if (invalid.length) {
+      setInvalidEntries(invalid);
+      return false;
+    }
+    setInvalidEntries([]);
+    return true;
+  };
+
+  const validateAndGetOwnerId = async (): Promise<string> => {
+    const { data: sessionData } = await dashboardService.getSession();
+    const sessionUserId = sessionData?.session?.user?.id;
+
+    if (!sessionUserId) {
+      throw new Error("No authenticated user found");
+    }
+
+    const { data: userData } = await dashboardService.fetchUserData();
+    if (!userData || userData.length === 0) {
+      throw new Error("User profile not found");
+    }
+
+    const userProfile = userData[0];
+    if (userProfile.id !== sessionUserId) {
+      throw new Error("User ID mismatch - unauthorized access attempt");
+    }
+
+    return userProfile.book_id;
+  };
+
   const handleSave = async () => {
     try {
-      // Update pathData with edited values
-      const updatedPathData = [...pathData];
-      editedValues.forEach((value, entryId) => {
-        if (entryId !== undefined) {
-          // Format date from YYYY-MM-DD to DD/MM/YYYY
-          const formattedDate = value.date
-            ? value.date.split("-").reverse().join("/")
-            : updatedPathData[entryId].date;
-
-          // Format money to Colombian currency format
-          const formattedMoney = value.money
-            ? parseFloat(value.money).toLocaleString("es-CO", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              })
-            : updatedPathData[entryId].money;
-
-          updatedPathData[entryId] = {
-            ...updatedPathData[entryId],
-            date: formattedDate,
-            money: formattedMoney,
-          };
-        }
-      });
+      const updatedPathData = formatUpdatedPathData(pathData, editedValues);
       setPathData(updatedPathData);
 
-      // Get session data to validate user
-      const { data: sessionData } = await dashboardService.getSession();
-      const sessionUserId = sessionData?.session?.user?.id;
-
-      if (!sessionUserId) {
-        throw new Error("No authenticated user found");
+      // Prevent saving if any entry is missing date or money
+      if (!validateAllEntriesPresent(updatedPathData)) {
+        return;
       }
 
-      // Fetch user data to get book_id
-      const { data: userData } = await dashboardService.fetchUserData();
-      if (!userData || userData.length === 0) {
-        throw new Error("User profile not found");
-      }
+      const ownerId = await validateAndGetOwnerId();
+      const bookId = globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : String(Date.now());
+      const title = computeTitleFromPathData(updatedPathData);
 
-      const userProfile = userData[0];
-      const bookId = userProfile.book_id;
-
-      // Validate that the user ID from profile matches the session user ID
-      if (userProfile.id !== sessionUserId) {
-        throw new Error("User ID mismatch - unauthorized access attempt");
-      }
-
-      // Save the book data with unencrypted content
-      await dashboardService.insertBookData(
-        bookId,
-        "New Book",
-        updatedPathData
-      );
+      await dashboardService.insertBookData(bookId, ownerId, title, updatedPathData);
     } catch (error) {
       console.error("Error saving book data:", error);
       throw error;
