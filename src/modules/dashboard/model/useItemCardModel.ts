@@ -5,6 +5,7 @@ import {
   combineDatesAndCurrency,
   extractCurrencyValues,
   findInvalidEntries,
+  getValidFieldsFromInvalidEntries,
   isCombinedDataValid,
   parseDates,
 } from "@/app/utils/data";
@@ -90,7 +91,12 @@ export const useItemCardModel = (): [
       );
 
       if (!isCombinedDataValid(result)) {
-        setInvalidEntries(findInvalidEntries(result));
+        const invalid = findInvalidEntries(result);
+        setInvalidEntries(invalid);
+
+        // Pre-populate carousel with valid fields from invalid entries
+        const validFields = getValidFieldsFromInvalidEntries(result);
+        setEditedValues(validFields);
       }
 
       setPathData(result);
@@ -129,7 +135,9 @@ export const useItemCardModel = (): [
   };
 
   const computeTitleFromPathData = (updatedPathData: MainData[]): string => {
-    const dateStrings = updatedPathData.map((d) => d.date).filter(Boolean) as string[];
+    const dateStrings = updatedPathData
+      .map((d) => d.date)
+      .filter(Boolean) as string[];
 
     const toDate = (s: string): Date | null => {
       if (!s) return null;
@@ -207,10 +215,17 @@ export const useItemCardModel = (): [
       }
 
       const ownerId = await validateAndGetOwnerId();
-      const bookId = globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : String(Date.now());
+      const bookId = globalThis.crypto?.randomUUID
+        ? globalThis.crypto.randomUUID()
+        : String(Date.now());
       const title = computeTitleFromPathData(updatedPathData);
 
-      await dashboardService.insertBookData(bookId, ownerId, title, updatedPathData);
+      await dashboardService.insertBookData(
+        bookId,
+        ownerId,
+        title,
+        updatedPathData,
+      );
     } catch (error) {
       console.error("Error saving book data:", error);
       throw error;

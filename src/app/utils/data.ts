@@ -67,7 +67,7 @@ export const extractCurrencyValues = (pathsArray: string[]): string[] => {
 
 export const combineDatesAndCurrency = (
   datesArray: (string | null)[],
-  currencyArray: string[]
+  currencyArray: string[],
 ) => {
   const combinedArray = [];
 
@@ -83,20 +83,50 @@ export const combineDatesAndCurrency = (
 };
 
 export const isCombinedDataValid = (
-  combinedData: { date: string; money: string; id: number }[]
+  combinedData: { date: string; money: string; id: number }[],
 ): boolean => {
   return combinedData.every(
     (entry) =>
-      entry.date && entry.date !== "N/A" && entry.money && entry.money !== "N/A"
+      entry.date &&
+      entry.date !== "N/A" &&
+      entry.money &&
+      entry.money !== "N/A",
   );
 };
 
 export const findInvalidEntries = (
-  combinedData: { date: string; money: string; id: number }[]
+  combinedData: { date: string; money: string; id: number }[],
 ) => {
   return combinedData.filter(
     (entry) =>
-      !entry.date || entry.date === "N/A" ||
-      !entry.money || entry.money === "N/A"
+      !entry.date ||
+      entry.date === "N/A" ||
+      !entry.money ||
+      entry.money === "N/A",
   );
+};
+
+/**
+ * Returns a map of entry IDs to their valid fields (date/money).
+ * Useful for pre-populating carousel values with valid data.
+ */
+export const getValidFieldsFromInvalidEntries = (
+  combinedData: { date: string; money: string; id: number }[],
+): Map<number, { date: string; money: string }> => {
+  const validFields = new Map();
+
+  combinedData.forEach((entry) => {
+    const isDateValid = entry.date && entry.date !== "N/A";
+    const isMoneyValid = entry.money && entry.money !== "N/A";
+
+    // Only add to map if at least one field is invalid (entry needs fixing)
+    if (!isDateValid || !isMoneyValid) {
+      validFields.set(entry.id, {
+        date: isDateValid ? entry.date : "",
+        money: isMoneyValid ? entry.money : "",
+      });
+    }
+  });
+
+  return validFields;
 };
