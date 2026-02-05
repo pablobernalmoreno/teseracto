@@ -8,18 +8,9 @@ import { dashboardService } from "@/modules/dashboard/model/dashboardService";
 import "./mainStyles.css";
 
 const page = () => {
-  const mappedItems = [
-    { id: 1, name: "Lizard", description: "Lizards are" },
-    { id: 2, name: "Iguana", description: "Iguanas are large lizards" },
-    {
-      id: 3,
-      name: "Chameleon",
-      description: "Chameleons are known for their color-changing abilities",
-    },
-  ];
-
-  const newItem = { id: 4, name: "newItemCard", description: "" };
-  mappedItems.unshift(newItem);
+  const [items, setItems] = React.useState<
+    Array<{ id: number; name: string; description: string }>
+  >([{ id: 0, name: "newItemCard", description: "" }]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -29,8 +20,11 @@ const page = () => {
         redirect("/");
       }
 
-      await dashboardService.fetchUserData();
-      await dashboardService.fetchBookData();
+      const userData = await dashboardService.fetchUserData();
+      const bookData = await dashboardService.fetchBookData();
+      if (!bookData.error && bookData.data.length > 0) {
+        setItems((prevItems) => [...prevItems, ...bookData.data]);
+      }
     };
     loadData();
   }, []);
@@ -43,7 +37,7 @@ const page = () => {
       </Paper>
       <Box className="dashboard_background">
         <Box className="dashboard_container">
-          {mappedItems.map((item) => (
+          {items.map((item) => (
             <ItemCardPresenter key={item.id} {...item} />
           ))}
         </Box>

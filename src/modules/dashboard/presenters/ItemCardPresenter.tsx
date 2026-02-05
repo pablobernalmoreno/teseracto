@@ -32,7 +32,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
     inputRef.current?.click();
   };
 
-  if (name.includes("newItemCard")) {
+  if (name?.includes("newItemCard")) {
     // Convert Map to object for carouselValues prop
     const carouselValues: { [entryId: number]: { date: string; money: string } } = {};
     state.editedValues.forEach((value, entryId) => {
