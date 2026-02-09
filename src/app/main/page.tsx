@@ -9,8 +9,8 @@ import "./mainStyles.css";
 
 const page = () => {
   const [items, setItems] = React.useState<
-    Array<{ id: number; name: string; description: string }>
-  >([{ id: 0, name: "newItemCard", description: "" }]);
+    Array<{ id: number; title: string; description: string }>
+  >([{ id: 0, title: "newItemCard", description: "" }]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -20,10 +20,16 @@ const page = () => {
         redirect("/");
       }
 
-      const userData = await dashboardService.fetchUserData();
-      const bookData = await dashboardService.fetchBookData();
-      if (!bookData.error && bookData.data.length > 0) {
-        setItems((prevItems) => [...prevItems, ...bookData.data]);
+      const { data: userData } = await dashboardService.fetchUserData();
+      const { data: bookData, error: bookError } =
+        await dashboardService.fetchBookData();
+
+      if (!bookError && bookData?.length > 0) {
+        const user = userData?.[0];
+        const ownedData = bookData.filter(
+          (book) => book.owner_id === user?.book_id,
+        );
+        setItems((prevItems) => [...prevItems, ...ownedData]);
       }
     };
     loadData();
@@ -38,7 +44,11 @@ const page = () => {
       <Box className="dashboard_background">
         <Box className="dashboard_container">
           {items.map((item) => (
-            <ItemCardPresenter key={item.id} {...item} />
+            <ItemCardPresenter
+              key={item.id}
+              name={item.title}
+              description={item.description}
+            />
           ))}
         </Box>
       </Box>
