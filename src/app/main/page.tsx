@@ -1,16 +1,17 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { ItemCardPresenter } from "@/modules/dashboard/presenters";
 import { dashboardService } from "@/modules/dashboard/model/dashboardService";
 import "./mainStyles.css";
 
 const page = () => {
-  const [items, setItems] = React.useState<
+  const [items, setItems] = useState<
     Array<{ id: number; title: string; description: string }>
   >([{ id: 0, title: "newItemCard", description: "" }]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -31,6 +32,7 @@ const page = () => {
         );
         setItems((prevItems) => [...prevItems, ...ownedData]);
       }
+      setIsLoading(false);
     };
     loadData();
   }, []);
@@ -43,13 +45,28 @@ const page = () => {
       </Paper>
       <Box className="dashboard_background">
         <Box className="dashboard_container">
-          {items.map((item) => (
-            <ItemCardPresenter
-              key={item.id}
-              name={item.title}
-              description={item.description}
-            />
-          ))}
+          {isLoading ? (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mt: 4,
+              }}
+            >
+              <CircularProgress size={150} />
+            </Box>
+          ) : (
+            items.map((item) => (
+              <ItemCardPresenter
+                key={item.id}
+                name={item.title}
+                description={item.description}
+              />
+            ))
+          )}
         </Box>
       </Box>
     </>
