@@ -3,9 +3,15 @@ import React, { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
-import { ItemCardPresenter } from "@/modules/dashboard/presenters";
 import { dashboardService } from "@/modules/dashboard/model/dashboardService";
+import dynamic from "next/dynamic";
 import "./mainStyles.css";
+
+const ItemCardPresenter = dynamic(() =>
+  import("@/modules/dashboard/presenters/ItemCardPresenter").then((mod) => ({
+    default: mod.ItemCardPresenter,
+  })),
+);
 
 const page = () => {
   const [items, setItems] = useState<
