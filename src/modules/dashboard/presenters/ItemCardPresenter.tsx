@@ -1,20 +1,20 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { useItemCardModel } from "../model/useItemCardModel";
-import {
-  NewItemCardView,
-  NormalItemCardView,
-} from "../views/DashboardViews";
+import { NewItemCardView, NormalItemCardView } from "../views/DashboardViews";
 
 interface ItemCardPresenterProps {
+  cardId: string | number;
   name: string;
   description: string;
 }
 
 export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
+  cardId,
   name,
   description,
 }) => {
+
   const [state, actions] = useItemCardModel();
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -34,7 +34,9 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
 
   if (name?.includes("newItemCard")) {
     // Convert Map to object for carouselValues prop
-    const carouselValues: { [entryId: number]: { date: string; money: string } } = {};
+    const carouselValues: {
+      [entryId: number]: { date: string; money: string };
+    } = {};
     state.editedValues.forEach((value, entryId) => {
       carouselValues[entryId] = value;
     });
@@ -54,12 +56,10 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
       },
       onFileChange: actions.onFileChange,
       onPrev: () =>
-        actions.setCarouselIndex(
-          Math.max(0, state.carouselIndex - 1)
-        ),
+        actions.setCarouselIndex(Math.max(0, state.carouselIndex - 1)),
       onNext: () =>
         actions.setCarouselIndex(
-          Math.min(state.invalidEntries.length - 1, state.carouselIndex + 1)
+          Math.min(state.invalidEntries.length - 1, state.carouselIndex + 1),
         ),
       onDateChange: actions.onDateChange,
       onMoneyChange: actions.onMoneyChange,
@@ -75,5 +75,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
     );
   }
 
-  return <NormalItemCardView name={name} description={description} />;
+  return (
+    <NormalItemCardView cardId={cardId} name={name} description={description} />
+  );
 };

@@ -42,6 +42,8 @@ const page = () => {
     };
     loadData();
   }, []);
+  console.log({items});
+  
 
   return (
     <>
@@ -68,6 +70,7 @@ const page = () => {
             items.map((item) => (
               <ItemCardPresenter
                 key={item.id}
+                cardId={item.id}
                 name={item.title}
                 description={item.description}
               />

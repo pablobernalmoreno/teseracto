@@ -166,7 +166,6 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
   onContentClick,
 }) => {
   const currentEntry = invalidEntries[carouselIndex];
-  const currentValues = currentEntry ? carouselValues[currentEntry.id] || { date: "", money: "" } : { date: "", money: "" };
   const allInvalidEntriesFilled = invalidEntries.every((entry) => {
     const v = carouselValues[entry.id] || { date: "", money: "" };
     return Boolean(v.date) && Boolean(v.money);
@@ -262,11 +261,13 @@ export const InputDialogView: React.FC<InputDialogViewProps> = ({
 };
 
 interface NormalItemCardViewProps { 
+  cardId: string | number;
   name: string;
   description: string;
 }
 
 export const NormalItemCardView: React.FC<NormalItemCardViewProps> = ({
+  cardId,
   name,
   description,
 }) => {
@@ -279,7 +280,7 @@ export const NormalItemCardView: React.FC<NormalItemCardViewProps> = ({
         borderRadius: "12px",
       }}
     >
-      <CardActionArea>
+      <CardActionArea onClick={() => console.log(`Clicked on ${name} with id ${cardId}`)}>
         <CardContent sx={{ maxHeight: 90 }}>
           <Typography gutterBottom variant="h5" component="div">
             {name}
