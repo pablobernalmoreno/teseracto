@@ -42,9 +42,7 @@ const page = () => {
     };
     loadData();
   }, []);
-  console.log({items});
   
-
   return (
     <>
       <AppBarMenu isLogged />
