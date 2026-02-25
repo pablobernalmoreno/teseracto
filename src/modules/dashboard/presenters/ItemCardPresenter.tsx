@@ -1,7 +1,8 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { useItemCardModel } from "../model/useItemCardModel";
-import { NewItemCardView, NormalItemCardView } from "../views/DashboardViews";
+import { NormalItemCard } from "@/app/components/dashboard/ItemCard/NormalItemCard";
+import { NewItemCard } from "@/app/components/dashboard/ItemCard/NewItemCard";
 
 interface ItemCardPresenterProps {
   cardId: string | number;
@@ -68,7 +69,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
     };
 
     return (
-      <NewItemCardView
+      <NewItemCard
         onAddClick={handleInputDialogOpen}
         dialogProps={dialogProps}
       />
@@ -76,6 +77,6 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   }
 
   return (
-    <NormalItemCardView cardId={cardId} name={name} description={description} />
+    <NormalItemCard cardId={cardId} name={name} description={description} />
   );
 };
