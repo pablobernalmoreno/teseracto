@@ -44,8 +44,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
 
     const dialogProps = {
       open,
-      loader: state.loader,
-      successLoad: state.successLoad,
+      dialogState: state.dialogState,
       invalidEntries: state.invalidEntries,
       sources: state.sources,
       carouselIndex: state.carouselIndex,

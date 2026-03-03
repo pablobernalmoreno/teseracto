@@ -16,10 +16,16 @@ export interface MainData {
   id: number;
 }
 
+// Dialog state machine types
+export type DialogState =
+  | { type: "idle" }
+  | { type: "loading" }
+  | { type: "invalid_entries" }
+  | { type: "success" };
+
 interface ItemCardModelState {
   files: FileList | undefined;
-  loader: boolean;
-  successLoad: boolean;
+  dialogState: DialogState;
   pathData: MainData[];
   sources: string[];
   invalidEntries: MainData[];
@@ -43,8 +49,7 @@ export const useItemCardModel = (): [
   ItemCardModelActions,
 ] => {
   const [files, setFiles] = useState<FileList>();
-  const [loader, setLoader] = useState<boolean>(false);
-  const [successLoad, setSuccessLoad] = useState<boolean>(false);
+  const [dialogState, setDialogState] = useState<DialogState>({ type: "idle" });
   const [pathData, setPathData] = useState<MainData[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [invalidEntries, setInvalidEntries] = useState<MainData[]>([]);
@@ -54,7 +59,7 @@ export const useItemCardModel = (): [
   >(new Map());
 
   const handleDialogClose = () => {
-    setSuccessLoad(false);
+    setDialogState({ type: "idle" });
     setFiles(undefined);
     setInvalidEntries([]);
     setCarouselIndex(0);
@@ -74,7 +79,7 @@ export const useItemCardModel = (): [
     const paths: string[] = [];
     const newSources: string[] = [];
     if (files?.length) {
-      setLoader(true);
+      setDialogState({ type: "loading" });
       for (let i = 0; i < files?.length; ++i) {
         const file = files[i];
         const ret = await worker.recognize(file);
@@ -97,13 +102,14 @@ export const useItemCardModel = (): [
         // Pre-populate carousel with valid fields from invalid entries
         const validFields = getValidFieldsFromInvalidEntries(result);
         setEditedValues(validFields);
+        setDialogState({ type: "invalid_entries" });
+      } else {
+        setDialogState({ type: "success" });
       }
 
       setPathData(result);
     }
     await worker.terminate();
-    setLoader(false);
-    setSuccessLoad(true);
   };
 
   const formatUpdatedPathData = (
@@ -260,8 +266,7 @@ export const useItemCardModel = (): [
 
   const state: ItemCardModelState = {
     files,
-    loader,
-    successLoad,
+    dialogState,
     pathData,
     sources,
     invalidEntries,
