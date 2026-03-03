@@ -1,16 +1,34 @@
-import { Card, CardActionArea, CardContent, CardMedia, Typography } from "@mui/material";
+import { Card, CardActionArea, CardContent, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { MainData } from "@/modules/dashboard/model/useItemCardModel";
 
 interface NormalItemCardProps {
   cardId: string | number;
   name: string;
   description: string;
+  content?: MainData[];
 }
 
 export const NormalItemCard: React.FC<NormalItemCardProps> = ({
   cardId,
   name,
   description,
+  content = [],
 }) => {
+  // Get first 3 entries for preview
+  const previewData = content.slice(0, 3);
+
+  // Format date from various formats to dd/mm/yyyy
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return "--/--/----";
+    // Handle dd/mm/yyyy format (already correct)
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+    // Handle yyyy-mm-dd format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [year, month, day] = dateStr.split("-");
+      return `${day}/${month}/${year}`;
+    }
+    return dateStr;
+  };
   return (
     <Card
       sx={{
@@ -31,12 +49,34 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
             {description}
           </Typography>
         </CardContent>
-        <CardMedia
-          component="img"
-          height="140"
-          image="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mustela_nivalis_-British_Wildlife_Centre-4.jpg/1024px-Mustela_nivalis_-British_Wildlife_Centre-4.jpg"
-          alt="green iguana"
-        />
+        <Box sx={{ bgcolor: '#f9f9f9', height: 140, overflow: 'hidden' }}>
+          <TableContainer component={Paper} elevation={0} sx={{ bgcolor: 'transparent' }}>
+            <Table size="small" sx={{ minWidth: 200 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '0.7rem', py: 0.5 }}>Fecha</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '0.7rem', py: 0.5 }}>Ganancias</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {previewData.length > 0 ? (
+                  previewData.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell sx={{ fontSize: '0.7rem', py: 0.5 }}>{formatDate(entry.date)}</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.7rem', py: 0.5 }}>{entry.money}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={2} align="center" sx={{ fontSize: '0.7rem', py: 1, color: 'text.secondary' }}>
+                      Sin datos
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
       </CardActionArea>
     </Card>
   );

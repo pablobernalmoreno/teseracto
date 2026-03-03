@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useState } from "react";
-import { useItemCardModel } from "../model/useItemCardModel";
+import { useItemCardModel, MainData } from "../model/useItemCardModel";
 import { NormalItemCard } from "@/app/components/dashboard/ItemCard/NormalItemCard";
 import { NewItemCard } from "@/app/components/dashboard/ItemCard/NewItemCard";
 
@@ -8,12 +8,14 @@ interface ItemCardPresenterProps {
   cardId: string | number;
   name: string;
   description: string;
+  content?: MainData[];
 }
 
 export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   cardId,
   name,
   description,
+  content,
 }) => {
 
   const [state, actions] = useItemCardModel();
@@ -76,6 +78,6 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   }
 
   return (
-    <NormalItemCard cardId={cardId} name={name} description={description} />
+    <NormalItemCard cardId={cardId} name={name} description={description} content={content} />
   );
 };

@@ -10,6 +10,9 @@ export interface UserData {
 export interface BookData {
   id: string;
   title: string;
+  content?: MainData[];
+  description?: string;
+  owner_id?: string;
 }
 
 // Dashboard service object with separate functions

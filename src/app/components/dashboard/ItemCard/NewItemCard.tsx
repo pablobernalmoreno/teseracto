@@ -24,12 +24,13 @@ export const NewItemCard: React.FC<NewItemCardProps> = ({
     <>
       <Card
         sx={{
+          maxWidth: 345,
+          maxHeight: 370,
           margin: "1rem",
           borderRadius: "12px",
-          width: 200,
-          height: 200,
           display: "flex",
           alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <CardActionArea onClick={onAddClick}>
