@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { redirect } from "next/navigation";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
@@ -15,11 +15,16 @@ const ItemCardPresenter = dynamic(() =>
 
 const page = () => {
   const [items, setItems] = useState<
-    Array<{ id: number; title: string; description: string }>
-  >([{ id: 0, title: "newItemCard", description: "" }]);
+    Array<{ id: string | number; title: string; description: string }>
+  >([{ id: "new-item", title: "newItemCard", description: "" }]);
   const [isLoading, setIsLoading] = useState(true);
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
+    // Prevent double-loading in strict mode
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+
     const loadData = async () => {
       const { data } = await dashboardService.getSession();
 
@@ -36,7 +41,17 @@ const page = () => {
         const ownedData = bookData.filter(
           (book) => book.owner_id === user?.book_id,
         );
-        setItems((prevItems) => [...prevItems, ...ownedData]);
+        
+        // Deduplicate by ID to prevent duplicate keys
+        const uniqueBooks = Array.from(
+          new Map(ownedData.map((book) => [book.id, book])).values()
+        ).map((book) => ({
+          id: book.id,
+          title: book.title,
+          description: book.description || "",
+        }));
+        
+        setItems((prevItems) => [...prevItems, ...uniqueBooks]);
       }
       setIsLoading(false);
     };
