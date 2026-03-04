@@ -116,15 +116,7 @@ const page = () => {
               />
             ))
           )}
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              mt: 4,
-              mb: 2,
-            }}
-          >
+          <Box className="dashboard_pagination">
             <Pagination
               count={totalPages}
               page={currentPage}

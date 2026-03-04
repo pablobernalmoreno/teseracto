@@ -20,4 +20,13 @@
   justify-content: center;
   border-radius: 12px;
   flex-wrap: wrap;
+  position: relative; /* allow absolutely positioned pagination */
+  padding-bottom: 120px; /* reserve space for pagination */
+}
+
+.dashboard_pagination {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
 }
