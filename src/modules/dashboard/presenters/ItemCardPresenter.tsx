@@ -9,6 +9,7 @@ interface ItemCardPresenterProps {
   name: string;
   description: string;
   content?: MainData[];
+  onOpenDetail?: (id: string | number) => void;
 }
 
 export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
@@ -16,8 +17,8 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   name,
   description,
   content,
+  onOpenDetail,
 }) => {
-
   const [state, actions] = useItemCardModel();
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -78,6 +79,12 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   }
 
   return (
-    <NormalItemCard cardId={cardId} name={name} description={description} content={content} />
+    <NormalItemCard
+      cardId={cardId}
+      name={name}
+      description={description}
+      content={content}
+      onOpenDetail={onOpenDetail}
+    />
   );
 };

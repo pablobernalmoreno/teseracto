@@ -1,4 +1,17 @@
-import { Card, CardActionArea, CardContent, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import {
+  Card,
+  CardActionArea,
+  CardContent,
+  Typography,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 import { MainData } from "@/modules/dashboard/model/useItemCardModel";
 
 interface NormalItemCardProps {
@@ -6,6 +19,7 @@ interface NormalItemCardProps {
   name: string;
   description: string;
   content?: MainData[];
+  onOpenDetail?: (id: string | number) => void;
 }
 
 export const NormalItemCard: React.FC<NormalItemCardProps> = ({
@@ -13,6 +27,7 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
   name,
   description,
   content = [],
+  onOpenDetail,
 }) => {
   // Get first 3 entries for preview
   const previewData = content.slice(0, 3);
@@ -39,7 +54,9 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
       }}
     >
       <CardActionArea
-        onClick={() => console.log(`Clicked on ${name} with id ${cardId}`)}
+        onClick={() => {
+          onOpenDetail?.(cardId);
+        }}
       >
         <CardContent sx={{ maxHeight: 90 }}>
           <Typography gutterBottom variant="h5" component="div">
@@ -49,26 +66,54 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
             {description}
           </Typography>
         </CardContent>
-        <Box sx={{ bgcolor: '#f9f9f9', height: 140, overflow: 'hidden' }}>
-          <TableContainer component={Paper} elevation={0} sx={{ bgcolor: 'transparent' }}>
+        <Box sx={{ bgcolor: "#f9f9f9", height: 140, overflow: "hidden" }}>
+          <TableContainer
+            component={Paper}
+            elevation={0}
+            sx={{ bgcolor: "transparent" }}
+          >
             <Table size="small" sx={{ minWidth: 200 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '0.7rem', py: 0.5 }}>Fecha</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '0.7rem', py: 0.5 }}>Ganancias</TableCell>
+                  <TableCell
+                    sx={{ fontWeight: "bold", fontSize: "0.7rem", py: 0.5 }}
+                  >
+                    Fecha
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{ fontWeight: "bold", fontSize: "0.7rem", py: 0.5 }}
+                  >
+                    Ganancias
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {previewData.length > 0 ? (
                   previewData.map((entry) => (
                     <TableRow key={entry.id}>
-                      <TableCell sx={{ fontSize: '0.7rem', py: 0.5 }}>{formatDate(entry.date)}</TableCell>
-                      <TableCell align="right" sx={{ fontSize: '0.7rem', py: 0.5 }}>{entry.money}</TableCell>
+                      <TableCell sx={{ fontSize: "0.7rem", py: 0.5 }}>
+                        {formatDate(entry.date)}
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ fontSize: "0.7rem", py: 0.5 }}
+                      >
+                        {entry.money}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={2} align="center" sx={{ fontSize: '0.7rem', py: 1, color: 'text.secondary' }}>
+                    <TableCell
+                      colSpan={2}
+                      align="center"
+                      sx={{
+                        fontSize: "0.7rem",
+                        py: 1,
+                        color: "text.secondary",
+                      }}
+                    >
                       Sin datos
                     </TableCell>
                   </TableRow>

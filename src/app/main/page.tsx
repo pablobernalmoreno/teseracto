@@ -3,10 +3,19 @@ import React, { useEffect, useState, useRef } from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import {
   Box,
+  Button,
   CircularProgress,
   Paper,
   Typography,
   Pagination,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import { dashboardService } from "@/modules/dashboard/model/dashboardService";
 import { MainData } from "@/modules/dashboard/model/useItemCardModel";
@@ -44,6 +53,156 @@ const page = () => {
     value: number,
   ) => {
     setCurrentPage(value);
+  };
+
+  // Load full content for a book (used by openDetail)
+  const handleLoadContent = async (bookId: string | number) => {
+    const existing = items.find((it) => it.id === bookId);
+    if (!existing) return;
+    if (existing.content && existing.content.length > 0) return; // already loaded
+
+    try {
+      const { data, error } = await dashboardService.fetchBookContent(bookId);
+      if (!error && data?.content) {
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === bookId ? { ...it, content: data.content || [] } : it,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error("Error loading book content:", err);
+    }
+  };
+
+  const [selectedCardId, setSelectedCardId] = useState<string | number | null>(
+    null,
+  );
+  const [editedRows, setEditedRows] = useState<MainData[]>([]);
+  const [focusedMoneyIndex, setFocusedMoneyIndex] = useState<number | null>(null);
+
+  // Helpers: convert date formats and format currency for display
+  const toInputDate = (dateStr: string): string => {
+    if (!dateStr) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    const parsed = new Date(dateStr);
+    if (!isNaN(parsed.getTime())) {
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth() + 1).padStart(2, "0");
+      const d = String(parsed.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    return "";
+  };
+
+  const formatCurrency = (raw: string | number): string => {
+    const parseNumberFromString = (s: string | number): number => {
+      if (typeof s === "number") return s;
+      let str = String(s || "").trim();
+      if (!str) return 0;
+      // keep digits, dot, comma, minus
+      const cleaned = str.replace(/[^0-9.,-]/g, "");
+      if (!cleaned) return 0;
+
+      const lastComma = cleaned.lastIndexOf(",");
+      const lastDot = cleaned.lastIndexOf(".");
+
+      // no separators
+      if (lastComma === -1 && lastDot === -1) return Number(cleaned) || 0;
+
+      // only comma present
+      if (lastComma > -1 && lastDot === -1) {
+        const decimalsLen = cleaned.length - lastComma - 1;
+        if (decimalsLen === 3) {
+          // comma used as thousands sep: remove all commas
+          return Number(cleaned.replace(/,/g, "")) || 0;
+        }
+        // comma used as decimal sep
+        return Number(cleaned.replace(/,/g, ".")) || 0;
+      }
+
+      // only dot present
+      if (lastDot > -1 && lastComma === -1) {
+        const decimalsLen = cleaned.length - lastDot - 1;
+        if (decimalsLen === 3) {
+          // dot used as thousands sep
+          return Number(cleaned.replace(/\./g, "")) || 0;
+        }
+        // dot used as decimal
+        return Number(cleaned) || 0;
+      }
+
+      // both present: decide by which comes last
+      if (lastComma > lastDot) {
+        // comma is decimal sep, dots are thousands
+        const normalized = cleaned.replace(/\./g, "").replace(/,/g, ".");
+        return Number(normalized) || 0;
+      } else {
+        // dot is decimal sep, commas are thousands
+        const normalized = cleaned.replace(/,/g, "");
+        return Number(normalized) || 0;
+      }
+    };
+
+    const num = parseNumberFromString(raw);
+    // format as COP without fractional digits
+    return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(Math.round(num));
+  };
+
+  const openDetail = async (bookId: string | number) => {
+    // Ensure content is loaded first
+    const existing = items.find((it) => it.id === bookId);
+    if (!existing) return;
+    if (!existing.content || existing.content.length === 0) {
+      await handleLoadContent(bookId);
+    }
+    const updated = items.find((it) => it.id === bookId);
+    // Normalize dates to yyyy-mm-dd for the date input and format money for display
+    const normalized = (updated?.content || []).map((r) => ({
+      ...r,
+      date: toInputDate(r.date),
+      // keep raw numeric string for editing (no formatting)
+      money: String(parseFloat(String(r.money).toString().replace(/[^0-9.,-]+/g, "").replace(/,/g, "")) || ""),
+    }));
+    setEditedRows(normalized);
+    setSelectedCardId(bookId);
+  };
+
+  const handleBackFromDetail = () => {
+    setSelectedCardId(null);
+    setEditedRows([]);
+  };
+
+  const handleSaveDetail = () => {
+    if (selectedCardId == null) return;
+    setItems((prev) =>
+      prev.map((it) =>
+        it.id === selectedCardId ? { ...it, content: editedRows } : it,
+      ),
+    );
+    setSelectedCardId(null);
+    setEditedRows([]);
+  };
+
+  const handleRowChange = (
+    index: number,
+    field: "date" | "money",
+    value: string,
+  ) => {
+    setEditedRows((prev) => {
+      const copy = prev.map((r) => ({ ...r }));
+      if (field === "date") {
+        copy[index] = { ...copy[index], date: value } as MainData;
+      } else {
+        // keep raw input for money while editing; format only for display
+        copy[index] = { ...copy[index], money: value } as MainData;
+      }
+      return copy;
+    });
   };
 
   useEffect(() => {
@@ -105,6 +264,69 @@ const page = () => {
             >
               <CircularProgress size={150} />
             </Box>
+          ) : selectedCardId ? (
+            <Paper elevation={2} sx={{ width: "100%", padding: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6">Detalle del libro</Typography>
+                <Box>
+                  <Button onClick={handleBackFromDetail} sx={{ mr: 1 }}>
+                    Back
+                  </Button>
+                  <Button variant="contained" onClick={handleSaveDetail}>
+                    Save
+                  </Button>
+                </Box>
+              </Box>
+              <TableContainer component={Paper} elevation={0}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Fecha</TableCell>
+                      <TableCell>Ganancias</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {editedRows.map((row, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>
+                          <TextField
+                            size="small"
+                            type="date"
+                            value={row.date}
+                            onChange={(e) =>
+                              handleRowChange(idx, "date", e.target.value)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            size="small"
+                            value={focusedMoneyIndex === idx ? row.money : formatCurrency(row.money)}
+                            onFocus={() => setFocusedMoneyIndex(idx)}
+                            onBlur={() => setFocusedMoneyIndex(null)}
+                            onChange={(e) =>
+                              handleRowChange(idx, "money", e.target.value)
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">$</InputAdornment>
+                              ),
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
           ) : (
             currentItems.map((item) => (
               <ItemCardPresenter
@@ -113,19 +335,22 @@ const page = () => {
                 name={item.title}
                 description={item.description}
                 content={item.content}
+                onOpenDetail={openDetail}
               />
             ))
           )}
-          <Box className="dashboard_pagination">
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-              size="large"
-              disabled={isLoading}
-            />
-          </Box>
+          {!selectedCardId && (
+            <Box className="dashboard_pagination">
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                disabled={isLoading}
+              />
+            </Box>
+          )}
         </Box>
       </Box>
     </>

@@ -29,6 +29,15 @@ export const dashboardService = {
     return await supabase.from("user_books").select();
   },
 
+  // Fetch full content for a single book by id (used for lazy-loading)
+  async fetchBookContent(bookId: string | number) {
+    return await supabase
+      .from("user_books")
+      .select("content")
+      .eq("id", bookId)
+      .single();
+  },
+
   async insertBookData(bookId: string, ownerId: string, title: string, content: MainData[]) {
     return await supabase
       .from("user_books")
