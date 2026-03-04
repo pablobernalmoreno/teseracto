@@ -78,7 +78,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
             <TextField
               key={`money-${currentIndex}`}
               label="Dinero"
-              type="number"
+              type="text"
               variant="outlined"
               size="small"
               value={currentValues.money}

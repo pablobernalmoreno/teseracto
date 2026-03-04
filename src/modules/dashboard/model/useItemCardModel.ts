@@ -117,6 +117,42 @@ export const useItemCardModel = (): [
     edits: Map<number, { date: string; money: string }>,
   ): MainData[] => {
     const updated = [...originalPathData];
+    const parseNumberFromString = (s: string | number): number => {
+      if (typeof s === "number") return s;
+      let str = String(s || "").trim();
+      if (!str) return 0;
+      const cleaned = str.replace(/[^0-9.,-]/g, "");
+      if (!cleaned) return 0;
+
+      const lastComma = cleaned.lastIndexOf(",");
+      const lastDot = cleaned.lastIndexOf(".");
+
+      if (lastComma === -1 && lastDot === -1) return Number(cleaned) || 0;
+
+      if (lastComma > -1 && lastDot === -1) {
+        const decimalsLen = cleaned.length - lastComma - 1;
+        if (decimalsLen === 3) {
+          return Number(cleaned.replace(/,/g, "")) || 0;
+        }
+        return Number(cleaned.replace(/,/g, ".")) || 0;
+      }
+
+      if (lastDot > -1 && lastComma === -1) {
+        const decimalsLen = cleaned.length - lastDot - 1;
+        if (decimalsLen === 3) {
+          return Number(cleaned.replace(/\./g, "")) || 0;
+        }
+        return Number(cleaned) || 0;
+      }
+
+      if (lastComma > lastDot) {
+        const normalized = cleaned.replace(/\./g, "").replace(/,/g, ".");
+        return Number(normalized) || 0;
+      } else {
+        const normalized = cleaned.replace(/,/g, "");
+        return Number(normalized) || 0;
+      }
+    };
     edits.forEach((value, entryId) => {
       if (entryId !== undefined) {
         const formattedDate = value.date
@@ -124,7 +160,7 @@ export const useItemCardModel = (): [
           : updated[entryId].date;
 
         const formattedMoney = value.money
-          ? parseFloat(value.money).toLocaleString("es-CO", {
+          ? parseNumberFromString(value.money).toLocaleString("es-CO", {
               minimumFractionDigits: 0,
               maximumFractionDigits: 2,
             })
