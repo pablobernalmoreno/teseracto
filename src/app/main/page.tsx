@@ -21,6 +21,7 @@ import { dashboardService } from "@/modules/dashboard/model/dashboardService";
 import { MainData } from "@/modules/dashboard/model/useItemCardModel";
 import dynamic from "next/dynamic";
 import "./mainStyles.css";
+import DataTable from "../components/dataTable/DataTable";
 
 const ItemCardPresenter = dynamic(() =>
   import("@/modules/dashboard/presenters/ItemCardPresenter").then((mod) => ({
@@ -79,7 +80,9 @@ const page = () => {
     null,
   );
   const [editedRows, setEditedRows] = useState<MainData[]>([]);
-  const [focusedMoneyIndex, setFocusedMoneyIndex] = useState<number | null>(null);
+  const [focusedMoneyIndex, setFocusedMoneyIndex] = useState<number | null>(
+    null,
+  );
 
   // Helpers: convert date formats and format currency for display
   const toInputDate = (dateStr: string): string => {
@@ -99,30 +102,31 @@ const page = () => {
     return "";
   };
 
+  // Format numeric-like strings into a thousands-separated string (no rounding)
+  // Examples: "138200" | "138,200" | "138.200" -> "138,200"
   const formatCurrency = (raw: string | number): string => {
-    const parseNumberFromString = (s: string | number): number => {
-      if (typeof s === "number") return s;
+    const parseNumberParts = (s: string | number) => {
+      if (typeof s === "number") return { intPart: String(Math.trunc(s)), fracPart: undefined };
       let str = String(s || "").trim();
-      if (!str) return 0;
-      // keep digits, dot, comma, minus
+      if (!str) return { intPart: "", fracPart: undefined };
       const cleaned = str.replace(/[^0-9.,-]/g, "");
-      if (!cleaned) return 0;
+      if (!cleaned) return { intPart: "", fracPart: undefined };
 
       const lastComma = cleaned.lastIndexOf(",");
       const lastDot = cleaned.lastIndexOf(".");
 
       // no separators
-      if (lastComma === -1 && lastDot === -1) return Number(cleaned) || 0;
+      if (lastComma === -1 && lastDot === -1) return { intPart: cleaned, fracPart: undefined };
 
       // only comma present
       if (lastComma > -1 && lastDot === -1) {
         const decimalsLen = cleaned.length - lastComma - 1;
         if (decimalsLen === 3) {
           // comma used as thousands sep: remove all commas
-          return Number(cleaned.replace(/,/g, "")) || 0;
+          return { intPart: cleaned.replace(/,/g, ""), fracPart: undefined };
         }
         // comma used as decimal sep
-        return Number(cleaned.replace(/,/g, ".")) || 0;
+        return { intPart: cleaned.slice(0, lastComma).replace(/\./g, ""), fracPart: cleaned.slice(lastComma + 1) };
       }
 
       // only dot present
@@ -130,27 +134,25 @@ const page = () => {
         const decimalsLen = cleaned.length - lastDot - 1;
         if (decimalsLen === 3) {
           // dot used as thousands sep
-          return Number(cleaned.replace(/\./g, "")) || 0;
+          return { intPart: cleaned.replace(/\./g, ""), fracPart: undefined };
         }
         // dot used as decimal
-        return Number(cleaned) || 0;
+        return { intPart: cleaned.slice(0, lastDot).replace(/,/g, ""), fracPart: cleaned.slice(lastDot + 1) };
       }
 
       // both present: decide by which comes last
       if (lastComma > lastDot) {
         // comma is decimal sep, dots are thousands
-        const normalized = cleaned.replace(/\./g, "").replace(/,/g, ".");
-        return Number(normalized) || 0;
+        return { intPart: cleaned.slice(0, lastComma).replace(/\./g, ""), fracPart: cleaned.slice(lastComma + 1) };
       } else {
         // dot is decimal sep, commas are thousands
-        const normalized = cleaned.replace(/,/g, "");
-        return Number(normalized) || 0;
+        return { intPart: cleaned.slice(0, lastDot).replace(/,/g, ""), fracPart: cleaned.slice(lastDot + 1) };
       }
     };
 
-    const num = parseNumberFromString(raw);
-    // format as COP without fractional digits
-    return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(Math.round(num));
+    const parts = parseNumberParts(raw);
+    const intFormatted = parts.intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.fracPart ? `${intFormatted}.${parts.fracPart}` : intFormatted;
   };
 
   const openDetail = async (bookId: string | number) => {
@@ -162,12 +164,37 @@ const page = () => {
     }
     const updated = items.find((it) => it.id === bookId);
     // Normalize dates to yyyy-mm-dd for the date input and format money for display
-    const normalized = (updated?.content || []).map((r) => ({
-      ...r,
-      date: toInputDate(r.date),
-      // keep raw numeric string for editing (no formatting)
-      money: String(parseFloat(String(r.money).toString().replace(/[^0-9.,-]+/g, "").replace(/,/g, "")) || ""),
-    }));
+    const normalized = (updated?.content || []).map((r) => {
+      // normalize money to an unformatted numeric string suitable for editing
+      const raw = String(r.money || "").toString().replace(/[^0-9.,-]+/g, "");
+      // reuse the parse logic to remove thousands separators but keep decimals
+      const parseParts = (s: string) => {
+        const cleaned = s;
+        const lastComma = cleaned.lastIndexOf(",");
+        const lastDot = cleaned.lastIndexOf(".");
+        if (lastComma === -1 && lastDot === -1) return { intPart: cleaned, frac: undefined };
+        if (lastComma > -1 && lastDot === -1) {
+          const decimalsLen = cleaned.length - lastComma - 1;
+          if (decimalsLen === 3) return { intPart: cleaned.replace(/,/g, ""), frac: undefined };
+          return { intPart: cleaned.slice(0, lastComma).replace(/\./g, ""), frac: cleaned.slice(lastComma + 1) };
+        }
+        if (lastDot > -1 && lastComma === -1) {
+          const decimalsLen = cleaned.length - lastDot - 1;
+          if (decimalsLen === 3) return { intPart: cleaned.replace(/\./g, ""), frac: undefined };
+          return { intPart: cleaned.slice(0, lastDot).replace(/,/g, ""), frac: cleaned.slice(lastDot + 1) };
+        }
+        if (lastComma > lastDot) return { intPart: cleaned.slice(0, lastComma).replace(/\./g, ""), frac: cleaned.slice(lastComma + 1) };
+        return { intPart: cleaned.slice(0, lastDot).replace(/,/g, ""), frac: cleaned.slice(lastDot + 1) };
+      };
+      const parts = parseParts(raw);
+      const moneyStr = parts.frac ? `${parts.intPart}.${parts.frac}` : parts.intPart;
+      return {
+        ...r,
+        date: toInputDate(r.date),
+        // keep raw numeric string for editing (no formatting)
+        money: moneyStr,
+      };
+    });
     setEditedRows(normalized);
     setSelectedCardId(bookId);
   };
@@ -284,48 +311,7 @@ const page = () => {
                   </Button>
                 </Box>
               </Box>
-              <TableContainer component={Paper} elevation={0}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Fecha</TableCell>
-                      <TableCell>Ganancias</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {editedRows.map((row, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell>
-                          <TextField
-                            size="small"
-                            type="date"
-                            value={row.date}
-                            onChange={(e) =>
-                              handleRowChange(idx, "date", e.target.value)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            size="small"
-                            value={focusedMoneyIndex === idx ? row.money : formatCurrency(row.money)}
-                            onFocus={() => setFocusedMoneyIndex(idx)}
-                            onBlur={() => setFocusedMoneyIndex(null)}
-                            onChange={(e) =>
-                              handleRowChange(idx, "money", e.target.value)
-                            }
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">$</InputAdornment>
-                              ),
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <DataTable rows={editedRows} editable onRowsChange={setEditedRows} />
             </Paper>
           ) : (
             currentItems.map((item) => (

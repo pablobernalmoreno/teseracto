@@ -4,14 +4,9 @@ import {
   CardContent,
   Typography,
   Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
 } from "@mui/material";
+import DataTable from "../../dataTable/DataTable";
 import { MainData } from "@/modules/dashboard/model/useItemCardModel";
 
 interface NormalItemCardProps {
@@ -66,61 +61,8 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
             {description}
           </Typography>
         </CardContent>
-        <Box sx={{ bgcolor: "#f9f9f9", height: 140, overflow: "hidden" }}>
-          <TableContainer
-            component={Paper}
-            elevation={0}
-            sx={{ bgcolor: "transparent" }}
-          >
-            <Table size="small" sx={{ minWidth: 200 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    sx={{ fontWeight: "bold", fontSize: "0.7rem", py: 0.5 }}
-                  >
-                    Fecha
-                  </TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{ fontWeight: "bold", fontSize: "0.7rem", py: 0.5 }}
-                  >
-                    Ganancias
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {previewData.length > 0 ? (
-                  previewData.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell sx={{ fontSize: "0.7rem", py: 0.5 }}>
-                        {formatDate(entry.date)}
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        sx={{ fontSize: "0.7rem", py: 0.5 }}
-                      >
-                        {entry.money}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={2}
-                      align="center"
-                      sx={{
-                        fontSize: "0.7rem",
-                        py: 1,
-                        color: "text.secondary",
-                      }}
-                    >
-                      Sin datos
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <Box sx={{ bgcolor: "#f9f9f9", height: 140, overflow: "hidden", px: 1 }}>
+          <DataTable rows={previewData} />
         </Box>
       </CardActionArea>
     </Card>
