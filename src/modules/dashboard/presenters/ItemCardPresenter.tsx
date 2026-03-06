@@ -10,6 +10,7 @@ interface ItemCardPresenterProps {
   description: string;
   content?: MainData[];
   onOpenDetail?: (id: string | number) => void;
+  onBookCreated?: () => Promise<void> | void;
 }
 
 export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
@@ -18,6 +19,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   description,
   content,
   onOpenDetail,
+  onBookCreated,
 }) => {
   const [state, actions] = useItemCardModel();
   const [open, setOpen] = useState(false);
@@ -53,9 +55,13 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
       carouselIndex: state.carouselIndex,
       carouselValues,
       onClose: handleInputDialogClose,
-      onSave: () => {
-        actions.handleSave();
-        handleInputDialogClose();
+      onSave: async () => {
+        try {
+          await actions.handleSave();
+          await onBookCreated?.();
+        } finally {
+          setOpen(false);
+        }
       },
       onFileChange: actions.onFileChange,
       onPrev: () =>

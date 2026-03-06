@@ -12,7 +12,7 @@ export interface InputDialogProps {
   carouselIndex: number;
   carouselValues: CarouselValues;
   onClose: () => void;
-  onSave: () => void;
+  onSave: () => Promise<void> | void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPrev: () => void;
   onNext: () => void;

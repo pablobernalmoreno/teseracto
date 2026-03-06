@@ -13,6 +13,7 @@ export interface BookData {
   content?: MainData[];
   description?: string;
   owner_id?: string;
+  creationTime?: string;
 }
 
 // Dashboard service object with separate functions
@@ -26,7 +27,11 @@ export const dashboardService = {
   },
 
   async fetchBookData() {
-    return await supabase.from("user_books").select();
+    return await supabase
+      .from("user_books")
+      .select()
+      .order("creationTime", { ascending: false })
+      .order("id", { ascending: false });
   },
 
   // Fetch full content for a single book by id (used for lazy-loading)
@@ -38,10 +43,23 @@ export const dashboardService = {
       .single();
   },
 
-  async insertBookData(bookId: string, ownerId: string, title: string, content: MainData[]) {
+  async insertBookData(
+    bookId: string,
+    ownerId: string,
+    title: string,
+    content: MainData[],
+  ) {
     return await supabase
       .from("user_books")
-      .insert([{ id: bookId, owner_id: ownerId, title, content }])
+      .insert([
+        {
+          id: bookId,
+          owner_id: ownerId,
+          title,
+          content,
+          creationTime: new Date().toISOString(),
+        },
+      ])
       .select();
   },
 

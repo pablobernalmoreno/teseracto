@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import {
   Box,
@@ -8,14 +8,6 @@ import {
   Paper,
   Typography,
   Pagination,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  InputAdornment,
 } from "@mui/material";
 import { dashboardService } from "@/modules/dashboard/model/dashboardService";
 import { MainData } from "@/modules/dashboard/model/useItemCardModel";
@@ -29,6 +21,8 @@ const ItemCardPresenter = dynamic(() =>
   })),
 );
 
+const NEW_ITEM_CARD = { id: "new-item", title: "newItemCard", description: "" };
+
 const page = () => {
   const [items, setItems] = useState<
     Array<{
@@ -37,7 +31,7 @@ const page = () => {
       description: string;
       content?: MainData[];
     }>
-  >([{ id: "new-item", title: "newItemCard", description: "" }]);
+  >([NEW_ITEM_CARD]);
   const [isLoading, setIsLoading] = useState(true);
   const hasLoaded = useRef(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,9 +74,54 @@ const page = () => {
     null,
   );
   const [editedRows, setEditedRows] = useState<MainData[]>([]);
-  const [focusedMoneyIndex, setFocusedMoneyIndex] = useState<number | null>(
-    null,
-  );
+
+  const loadCardItems = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const { data: userData } = await dashboardService.fetchUserData();
+      const { data: bookData, error: bookError } =
+        await dashboardService.fetchBookData();
+
+      if (bookError || !bookData?.length) {
+        setItems([NEW_ITEM_CARD]);
+        return;
+      }
+
+      const user = userData?.[0];
+      const ownedData = bookData.filter((book) => book.owner_id === user?.book_id);
+      const sortedOwnedData = [...ownedData].sort((a, b) => {
+        const aTime = a.creationTime ? new Date(a.creationTime).getTime() : 0;
+        const bTime = b.creationTime ? new Date(b.creationTime).getTime() : 0;
+
+        if (aTime !== bTime) return bTime - aTime;
+
+        // Deterministic fallback ordering when timestamps are equal/missing.
+        return String(b.id).localeCompare(String(a.id));
+      });
+
+      // Deduplicate by ID to prevent duplicate keys
+      const uniqueBooks = Array.from(
+        new Map(sortedOwnedData.map((book) => [book.id, book])).values(),
+      ).map((book) => ({
+        id: book.id,
+        title: book.title,
+        description: book.description || "",
+        content: book.content || [],
+      }));
+
+      setItems([NEW_ITEM_CARD, ...uniqueBooks]);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      setItems([NEW_ITEM_CARD]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleBookCreated = useCallback(async () => {
+    await loadCardItems();
+    setCurrentPage(1);
+  }, [loadCardItems]);
 
   // Helpers: convert date formats and format currency for display
   const toInputDate = (dateStr: string): string => {
@@ -100,59 +139,6 @@ const page = () => {
       return `${y}-${m}-${d}`;
     }
     return "";
-  };
-
-  // Format numeric-like strings into a thousands-separated string (no rounding)
-  // Examples: "138200" | "138,200" | "138.200" -> "138,200"
-  const formatCurrency = (raw: string | number): string => {
-    const parseNumberParts = (s: string | number) => {
-      if (typeof s === "number") return { intPart: String(Math.trunc(s)), fracPart: undefined };
-      let str = String(s || "").trim();
-      if (!str) return { intPart: "", fracPart: undefined };
-      const cleaned = str.replace(/[^0-9.,-]/g, "");
-      if (!cleaned) return { intPart: "", fracPart: undefined };
-
-      const lastComma = cleaned.lastIndexOf(",");
-      const lastDot = cleaned.lastIndexOf(".");
-
-      // no separators
-      if (lastComma === -1 && lastDot === -1) return { intPart: cleaned, fracPart: undefined };
-
-      // only comma present
-      if (lastComma > -1 && lastDot === -1) {
-        const decimalsLen = cleaned.length - lastComma - 1;
-        if (decimalsLen === 3) {
-          // comma used as thousands sep: remove all commas
-          return { intPart: cleaned.replace(/,/g, ""), fracPart: undefined };
-        }
-        // comma used as decimal sep
-        return { intPart: cleaned.slice(0, lastComma).replace(/\./g, ""), fracPart: cleaned.slice(lastComma + 1) };
-      }
-
-      // only dot present
-      if (lastDot > -1 && lastComma === -1) {
-        const decimalsLen = cleaned.length - lastDot - 1;
-        if (decimalsLen === 3) {
-          // dot used as thousands sep
-          return { intPart: cleaned.replace(/\./g, ""), fracPart: undefined };
-        }
-        // dot used as decimal
-        return { intPart: cleaned.slice(0, lastDot).replace(/,/g, ""), fracPart: cleaned.slice(lastDot + 1) };
-      }
-
-      // both present: decide by which comes last
-      if (lastComma > lastDot) {
-        // comma is decimal sep, dots are thousands
-        return { intPart: cleaned.slice(0, lastComma).replace(/\./g, ""), fracPart: cleaned.slice(lastComma + 1) };
-      } else {
-        // dot is decimal sep, commas are thousands
-        return { intPart: cleaned.slice(0, lastDot).replace(/,/g, ""), fracPart: cleaned.slice(lastDot + 1) };
-      }
-    };
-
-    const parts = parseNumberParts(raw);
-    const intFormatted = parts.intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.fracPart ? `${intFormatted}.${parts.fracPart}` : intFormatted;
   };
 
   const openDetail = async (bookId: string | number) => {
@@ -237,38 +223,8 @@ const page = () => {
     if (hasLoaded.current) return;
     hasLoaded.current = true;
 
-    const loadData = async () => {
-      try {
-        const { data: userData } = await dashboardService.fetchUserData();
-        const { data: bookData, error: bookError } =
-          await dashboardService.fetchBookData();
-
-        if (!bookError && bookData?.length > 0) {
-          const user = userData?.[0];
-          const ownedData = bookData.filter(
-            (book) => book.owner_id === user?.book_id,
-          );
-
-          // Deduplicate by ID to prevent duplicate keys
-          const uniqueBooks = Array.from(
-            new Map(ownedData.map((book) => [book.id, book])).values(),
-          ).map((book) => ({
-            id: book.id,
-            title: book.title,
-            description: book.description || "",
-            content: book.content || [],
-          }));
-
-          setItems((prevItems) => [...prevItems, ...uniqueBooks]);
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadData();
-  }, []);
+    loadCardItems();
+  }, [loadCardItems]);
 
   return (
     <>
@@ -322,6 +278,7 @@ const page = () => {
                 description={item.description}
                 content={item.content}
                 onOpenDetail={openDetail}
+                onBookCreated={handleBookCreated}
               />
             ))
           )}

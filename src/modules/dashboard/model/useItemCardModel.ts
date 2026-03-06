@@ -16,6 +16,86 @@ export interface MainData {
   id: number;
 }
 
+// Format date for display as dd/mm/yyyy
+export const formatDateDisplay = (dateStr: string): string => {
+  if (!dateStr) return "--/--/----";
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split("-");
+    return `${d}/${m}/${y}`;
+  }
+
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) {
+    const d = String(parsed.getDate()).padStart(2, "0");
+    const m = String(parsed.getMonth() + 1).padStart(2, "0");
+    const y = parsed.getFullYear();
+    return `${d}/${m}/${y}`;
+  }
+
+  return dateStr;
+};
+
+// Format numeric-like strings into a thousands-separated string (no rounding)
+export const formatCurrency = (raw: string | number): string => {
+  const parseNumberParts = (s: string | number) => {
+    if (typeof s === "number") {
+      return { intPart: String(Math.trunc(s)), fracPart: undefined };
+    }
+
+    const str = String(s || "").trim();
+    if (!str) return { intPart: "", fracPart: undefined };
+
+    const cleaned = str.replace(/[^0-9.,-]/g, "");
+    if (!cleaned) return { intPart: "", fracPart: undefined };
+
+    const lastComma = cleaned.lastIndexOf(",");
+    const lastDot = cleaned.lastIndexOf(".");
+
+    if (lastComma === -1 && lastDot === -1) {
+      return { intPart: cleaned, fracPart: undefined };
+    }
+
+    if (lastComma > -1 && lastDot === -1) {
+      const decimalsLen = cleaned.length - lastComma - 1;
+      if (decimalsLen === 3) {
+        return { intPart: cleaned.replace(/,/g, ""), fracPart: undefined };
+      }
+      return {
+        intPart: cleaned.slice(0, lastComma).replace(/\./g, ""),
+        fracPart: cleaned.slice(lastComma + 1),
+      };
+    }
+
+    if (lastDot > -1 && lastComma === -1) {
+      const decimalsLen = cleaned.length - lastDot - 1;
+      if (decimalsLen === 3) {
+        return { intPart: cleaned.replace(/\./g, ""), fracPart: undefined };
+      }
+      return {
+        intPart: cleaned.slice(0, lastDot).replace(/,/g, ""),
+        fracPart: cleaned.slice(lastDot + 1),
+      };
+    }
+
+    if (lastComma > lastDot) {
+      return {
+        intPart: cleaned.slice(0, lastComma).replace(/\./g, ""),
+        fracPart: cleaned.slice(lastComma + 1),
+      };
+    }
+
+    return {
+      intPart: cleaned.slice(0, lastDot).replace(/,/g, ""),
+      fracPart: cleaned.slice(lastDot + 1),
+    };
+  };
+
+  const parts = parseNumberParts(raw);
+  const intFormatted = parts.intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.fracPart ? `${intFormatted}.${parts.fracPart}` : intFormatted;
+};
+
 // Dialog state machine types
 export type DialogState =
   | { type: "idle" }
@@ -38,7 +118,7 @@ interface ItemCardModelActions {
   handleDialogClose: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   getImageText: () => Promise<void>;
-  handleSave: () => void;
+  handleSave: () => Promise<void>;
   setCarouselIndex: (index: number) => void;
   onDateChange: (entryId: number, value: string) => void;
   onMoneyChange: (entryId: number, value: string) => void;
