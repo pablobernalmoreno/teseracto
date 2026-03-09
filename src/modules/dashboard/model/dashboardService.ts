@@ -1,6 +1,6 @@
 import supabase from "@/config/supabaseClient";
 import crypto from "crypto";
-import { MainData } from "./useItemCardModel";
+import type { MainData } from "./useItemCardModel";
 
 export interface UserData {
   id: string;

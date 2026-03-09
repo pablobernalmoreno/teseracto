@@ -124,6 +124,7 @@ interface ItemCardModelActions {
   onMoneyChange: (entryId: number, value: string) => void;
 }
 
+
 export const useItemCardModel = (): [
   ItemCardModelState,
   ItemCardModelActions,

@@ -1,0 +1,12 @@
+.search_navbar_wrapper {
+  width: min(760px, 92%);
+  margin: 20px auto 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search_navbar_count {
+  color: #4c4c4c;
+  text-align: right;
+}
