@@ -43,6 +43,10 @@ export const dashboardService = {
       .single();
   },
 
+  async deleteBooks(bookIds: Array<string | number>) {
+    return await supabase.from("user_books").delete().in("id", bookIds);
+  },
+
   async insertBookData(
     bookId: string,
     ownerId: string,

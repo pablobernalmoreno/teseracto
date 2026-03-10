@@ -6,6 +6,12 @@
   gap: 6px;
 }
 
+.search_navbar_controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .search_navbar_count {
   color: #4c4c4c;
   text-align: right;

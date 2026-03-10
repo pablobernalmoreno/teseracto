@@ -11,6 +11,8 @@ interface ItemCardPresenterProps {
   content?: MainData[];
   onOpenDetail?: (id: string | number) => void;
   onBookCreated?: () => Promise<void> | void;
+  isSelected?: boolean;
+  onSelectionChange?: (cardId: string | number, checked: boolean) => void;
 }
 
 export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
@@ -20,6 +22,8 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   content,
   onOpenDetail,
   onBookCreated,
+  isSelected = false,
+  onSelectionChange,
 }) => {
   const [state, actions] = useItemCardModel();
   const [open, setOpen] = useState(false);
@@ -91,6 +95,8 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
       description={description}
       content={content}
       onOpenDetail={onOpenDetail}
+      isSelected={isSelected}
+      onSelectionChange={(checked) => onSelectionChange?.(cardId, checked)}
     />
   );
 };

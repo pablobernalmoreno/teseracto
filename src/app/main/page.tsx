@@ -2,10 +2,16 @@
 import React from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Paper,
+  Snackbar,
   Typography,
   Pagination,
 } from "@mui/material";
@@ -24,6 +30,7 @@ const ItemCardPresenter = dynamic(() =>
 const page = () => {
   const [state, actions] = useDashboardPageModel();
   const {
+    items,
     isLoading,
     selectedCardId,
     editedRows,
@@ -32,7 +39,18 @@ const page = () => {
     currentPage,
     searchQuery,
     filteredCount,
+    selectedCardIds,
+    isDeleteModalOpen,
+    toastOpen,
+    toastMessage,
+    toastSeverity,
   } = state;
+
+  const selectedDeleteCount = selectedCardIds.length;
+  const selectedCardTitle =
+    selectedDeleteCount === 1
+      ? items.find((item) => item.id === selectedCardIds[0])?.title || ""
+      : "";
 
   return (
     <>
@@ -48,6 +66,8 @@ const page = () => {
                 value={searchQuery}
                 onChange={actions.setSearchQuery}
                 matchCount={filteredCount}
+                selectedCount={selectedCardIds.length}
+                onDeleteClick={actions.openDeleteModal}
               />
             </Box>
           )}
@@ -94,6 +114,8 @@ const page = () => {
                     content={item.content}
                     onOpenDetail={actions.openDetail}
                     onBookCreated={actions.handleBookCreated}
+                    isSelected={selectedCardIds.includes(item.id)}
+                    onSelectionChange={actions.toggleCardSelection}
                   />
                 ))}
               </Box>
@@ -114,6 +136,38 @@ const page = () => {
           )}
         </Box>
       </Box>
+
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={actions.closeDeleteModal}
+        aria-labelledby="delete-items-dialog-title"
+      >
+        <DialogTitle id="delete-items-dialog-title">Borrar elementos</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {selectedDeleteCount === 1
+              ? `¿Estás seguro de que deseas borrar el elemento ${selectedCardTitle}?`
+              : `¿Estás seguro de que deseas borrar los ${selectedDeleteCount} elementos?`}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={actions.closeDeleteModal}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={actions.deleteSelectedCards}>
+            Borrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={3500}
+        onClose={actions.closeToast}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert onClose={actions.closeToast} severity={toastSeverity} variant="filled">
+          {toastMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
