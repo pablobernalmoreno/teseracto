@@ -86,10 +86,10 @@ const page = () => {
                   <Typography variant="h6">Detalle del libro</Typography>
                   <Box>
                     <Button onClick={actions.handleBackFromDetail} sx={{ mr: 1 }}>
-                      Back
+                      Volver
                     </Button>
                     <Button variant="contained" onClick={actions.handleSaveDetail}>
-                      Save
+                      Guardar
                     </Button>
                   </Box>
                 </Box>
@@ -109,6 +109,7 @@ const page = () => {
                     description={item.description}
                     content={item.content}
                     onOpenDetail={actions.openDetail}
+                    onBeforeAddClick={actions.clearCardSelection}
                     onBookCreated={actions.handleBookCreated}
                     isSelected={selectedCardIds.includes(item.id)}
                     onSelectionChange={actions.toggleCardSelection}

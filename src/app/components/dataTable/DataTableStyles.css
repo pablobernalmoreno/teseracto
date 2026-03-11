@@ -1,0 +1,11 @@
+.data-table-row-new .MuiTableCell-root {
+  background-color: #a3dc9a;
+}
+
+.data-table-row-edited .MuiTableCell-root {
+  background-color: #fff9bd;
+}
+
+.data-table-add-cell {
+  text-align: left;
+}

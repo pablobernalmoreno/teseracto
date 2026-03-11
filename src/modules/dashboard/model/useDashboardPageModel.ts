@@ -30,13 +30,14 @@ interface DashboardPageModelActions {
   handlePageChange: (_event: React.ChangeEvent<unknown>, value: number) => void;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   openDetail: (bookId: string | number) => Promise<void>;
+  clearCardSelection: () => void;
   toggleCardSelection: (cardId: string | number, checked: boolean) => void;
   openDeleteModal: () => void;
   closeDeleteModal: () => void;
   deleteSelectedCards: () => Promise<void>;
   closeToast: () => void;
   handleBackFromDetail: () => void;
-  handleSaveDetail: () => void;
+  handleSaveDetail: () => Promise<void>;
   handleBookCreated: () => Promise<void>;
   setEditedRows: React.Dispatch<React.SetStateAction<MainData[]>>;
 }
@@ -212,6 +213,9 @@ export const useDashboardPageModel = (): [
     const existing = items.find((it) => it.id === bookId);
     if (!existing) return;
 
+    setSelectedCardIds([]);
+    setIsDeleteModalOpen(false);
+
     const content =
       existing.content && existing.content.length > 0
         ? existing.content
@@ -230,6 +234,11 @@ export const useDashboardPageModel = (): [
 
       return prev.filter((id) => id !== cardId);
     });
+  };
+
+  const clearCardSelection = () => {
+    setSelectedCardIds([]);
+    setIsDeleteModalOpen(false);
   };
 
   const openDeleteModal = () => {
@@ -284,15 +293,43 @@ export const useDashboardPageModel = (): [
     setEditedRows([]);
   };
 
-  const handleSaveDetail = () => {
+  const handleSaveDetail = async () => {
     if (selectedCardId == null) return;
-    setItems((prev) =>
-      prev.map((it) =>
-        it.id === selectedCardId ? { ...it, content: editedRows } : it,
-      ),
+
+    const rowsToSave = editedRows.filter(
+      (row) => row.date.trim() !== "" || row.money.trim() !== "",
     );
-    setSelectedCardId(null);
-    setEditedRows([]);
+
+    try {
+      const { error } = await dashboardService.updateBookContent(
+        selectedCardId,
+        rowsToSave,
+      );
+
+      if (error) {
+        console.error("Error saving book content:", error);
+        setToastSeverity("error");
+        setToastMessage("No se pudieron guardar los cambios.");
+        setToastOpen(true);
+        return;
+      }
+
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === selectedCardId ? { ...it, content: rowsToSave } : it,
+        ),
+      );
+      setSelectedCardId(null);
+      setEditedRows([]);
+      setToastSeverity("success");
+      setToastMessage("Cambios guardados correctamente.");
+      setToastOpen(true);
+    } catch (error) {
+      console.error("Error saving book content:", error);
+      setToastSeverity("error");
+      setToastMessage("No se pudieron guardar los cambios.");
+      setToastOpen(true);
+    }
   };
 
   const handleBookCreated = useCallback(async () => {
@@ -338,6 +375,7 @@ export const useDashboardPageModel = (): [
     handlePageChange,
     setSearchQuery,
     openDetail,
+    clearCardSelection,
     toggleCardSelection,
     openDeleteModal,
     closeDeleteModal,

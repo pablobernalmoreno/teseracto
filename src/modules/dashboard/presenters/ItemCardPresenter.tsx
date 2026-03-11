@@ -10,6 +10,7 @@ interface ItemCardPresenterProps {
   description: string;
   content?: MainData[];
   onOpenDetail?: (id: string | number) => void;
+  onBeforeAddClick?: () => void;
   onBookCreated?: () => Promise<void> | void;
   isSelected?: boolean;
   onSelectionChange?: (cardId: string | number, checked: boolean) => void;
@@ -21,6 +22,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   description,
   content,
   onOpenDetail,
+  onBeforeAddClick,
   onBookCreated,
   isSelected = false,
   onSelectionChange,
@@ -30,6 +32,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleInputDialogOpen = () => {
+    onBeforeAddClick?.();
     setOpen(true);
   };
 

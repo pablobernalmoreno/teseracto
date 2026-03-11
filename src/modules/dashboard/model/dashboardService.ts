@@ -67,6 +67,15 @@ export const dashboardService = {
       .select();
   },
 
+  async updateBookContent(bookId: string | number, content: MainData[]) {
+    return await supabase
+      .from("user_books")
+      .update({ content })
+      .eq("id", bookId)
+      .select()
+      .single();
+  },
+
   async createUserProfile(userId: string) {
     const uuid = crypto.randomUUID();
     return await supabase
