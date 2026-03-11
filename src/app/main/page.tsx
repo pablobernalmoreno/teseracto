@@ -2,16 +2,10 @@
 import React from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import {
-  Alert,
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Paper,
-  Snackbar,
   Typography,
   Pagination,
 } from "@mui/material";
@@ -20,6 +14,8 @@ import dynamic from "next/dynamic";
 import "./mainStyles.css";
 import DataTable from "../components/dataTable/DataTable";
 import { SearchNavbar } from "../components/dashboard/SearchNavbar/SearchNavbar";
+import AlertMessage from "../components/dashboard/Dialog/AlertMessage";
+import DeleteDialog from "../components/dashboard/Dialog/DeleteDialog";
 
 const ItemCardPresenter = dynamic(() =>
   import("@/modules/dashboard/presenters/ItemCardPresenter").then((mod) => ({
@@ -137,37 +133,20 @@ const page = () => {
         </Box>
       </Box>
 
-      <Dialog
+      <DeleteDialog
         open={isDeleteModalOpen}
+        selectedDeleteCount={selectedDeleteCount}
+        selectedCardTitle={selectedCardTitle}
         onClose={actions.closeDeleteModal}
-        aria-labelledby="delete-items-dialog-title"
-      >
-        <DialogTitle id="delete-items-dialog-title">Borrar elementos</DialogTitle>
-        <DialogContent>
-          <Typography>
-            {selectedDeleteCount === 1
-              ? `¿Estás seguro de que deseas borrar el elemento ${selectedCardTitle}?`
-              : `¿Estás seguro de que deseas borrar los ${selectedDeleteCount} elementos?`}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={actions.closeDeleteModal}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={actions.deleteSelectedCards}>
-            Borrar
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onDelete={actions.deleteSelectedCards}
+      />
 
-      <Snackbar
+      <AlertMessage
         open={toastOpen}
-        autoHideDuration={3500}
+        message={toastMessage}
+        severity={toastSeverity}
         onClose={actions.closeToast}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert onClose={actions.closeToast} severity={toastSeverity} variant="filled">
-          {toastMessage}
-        </Alert>
-      </Snackbar>
+      />
     </>
   );
 };

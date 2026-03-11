@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardActionArea, CardContent } from "@mui/material";
 import "@/app/components/dashboard/dashboardStyles.css";
-import { InputDialog, InputDialogProps } from "../InputDialog/InputDialog";
+import { InputDialog, InputDialogProps } from "../Dialog/InputDialog";
 import { CarouselValues } from "../InvalidEntryCarousel/InvalidEntryCarousel";
 
 interface NewItemCardProps {
