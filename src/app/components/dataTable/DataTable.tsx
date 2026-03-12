@@ -29,6 +29,42 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
   const [newRowIds, setNewRowIds] = useState<Set<number>>(new Set());
   const [editedRowIds, setEditedRowIds] = useState<Set<number>>(new Set());
 
+  const parseMoneyToNumber = (value: string | number): number => {
+    if (typeof value === "number") return value;
+    const str = String(value || "").trim();
+    if (!str) return 0;
+
+    const cleaned = str.replace(/[^0-9.,-]/g, "");
+    if (!cleaned) return 0;
+
+    const lastComma = cleaned.lastIndexOf(",");
+    const lastDot = cleaned.lastIndexOf(".");
+
+    if (lastComma === -1 && lastDot === -1) return Number(cleaned) || 0;
+
+    if (lastComma > -1 && lastDot === -1) {
+      const decimalsLen = cleaned.length - lastComma - 1;
+      if (decimalsLen === 3) return Number(cleaned.replace(/,/g, "")) || 0;
+      return Number(cleaned.replace(/,/g, ".")) || 0;
+    }
+
+    if (lastDot > -1 && lastComma === -1) {
+      const decimalsLen = cleaned.length - lastDot - 1;
+      if (decimalsLen === 3) return Number(cleaned.replace(/\./g, "")) || 0;
+      return Number(cleaned) || 0;
+    }
+
+    if (lastComma > lastDot) {
+      const normalized = cleaned.replace(/\./g, "").replace(/,/g, ".");
+      return Number(normalized) || 0;
+    }
+
+    const normalized = cleaned.replace(/,/g, "");
+    return Number(normalized) || 0;
+  };
+
+  const totalGanancias = rows.reduce((sum, row) => sum + parseMoneyToNumber(row.money), 0);
+
   useEffect(() => {
     const existingIds = new Set(rows.map((row) => row.id));
     setNewRowIds((prev) => new Set(Array.from(prev).filter((id) => existingIds.has(id))));
@@ -132,7 +168,9 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
                   Nuevo dato +
                 </Button>
               </TableCell>
-              <TableCell />
+              <TableCell align="right" className="data-table-total-cell">
+                Total: {formatCurrency(totalGanancias)}
+              </TableCell>
             </TableRow>
           )}
         </TableBody>

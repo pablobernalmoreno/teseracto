@@ -9,3 +9,7 @@
 .data-table-add-cell {
   text-align: left;
 }
+
+.data-table-total-cell {
+  font-weight: 600;
+}
