@@ -16,6 +16,13 @@ export interface BookData {
   creationTime?: string;
 }
 
+interface FetchBookDataPageParams {
+  ownerId: string;
+  from: number;
+  to: number;
+  searchQuery?: string;
+}
+
 // Dashboard service object with separate functions
 export const dashboardService = {
   async getSession() {
@@ -26,12 +33,46 @@ export const dashboardService = {
     return await supabase.from("user_profile").select();
   },
 
-  async fetchBookData() {
+  async fetchCurrentUserProfile() {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await this.getSession();
+
+    if (sessionError || !session?.user?.id) {
+      return { data: null, error: sessionError };
+    }
+
     return await supabase
+      .from("user_profile")
+      .select("id,book_id")
+      .eq("id", session.user.id)
+      .single();
+  },
+
+  async fetchBookDataPage({
+    ownerId,
+    from,
+    to,
+    searchQuery,
+  }: FetchBookDataPageParams) {
+    let query = supabase
       .from("user_books")
-      .select()
+      .select("*", {
+        count: "exact",
+      })
+      .eq("owner_id", ownerId)
       .order("creationTime", { ascending: false })
-      .order("id", { ascending: false });
+      .order("id", { ascending: false })
+      .range(from, to);
+
+    const trimmedQuery = searchQuery?.trim();
+    if (trimmedQuery) {
+      const escaped = trimmedQuery.replace(/[%_]/g, "\\$&");
+      query = query.or(`title.ilike.%${escaped}%,description.ilike.%${escaped}%`);
+    }
+
+    return await query;
   },
 
   // Fetch full content for a single book by id (used for lazy-loading)

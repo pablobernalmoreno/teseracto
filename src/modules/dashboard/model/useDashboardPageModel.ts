@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { dashboardService } from "./dashboardService";
 import { MainData } from "./useItemCardModel";
 
@@ -108,6 +108,7 @@ export const useDashboardPageModel = (): [
   const [items, setItems] = useState<DashboardCardItem[]>([NEW_ITEM_CARD]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredCount, setFilteredCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCardId, setSelectedCardId] = useState<string | number | null>(
     null,
@@ -122,21 +123,13 @@ export const useDashboardPageModel = (): [
     "success",
   );
   const [editedRows, setEditedRows] = useState<MainData[]>([]);
-  const hasLoaded = useRef(false);
-
-  const query = searchQuery.trim().toLowerCase();
-  const regularItems = items.filter((item) => item.id !== NEW_ITEM_CARD.id);
-  const filteredRegularItems = regularItems.filter((item) => {
-    if (!query) return true;
-    const title = item.title?.toLowerCase() || "";
-    const description = item.description?.toLowerCase() || "";
-    return title.includes(query) || description.includes(query);
-  });
-  const filteredItems = [NEW_ITEM_CARD, ...filteredRegularItems];
-
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const firstPageBookSlots = Math.max(ITEMS_PER_PAGE - 1, 0);
+  const totalPages =
+    filteredCount <= firstPageBookSlots
+      ? 1
+      : 1 + Math.ceil((filteredCount - firstPageBookSlots) / ITEMS_PER_PAGE);
+  const currentItems =
+    currentPage === 1 ? [NEW_ITEM_CARD, ...items] : items;
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
@@ -148,43 +141,56 @@ export const useDashboardPageModel = (): [
   const loadCardItems = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data: userData } = await dashboardService.fetchUserData();
-      const { data: bookData, error: bookError } =
-        await dashboardService.fetchBookData();
+      const { data: currentProfile } =
+        await dashboardService.fetchCurrentUserProfile();
+      const user = currentProfile
+        ? currentProfile
+        : (await dashboardService.fetchUserData()).data?.[0];
 
-      if (bookError || !bookData?.length) {
-        setItems([NEW_ITEM_CARD]);
+      if (!user?.book_id) {
+        setItems([]);
+        setFilteredCount(0);
         return;
       }
 
-      const user = userData?.[0];
-      const ownedData = bookData.filter((book) => book.owner_id === user?.book_id);
-      const sortedOwnedData = [...ownedData].sort((a, b) => {
-        const aTime = a.creationTime ? new Date(a.creationTime).getTime() : 0;
-        const bTime = b.creationTime ? new Date(b.creationTime).getTime() : 0;
+      const from =
+        currentPage <= 1
+          ? 0
+          : firstPageBookSlots + (currentPage - 2) * ITEMS_PER_PAGE;
+      const pageSize = currentPage <= 1 ? firstPageBookSlots : ITEMS_PER_PAGE;
+      const to = Math.max(from, from + pageSize - 1);
 
-        if (aTime !== bTime) return bTime - aTime;
+      const { data: bookData, error: bookError, count } =
+        await dashboardService.fetchBookDataPage({
+          ownerId: user.book_id,
+          from,
+          to,
+          searchQuery,
+        });
 
-        return String(b.id).localeCompare(String(a.id));
-      });
+      if (bookError) {
+        setItems([]);
+        setFilteredCount(0);
+        return;
+      }
 
-      const uniqueBooks = Array.from(
-        new Map(sortedOwnedData.map((book) => [book.id, book])).values(),
-      ).map((book) => ({
+      const currentPageBooks = (bookData || []).map((book) => ({
         id: book.id,
         title: book.title,
         description: book.description || "",
         content: book.content || [],
       }));
 
-      setItems([NEW_ITEM_CARD, ...uniqueBooks]);
+      setItems(currentPageBooks);
+      setFilteredCount(count || 0);
     } catch (error) {
       console.error("Error loading data:", error);
-      setItems([NEW_ITEM_CARD]);
+      setItems([]);
+      setFilteredCount(0);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentPage, firstPageBookSlots, searchQuery]);
 
   const handleLoadContent = async (bookId: string | number): Promise<MainData[]> => {
     const existing = items.find((it) => it.id === bookId);
@@ -270,9 +276,10 @@ export const useDashboardPageModel = (): [
 
       setItems((prev) =>
         prev.filter((item) =>
-          item.id === NEW_ITEM_CARD.id ? true : !selectedCardIds.includes(item.id),
+          !selectedCardIds.includes(item.id),
         ),
       );
+      setFilteredCount((prev) => Math.max(0, prev - deleteCount));
       setSelectedCardIds([]);
       setIsDeleteModalOpen(false);
       setToastSeverity("success");
@@ -280,13 +287,14 @@ export const useDashboardPageModel = (): [
         `Deleted ${deleteCount} item${deleteCount === 1 ? "" : "s"}.`,
       );
       setToastOpen(true);
+      await loadCardItems();
     } catch (error) {
       console.error("Error deleting books:", error);
       setToastSeverity("error");
       setToastMessage("Could not delete selected items.");
       setToastOpen(true);
     }
-  }, [selectedCardIds]);
+  }, [loadCardItems, selectedCardIds]);
 
   const handleBackFromDetail = () => {
     setSelectedCardId(null);
@@ -333,32 +341,35 @@ export const useDashboardPageModel = (): [
   };
 
   const handleBookCreated = useCallback(async () => {
-    await loadCardItems();
+    if (currentPage === 1) {
+      await loadCardItems();
+      return;
+    }
+
     setCurrentPage(1);
-  }, [loadCardItems]);
+  }, [currentPage, loadCardItems]);
 
   useEffect(() => {
-    if (hasLoaded.current) return;
-    hasLoaded.current = true;
     loadCardItems();
   }, [loadCardItems]);
 
   useEffect(() => {
-    setCurrentPage(1);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
   }, [searchQuery]);
 
   useEffect(() => {
-    setCurrentPage((prevPage) => {
-      const maxPage = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
-      return Math.min(prevPage, maxPage);
-    });
-  }, [filteredItems.length]);
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const state: DashboardPageModelState = {
     items,
     isLoading,
     searchQuery,
-    filteredCount: filteredRegularItems.length,
+    filteredCount,
     currentPage,
     totalPages,
     currentItems,
