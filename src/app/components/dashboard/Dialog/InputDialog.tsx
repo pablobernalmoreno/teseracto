@@ -2,7 +2,16 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { MainData, DialogState } from "@/modules/dashboard/model/useItemCardModel";
 import { CarouselValues, InvalidEntryCarousel } from "../InvalidEntryCarousel/InvalidEntryCarousel";
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Fade } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fade,
+} from "@mui/material";
 
 export interface InputDialogProps {
   open: boolean;
@@ -125,12 +134,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
               className="file_upload_hidden_input"
               onChange={onFileChange}
             />
-            <Button
-              role={undefined}
-              variant="text"
-              tabIndex={-1}
-              startIcon={<CloudUploadIcon />}
-            >
+            <Button role={undefined} variant="text" tabIndex={-1} startIcon={<CloudUploadIcon />}>
               Subir Archivos
             </Button>
           </Box>
@@ -154,7 +158,10 @@ export const InputDialog: React.FC<InputDialogProps> = ({
         <Button
           onClick={onSave}
           autoFocus
-          disabled={(dialogState.type !== "invalid_entries" && dialogState.type !== "success") || !allInvalidEntriesFilled}
+          disabled={
+            (dialogState.type !== "invalid_entries" && dialogState.type !== "success") ||
+            !allInvalidEntriesFilled
+          }
         >
           Guardar
         </Button>

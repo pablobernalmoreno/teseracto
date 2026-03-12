@@ -21,9 +21,7 @@ const Page = () => {
   }, []);
 
   const resendConfirmationEmail = async () => {
-    const result = await accountConfirmationService.resendConfirmationEmail(
-      registeredEmail
-    );
+    const result = await accountConfirmationService.resendConfirmationEmail(registeredEmail);
     if (result.success) {
       setTimeLeft(60);
     }
@@ -46,9 +44,9 @@ const Page = () => {
           Confirmación de Cuenta
         </Typography>
         <Typography className="account_confirmation_subtitle" variant="h6">
-          Hemos enviado un email a {registeredEmail} para confirmar tu cuenta.
-          Por favor, revisa tu bandeja de entrada y sigue las instrucciones
-          proporcionadas. Una vez que hayas confirmado tu cuenta, podrás{" "}
+          Hemos enviado un email a {registeredEmail} para confirmar tu cuenta. Por favor, revisa tu
+          bandeja de entrada y sigue las instrucciones proporcionadas. Una vez que hayas confirmado
+          tu cuenta, podrás{" "}
           <Link href="/login" underline="hover">
             iniciar sesión
           </Link>

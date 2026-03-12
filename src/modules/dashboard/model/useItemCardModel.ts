@@ -124,19 +124,16 @@ interface ItemCardModelActions {
   onMoneyChange: (entryId: number, value: string) => void;
 }
 
-export const useItemCardModel = (): [
-  ItemCardModelState,
-  ItemCardModelActions,
-] => {
+export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] => {
   const [files, setFiles] = useState<FileList>();
   const [dialogState, setDialogState] = useState<DialogState>({ type: "idle" });
   const [pathData, setPathData] = useState<MainData[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [invalidEntries, setInvalidEntries] = useState<MainData[]>([]);
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
-  const [editedValues, setEditedValues] = useState<
-    Map<number, { date: string; money: string }>
-  >(new Map());
+  const [editedValues, setEditedValues] = useState<Map<number, { date: string; money: string }>>(
+    new Map()
+  );
 
   const handleDialogClose = () => {
     setDialogState({ type: "idle" });
@@ -170,10 +167,7 @@ export const useItemCardModel = (): [
       setSources(newSources);
       const expectedDatesArray = parseDates(paths);
       const expectedCurrencyArray = extractCurrencyValues(paths);
-      const result = combineDatesAndCurrency(
-        expectedDatesArray,
-        expectedCurrencyArray,
-      );
+      const result = combineDatesAndCurrency(expectedDatesArray, expectedCurrencyArray);
 
       if (!isCombinedDataValid(result)) {
         const invalid = findInvalidEntries(result);
@@ -194,7 +188,7 @@ export const useItemCardModel = (): [
 
   const formatUpdatedPathData = (
     originalPathData: MainData[],
-    edits: Map<number, { date: string; money: string }>,
+    edits: Map<number, { date: string; money: string }>
   ): MainData[] => {
     const updated = [...originalPathData];
     const parseNumberFromString = (s: string | number): number => {
@@ -257,9 +251,7 @@ export const useItemCardModel = (): [
   };
 
   const computeTitleFromPathData = (updatedPathData: MainData[]): string => {
-    const dateStrings = updatedPathData
-      .map((d) => d.date)
-      .filter(Boolean) as string[];
+    const dateStrings = updatedPathData.map((d) => d.date).filter(Boolean) as string[];
 
     const toDate = (s: string): Date | null => {
       if (!s) return null;
@@ -342,12 +334,7 @@ export const useItemCardModel = (): [
         : String(Date.now());
       const title = computeTitleFromPathData(updatedPathData);
 
-      await dashboardService.insertBookData(
-        bookId,
-        ownerId,
-        title,
-        updatedPathData,
-      );
+      await dashboardService.insertBookData(bookId, ownerId, title, updatedPathData);
     } catch (error) {
       console.error("Error saving book data:", error);
       throw error;

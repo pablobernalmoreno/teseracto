@@ -101,48 +101,34 @@ const normalizeRowsForEdit = (rows: MainData[]): MainData[] => {
   }));
 };
 
-export const useDashboardPageModel = (): [
-  DashboardPageModelState,
-  DashboardPageModelActions,
-] => {
+export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPageModelActions] => {
   const [items, setItems] = useState<DashboardCardItem[]>([NEW_ITEM_CARD]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCount, setFilteredCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCardId, setSelectedCardId] = useState<string | number | null>(
-    null,
-  );
-  const [selectedCardIds, setSelectedCardIds] = useState<Array<string | number>>(
-    [],
-  );
+  const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
+  const [selectedCardIds, setSelectedCardIds] = useState<Array<string | number>>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [toastSeverity, setToastSeverity] = useState<"success" | "error">(
-    "success",
-  );
+  const [toastSeverity, setToastSeverity] = useState<"success" | "error">("success");
   const [editedRows, setEditedRows] = useState<MainData[]>([]);
   const firstPageBookSlots = Math.max(ITEMS_PER_PAGE - 1, 0);
   const totalPages =
     filteredCount <= firstPageBookSlots
       ? 1
       : 1 + Math.ceil((filteredCount - firstPageBookSlots) / ITEMS_PER_PAGE);
-  const currentItems =
-    currentPage === 1 ? [NEW_ITEM_CARD, ...items] : items;
+  const currentItems = currentPage === 1 ? [NEW_ITEM_CARD, ...items] : items;
 
-  const handlePageChange = (
-    _event: React.ChangeEvent<unknown>,
-    value: number,
-  ) => {
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
 
   const loadCardItems = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data: currentProfile } =
-        await dashboardService.fetchCurrentUserProfile();
+      const { data: currentProfile } = await dashboardService.fetchCurrentUserProfile();
       const user = currentProfile
         ? currentProfile
         : (await dashboardService.fetchUserData()).data?.[0];
@@ -153,20 +139,20 @@ export const useDashboardPageModel = (): [
         return;
       }
 
-      const from =
-        currentPage <= 1
-          ? 0
-          : firstPageBookSlots + (currentPage - 2) * ITEMS_PER_PAGE;
+      const from = currentPage <= 1 ? 0 : firstPageBookSlots + (currentPage - 2) * ITEMS_PER_PAGE;
       const pageSize = currentPage <= 1 ? firstPageBookSlots : ITEMS_PER_PAGE;
       const to = Math.max(from, from + pageSize - 1);
 
-      const { data: bookData, error: bookError, count } =
-        await dashboardService.fetchBookDataPage({
-          ownerId: user.book_id,
-          from,
-          to,
-          searchQuery,
-        });
+      const {
+        data: bookData,
+        error: bookError,
+        count,
+      } = await dashboardService.fetchBookDataPage({
+        ownerId: user.book_id,
+        from,
+        to,
+        searchQuery,
+      });
 
       if (bookError) {
         setItems([]);
@@ -203,9 +189,7 @@ export const useDashboardPageModel = (): [
       const { data, error } = await dashboardService.fetchBookContent(bookId);
       if (!error && data?.content) {
         const content = data.content as MainData[];
-        setItems((prev) =>
-          prev.map((it) => (it.id === bookId ? { ...it, content } : it)),
-        );
+        setItems((prev) => prev.map((it) => (it.id === bookId ? { ...it, content } : it)));
         return content;
       }
     } catch (err) {
@@ -274,18 +258,12 @@ export const useDashboardPageModel = (): [
         return;
       }
 
-      setItems((prev) =>
-        prev.filter((item) =>
-          !selectedCardIds.includes(item.id),
-        ),
-      );
+      setItems((prev) => prev.filter((item) => !selectedCardIds.includes(item.id)));
       setFilteredCount((prev) => Math.max(0, prev - deleteCount));
       setSelectedCardIds([]);
       setIsDeleteModalOpen(false);
       setToastSeverity("success");
-      setToastMessage(
-        `Deleted ${deleteCount} item${deleteCount === 1 ? "" : "s"}.`,
-      );
+      setToastMessage(`Deleted ${deleteCount} item${deleteCount === 1 ? "" : "s"}.`);
       setToastOpen(true);
       await loadCardItems();
     } catch (error) {
@@ -305,14 +283,11 @@ export const useDashboardPageModel = (): [
     if (selectedCardId === null || selectedCardId === undefined) return;
 
     const rowsToSave = editedRows.filter(
-      (row) => row.date.trim() !== "" || row.money.trim() !== "",
+      (row) => row.date.trim() !== "" || row.money.trim() !== ""
     );
 
     try {
-      const { error } = await dashboardService.updateBookContent(
-        selectedCardId,
-        rowsToSave,
-      );
+      const { error } = await dashboardService.updateBookContent(selectedCardId, rowsToSave);
 
       if (error) {
         console.error("Error saving book content:", error);
@@ -323,9 +298,7 @@ export const useDashboardPageModel = (): [
       }
 
       setItems((prev) =>
-        prev.map((it) =>
-          it.id === selectedCardId ? { ...it, content: rowsToSave } : it,
-        ),
+        prev.map((it) => (it.id === selectedCardId ? { ...it, content: rowsToSave } : it))
       );
       setSelectedCardId(null);
       setEditedRows([]);

@@ -1,11 +1,4 @@
-import {
-  Card,
-  CardActionArea,
-  CardContent,
-  Typography,
-  Box,
-  Checkbox,
-} from "@mui/material";
+import { Card, CardActionArea, CardContent, Typography, Box, Checkbox } from "@mui/material";
 import DataTable from "../../dataTable/DataTable";
 import { MainData } from "@/modules/dashboard/model/useItemCardModel";
 
@@ -70,9 +63,7 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
             {description}
           </Typography>
         </CardContent>
-        <Box
-          sx={{ bgcolor: "#f9f9f9", height: 140, overflow: "hidden", px: 1 }}
-        >
+        <Box sx={{ bgcolor: "#f9f9f9", height: 140, overflow: "hidden", px: 1 }}>
           <DataTable rows={previewData} />
         </Box>
       </CardActionArea>

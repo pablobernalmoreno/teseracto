@@ -139,9 +139,7 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
                       slotProps={{
                         htmlInput: { inputMode: "decimal", pattern: "[0-9.,]*" },
                         input: {
-                          startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
-                          ),
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         },
                       }}
                     />

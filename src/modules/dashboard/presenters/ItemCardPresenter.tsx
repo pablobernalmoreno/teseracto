@@ -71,11 +71,10 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
         }
       },
       onFileChange: actions.onFileChange,
-      onPrev: () =>
-        actions.setCarouselIndex(Math.max(0, state.carouselIndex - 1)),
+      onPrev: () => actions.setCarouselIndex(Math.max(0, state.carouselIndex - 1)),
       onNext: () =>
         actions.setCarouselIndex(
-          Math.min(state.invalidEntries.length - 1, state.carouselIndex + 1),
+          Math.min(state.invalidEntries.length - 1, state.carouselIndex + 1)
         ),
       onDateChange: actions.onDateChange,
       onMoneyChange: actions.onMoneyChange,
@@ -83,12 +82,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
       onContentClick,
     };
 
-    return (
-      <NewItemCard
-        onAddClick={handleInputDialogOpen}
-        dialogProps={dialogProps}
-      />
-    );
+    return <NewItemCard onAddClick={handleInputDialogOpen} dialogProps={dialogProps} />;
   }
 
   return (

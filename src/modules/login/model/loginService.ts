@@ -43,14 +43,12 @@ export const loginService = {
       sessionStorage.setItem("email_iv", iv);
       return { error: null, success: true };
     } catch (encryptError) {
-      const errorMessage =
-        encryptError instanceof Error ? encryptError.message : "Unknown error";
+      const errorMessage = encryptError instanceof Error ? encryptError.message : "Unknown error";
       return { error: { message: errorMessage }, success: false };
     }
   },
 
   async signOut() {
     return await supabase.auth.signOut();
-  }
+  },
 };
-

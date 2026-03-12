@@ -60,9 +60,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
             alignItems: "center",
           }}
         >
-          {source && (
-            <Image src={source} alt="Invalid Entry" width={150} height={150} />
-          )}
+          {source && <Image src={source} alt="Invalid Entry" width={150} height={150} />}
           <Box sx={{ display: "flex", gap: 1, width: "100%" }}>
             <TextField
               key={`date-${currentIndex}`}
@@ -92,10 +90,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
         <IconButton onClick={onPrev} disabled={currentIndex === 0}>
           <NavigateBeforeIcon />
         </IconButton>
-        <IconButton
-          onClick={onNext}
-          disabled={currentIndex === invalidEntries.length - 1}
-        >
+        <IconButton onClick={onNext} disabled={currentIndex === invalidEntries.length - 1}>
           <NavigateNextIcon />
         </IconButton>
       </Box>
