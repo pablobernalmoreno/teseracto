@@ -67,6 +67,17 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
 
   const existingIds = useMemo(() => new Set(rows.map((row) => row.id)), [rows]);
 
+  // Filter tracking sets to only include IDs that exist in current dataset
+  const filteredNewRowIds = useMemo(
+    () => new Set([...newRowIds].filter((id) => existingIds.has(id))),
+    [newRowIds, existingIds]
+  );
+
+  const filteredEditedRowIds = useMemo(
+    () => new Set([...editedRowIds].filter((id) => existingIds.has(id))),
+    [editedRowIds, existingIds]
+  );
+
   const handleChange = (index: number, field: "date" | "money", value: string) => {
     if (!onRowsChange) return;
     const rowId = rows[index]?.id;
@@ -98,8 +109,8 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
 
   const getRowClassName = (rowId: number) => {
     if (!existingIds.has(rowId)) return "";
-    if (newRowIds.has(rowId)) return "data-table-row-new";
-    if (editedRowIds.has(rowId)) return "data-table-row-edited";
+    if (filteredNewRowIds.has(rowId)) return "data-table-row-new";
+    if (filteredEditedRowIds.has(rowId)) return "data-table-row-edited";
     return "";
   };
 
