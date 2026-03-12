@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Button,
   Table,
@@ -29,37 +29,39 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
   const [newRowIds, setNewRowIds] = useState<Set<number>>(new Set());
   const [editedRowIds, setEditedRowIds] = useState<Set<number>>(new Set());
 
+  const parseCommaDecimalFormat = (cleaned: string, lastComma: number): number => {
+    const decimalsLen = cleaned.length - lastComma - 1;
+    if (decimalsLen === 3) return Number(cleaned.replaceAll(/,/g, "")) || 0;
+    return Number(cleaned.replaceAll(/,/g, ".")) || 0;
+  };
+
+  const parseDotDecimalFormat = (cleaned: string, lastDot: number): number => {
+    const decimalsLen = cleaned.length - lastDot - 1;
+    if (decimalsLen === 3) return Number(cleaned.replaceAll(/\./g, "")) || 0;
+    return Number(cleaned) || 0;
+  };
+
   const parseMoneyToNumber = (value: string | number): number => {
     if (typeof value === "number") return value;
     const str = String(value || "").trim();
     if (!str) return 0;
 
-    const cleaned = str.replace(/[^0-9.,-]/g, "");
+    const cleaned = str.replaceAll(/[^0-9.,-]/g, "");
     if (!cleaned) return 0;
 
     const lastComma = cleaned.lastIndexOf(",");
     const lastDot = cleaned.lastIndexOf(".");
 
     if (lastComma === -1 && lastDot === -1) return Number(cleaned) || 0;
-
-    if (lastComma > -1 && lastDot === -1) {
-      const decimalsLen = cleaned.length - lastComma - 1;
-      if (decimalsLen === 3) return Number(cleaned.replace(/,/g, "")) || 0;
-      return Number(cleaned.replace(/,/g, ".")) || 0;
-    }
-
-    if (lastDot > -1 && lastComma === -1) {
-      const decimalsLen = cleaned.length - lastDot - 1;
-      if (decimalsLen === 3) return Number(cleaned.replace(/\./g, "")) || 0;
-      return Number(cleaned) || 0;
-    }
+    if (lastComma > -1 && lastDot === -1) return parseCommaDecimalFormat(cleaned, lastComma);
+    if (lastDot > -1 && lastComma === -1) return parseDotDecimalFormat(cleaned, lastDot);
 
     if (lastComma > lastDot) {
-      const normalized = cleaned.replace(/\./g, "").replace(/,/g, ".");
+      const normalized = cleaned.replaceAll(/\./g, "").replaceAll(/,/g, ".");
       return Number(normalized) || 0;
     }
 
-    const normalized = cleaned.replace(/,/g, "");
+    const normalized = cleaned.replaceAll(/,/g, "");
     return Number(normalized) || 0;
   };
 
@@ -78,6 +80,23 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
     [editedRowIds, existingIds]
   );
 
+  // Track previous rows to clean up stale IDs when dataset changes
+  const prevRowsRef = useRef(rows);
+  useEffect(() => {
+    // Only run cleanup if rows array actually changed (not just re-renders)
+    if (prevRowsRef.current !== rows) {
+      prevRowsRef.current = rows;
+
+      // Schedule cleanup for next tick to avoid setState-in-effect
+      const timeoutId = setTimeout(() => {
+        setNewRowIds((prev) => new Set([...prev].filter((id) => existingIds.has(id))));
+        setEditedRowIds((prev) => new Set([...prev].filter((id) => existingIds.has(id))));
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [rows, existingIds]);
+
   const handleChange = (index: number, field: "date" | "money", value: string) => {
     if (!onRowsChange) return;
     const rowId = rows[index]?.id;
@@ -91,7 +110,7 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
   };
 
   const handleMoneyChange = (index: number, value: string) => {
-    const numericOnlyValue = value.replace(/[^0-9.,]/g, "");
+    const numericOnlyValue = value.replaceAll(/[^0-9.,]/g, "");
     handleChange(index, "money", numericOnlyValue);
   };
 
@@ -105,6 +124,50 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
     };
     setNewRowIds((prev) => new Set(prev).add(newRowId));
     onRowsChange([...rows, newRow]);
+  };
+
+  const renderDateCell = (row: MainData, idx: number) => {
+    if (!editable) return <span>{formatDateDisplay(row.date)}</span>;
+
+    return (
+      <TextField
+        size="small"
+        type="date"
+        value={row.date}
+        onChange={(e) => handleChange(idx, "date", e.target.value)}
+      />
+    );
+  };
+
+  const renderMoneyCell = (row: MainData, idx: number) => {
+    if (!editable) return <span>{formatCurrency(row.money)}</span>;
+
+    return (
+      <TextField
+        size="small"
+        value={focusedMoneyIndex === idx ? row.money : formatCurrency(row.money)}
+        onFocus={() => setFocusedMoneyIndex(idx)}
+        onBlur={() => setFocusedMoneyIndex(null)}
+        onChange={(e) => handleMoneyChange(idx, e.target.value)}
+        slotProps={{
+          htmlInput: { inputMode: "decimal", pattern: "[0-9.,]*" },
+          input: {
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+          },
+        }}
+      />
+    );
+  };
+
+  const renderTableRow = (row: MainData, idx: number) => {
+    const rowClassName = editable ? getRowClassName(row.id) : "";
+
+    return (
+      <TableRow key={row.id ?? idx} className={rowClassName}>
+        <TableCell>{renderDateCell(row, idx)}</TableCell>
+        <TableCell align="right">{renderMoneyCell(row, idx)}</TableCell>
+      </TableRow>
+    );
   };
 
   const getRowClassName = (rowId: number) => {
@@ -125,41 +188,7 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
         </TableHead>
         <TableBody>
           {rows.length > 0 ? (
-            rows.map((row, idx) => (
-              <TableRow key={row.id ?? idx} className={editable ? getRowClassName(row.id) : ""}>
-                <TableCell>
-                  {editable ? (
-                    <TextField
-                      size="small"
-                      type="date"
-                      value={row.date}
-                      onChange={(e) => handleChange(idx, "date", e.target.value)}
-                    />
-                  ) : (
-                    <span>{formatDateDisplay(row.date)}</span>
-                  )}
-                </TableCell>
-                <TableCell align="right">
-                  {editable ? (
-                    <TextField
-                      size="small"
-                      value={focusedMoneyIndex === idx ? row.money : formatCurrency(row.money)}
-                      onFocus={() => setFocusedMoneyIndex(idx)}
-                      onBlur={() => setFocusedMoneyIndex(null)}
-                      onChange={(e) => handleMoneyChange(idx, e.target.value)}
-                      slotProps={{
-                        htmlInput: { inputMode: "decimal", pattern: "[0-9.,]*" },
-                        input: {
-                          startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                        },
-                      }}
-                    />
-                  ) : (
-                    <span>{formatCurrency(row.money)}</span>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
+            rows.map((row, idx) => renderTableRow(row, idx))
           ) : (
             <TableRow>
               <TableCell colSpan={2} align="center">

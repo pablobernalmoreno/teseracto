@@ -1,12 +1,6 @@
 import supabase from "@/config/supabaseClient";
 
 export const accountConfirmationService = {
-  async decryptRegisteredEmail(): Promise<string | null> {
-    // Email is no longer stored client-side for security
-    // Return null to show generic confirmation message
-    return null;
-  },
-
   async resendConfirmationEmail(email: string) {
     try {
       await supabase.auth.resend({
