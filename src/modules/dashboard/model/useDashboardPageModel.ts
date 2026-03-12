@@ -330,7 +330,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
-  }, [searchQuery, currentPage]);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
