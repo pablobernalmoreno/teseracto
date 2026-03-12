@@ -23,7 +23,7 @@ const ItemCardPresenter = dynamic(() =>
   })),
 );
 
-const page = () => {
+const Page = () => {
   const [state, actions] = useDashboardPageModel();
   const {
     items,
@@ -152,4 +152,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

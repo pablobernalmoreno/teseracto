@@ -125,12 +125,13 @@ export const dashboardService = {
       .select();
   },
 
-  async initializeUserProfile(sessionData: any, userData: any) {
-    if (
-      sessionData.session?.user.role === "authenticated" &&
-      userData?.length === 0
-    ) {
-      return await this.createUserProfile(sessionData?.session?.user.id);
+  async initializeUserProfile(
+    sessionData: { session?: { user?: { role?: string; id?: string } } } | null,
+    userData: unknown[] | null | undefined,
+  ) {
+    const user = sessionData?.session?.user;
+    if (user?.role === "authenticated" && user?.id && userData?.length === 0) {
+      return await this.createUserProfile(user.id);
     }
   },
 };

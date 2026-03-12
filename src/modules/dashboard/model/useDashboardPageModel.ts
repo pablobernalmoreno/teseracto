@@ -302,7 +302,7 @@ export const useDashboardPageModel = (): [
   };
 
   const handleSaveDetail = async () => {
-    if (selectedCardId == null) return;
+    if (selectedCardId === null || selectedCardId === undefined) return;
 
     const rowsToSave = editedRows.filter(
       (row) => row.date.trim() !== "" || row.money.trim() !== "",
@@ -357,7 +357,7 @@ export const useDashboardPageModel = (): [
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
-  }, [searchQuery]);
+  }, [searchQuery, currentPage]);
 
   useEffect(() => {
     if (currentPage > totalPages) {

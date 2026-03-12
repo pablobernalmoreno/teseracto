@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createWorker } from "tesseract.js";
 import { dashboardService } from "./dashboardService";
 import {
@@ -124,7 +124,6 @@ interface ItemCardModelActions {
   onMoneyChange: (entryId: number, value: string) => void;
 }
 
-
 export const useItemCardModel = (): [
   ItemCardModelState,
   ItemCardModelActions,
@@ -155,7 +154,7 @@ export const useItemCardModel = (): [
     }
   };
 
-  const getImageText = async () => {
+  const getImageText = useCallback(async () => {
     const worker = await createWorker("eng");
     const paths: string[] = [];
     const newSources: string[] = [];
@@ -191,7 +190,7 @@ export const useItemCardModel = (): [
       setPathData(result);
     }
     await worker.terminate();
-  };
+  }, [files]);
 
   const formatUpdatedPathData = (
     originalPathData: MainData[],
@@ -200,7 +199,7 @@ export const useItemCardModel = (): [
     const updated = [...originalPathData];
     const parseNumberFromString = (s: string | number): number => {
       if (typeof s === "number") return s;
-      let str = String(s || "").trim();
+      const str = String(s || "").trim();
       if (!str) return 0;
       const cleaned = str.replace(/[^0-9.,-]/g, "");
       if (!cleaned) return 0;
@@ -379,7 +378,7 @@ export const useItemCardModel = (): [
     if (files?.length && files?.length !== 0) {
       getImageText();
     }
-  }, [files]);
+  }, [files, getImageText]);
 
   const state: ItemCardModelState = {
     files,

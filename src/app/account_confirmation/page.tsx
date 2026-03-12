@@ -5,10 +5,10 @@ import React, { useEffect, useState } from "react";
 import "../login/loginStyles.css";
 import { accountConfirmationService } from "@/modules/account_confirmation/model/accountConfirmationService";
 
-const page = () => {
+const Page = () => {
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<number>(60);
-  const [isResendDisabled, setIsResendDisabled] = useState<boolean>(true);
+  const isResendDisabled = timeLeft > 0;
 
   useEffect(() => {
     const decryptAndSetEmail = async () => {
@@ -26,7 +26,6 @@ const page = () => {
     );
     if (result.success) {
       setTimeLeft(60);
-      setIsResendDisabled(true);
     }
   };
 
@@ -36,8 +35,6 @@ const page = () => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       return () => clearTimeout(timerId);
-    } else {
-      setIsResendDisabled(false);
     }
   }, [timeLeft]);
 
@@ -70,4 +67,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

@@ -24,7 +24,7 @@ const initialUserState: User = {
 
 const errorMessageInitialState: string = "";
 
-const page = () => {
+const Page = () => {
   const [user, setUser] = useState<User>(initialUserState);
   const [errorMessage, setErrorMessage] = useState<string>(errorMessageInitialState);
 
@@ -142,4 +142,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

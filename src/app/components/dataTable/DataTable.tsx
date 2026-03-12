@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Button,
   Table,
@@ -65,11 +65,7 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
 
   const totalGanancias = rows.reduce((sum, row) => sum + parseMoneyToNumber(row.money), 0);
 
-  useEffect(() => {
-    const existingIds = new Set(rows.map((row) => row.id));
-    setNewRowIds((prev) => new Set(Array.from(prev).filter((id) => existingIds.has(id))));
-    setEditedRowIds((prev) => new Set(Array.from(prev).filter((id) => existingIds.has(id))));
-  }, [rows]);
+  const existingIds = useMemo(() => new Set(rows.map((row) => row.id)), [rows]);
 
   const handleChange = (index: number, field: "date" | "money", value: string) => {
     if (!onRowsChange) return;
@@ -101,6 +97,7 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
   };
 
   const getRowClassName = (rowId: number) => {
+    if (!existingIds.has(rowId)) return "";
     if (newRowIds.has(rowId)) return "data-table-row-new";
     if (editedRowIds.has(rowId)) return "data-table-row-edited";
     return "";
