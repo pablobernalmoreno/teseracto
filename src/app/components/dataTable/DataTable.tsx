@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Button,
   Table,
@@ -31,13 +31,13 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
 
   const parseCommaDecimalFormat = (cleaned: string, lastComma: number): number => {
     const decimalsLen = cleaned.length - lastComma - 1;
-    if (decimalsLen === 3) return Number(cleaned.replaceAll(/,/g, "")) || 0;
-    return Number(cleaned.replaceAll(/,/g, ".")) || 0;
+    if (decimalsLen === 3) return Number(cleaned.replaceAll(",", "")) || 0;
+    return Number(cleaned.replaceAll(",", ".")) || 0;
   };
 
   const parseDotDecimalFormat = (cleaned: string, lastDot: number): number => {
     const decimalsLen = cleaned.length - lastDot - 1;
-    if (decimalsLen === 3) return Number(cleaned.replaceAll(/\./g, "")) || 0;
+    if (decimalsLen === 3) return Number(cleaned.replaceAll(".", "")) || 0;
     return Number(cleaned) || 0;
   };
 
@@ -57,11 +57,11 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
     if (lastDot > -1 && lastComma === -1) return parseDotDecimalFormat(cleaned, lastDot);
 
     if (lastComma > lastDot) {
-      const normalized = cleaned.replaceAll(/\./g, "").replaceAll(/,/g, ".");
+      const normalized = cleaned.replaceAll(".", "").replaceAll(",", ".");
       return Number(normalized) || 0;
     }
 
-    const normalized = cleaned.replaceAll(/,/g, "");
+    const normalized = cleaned.replaceAll(",", "");
     return Number(normalized) || 0;
   };
 
@@ -79,23 +79,6 @@ export const DataTable: React.FC<DataTableProps> = ({ rows, editable = false, on
     () => new Set([...editedRowIds].filter((id) => existingIds.has(id))),
     [editedRowIds, existingIds]
   );
-
-  // Track previous rows to clean up stale IDs when dataset changes
-  const prevRowsRef = useRef(rows);
-  useEffect(() => {
-    // Only run cleanup if rows array actually changed (not just re-renders)
-    if (prevRowsRef.current !== rows) {
-      prevRowsRef.current = rows;
-
-      // Schedule cleanup for next tick to avoid setState-in-effect
-      const timeoutId = setTimeout(() => {
-        setNewRowIds((prev) => new Set([...prev].filter((id) => existingIds.has(id))));
-        setEditedRowIds((prev) => new Set([...prev].filter((id) => existingIds.has(id))));
-      }, 0);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [rows, existingIds]);
 
   const handleChange = (index: number, field: "date" | "money", value: string) => {
     if (!onRowsChange) return;

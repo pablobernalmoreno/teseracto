@@ -327,9 +327,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
   }, [loadCardItems]);
 
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
+    setCurrentPage(1);
   }, [searchQuery]);
 
   useEffect(() => {
