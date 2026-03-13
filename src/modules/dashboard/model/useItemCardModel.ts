@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createWorker } from "tesseract.js";
 import { dashboardService } from "./dashboardService";
 import {
@@ -124,20 +124,16 @@ interface ItemCardModelActions {
   onMoneyChange: (entryId: number, value: string) => void;
 }
 
-
-export const useItemCardModel = (): [
-  ItemCardModelState,
-  ItemCardModelActions,
-] => {
+export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] => {
   const [files, setFiles] = useState<FileList>();
   const [dialogState, setDialogState] = useState<DialogState>({ type: "idle" });
   const [pathData, setPathData] = useState<MainData[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [invalidEntries, setInvalidEntries] = useState<MainData[]>([]);
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
-  const [editedValues, setEditedValues] = useState<
-    Map<number, { date: string; money: string }>
-  >(new Map());
+  const [editedValues, setEditedValues] = useState<Map<number, { date: string; money: string }>>(
+    new Map()
+  );
 
   const handleDialogClose = () => {
     setDialogState({ type: "idle" });
@@ -155,7 +151,7 @@ export const useItemCardModel = (): [
     }
   };
 
-  const getImageText = async () => {
+  const getImageText = useCallback(async () => {
     const worker = await createWorker("eng");
     const paths: string[] = [];
     const newSources: string[] = [];
@@ -171,10 +167,7 @@ export const useItemCardModel = (): [
       setSources(newSources);
       const expectedDatesArray = parseDates(paths);
       const expectedCurrencyArray = extractCurrencyValues(paths);
-      const result = combineDatesAndCurrency(
-        expectedDatesArray,
-        expectedCurrencyArray,
-      );
+      const result = combineDatesAndCurrency(expectedDatesArray, expectedCurrencyArray);
 
       if (!isCombinedDataValid(result)) {
         const invalid = findInvalidEntries(result);
@@ -191,16 +184,16 @@ export const useItemCardModel = (): [
       setPathData(result);
     }
     await worker.terminate();
-  };
+  }, [files]);
 
   const formatUpdatedPathData = (
     originalPathData: MainData[],
-    edits: Map<number, { date: string; money: string }>,
+    edits: Map<number, { date: string; money: string }>
   ): MainData[] => {
     const updated = [...originalPathData];
     const parseNumberFromString = (s: string | number): number => {
       if (typeof s === "number") return s;
-      let str = String(s || "").trim();
+      const str = String(s || "").trim();
       if (!str) return 0;
       const cleaned = str.replace(/[^0-9.,-]/g, "");
       if (!cleaned) return 0;
@@ -258,9 +251,7 @@ export const useItemCardModel = (): [
   };
 
   const computeTitleFromPathData = (updatedPathData: MainData[]): string => {
-    const dateStrings = updatedPathData
-      .map((d) => d.date)
-      .filter(Boolean) as string[];
+    const dateStrings = updatedPathData.map((d) => d.date).filter(Boolean) as string[];
 
     const toDate = (s: string): Date | null => {
       if (!s) return null;
@@ -343,12 +334,7 @@ export const useItemCardModel = (): [
         : String(Date.now());
       const title = computeTitleFromPathData(updatedPathData);
 
-      await dashboardService.insertBookData(
-        bookId,
-        ownerId,
-        title,
-        updatedPathData,
-      );
+      await dashboardService.insertBookData(bookId, ownerId, title, updatedPathData);
     } catch (error) {
       console.error("Error saving book data:", error);
       throw error;
@@ -379,7 +365,7 @@ export const useItemCardModel = (): [
     if (files?.length && files?.length !== 0) {
       getImageText();
     }
-  }, [files]);
+  }, [files, getImageText]);
 
   const state: ItemCardModelState = {
     files,

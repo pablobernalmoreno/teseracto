@@ -1,7 +1,7 @@
 import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import React from "react";
 import "./AppBarMenuStyles.css";
 import { loginService } from "@/modules/login/model/loginService";
@@ -48,9 +48,7 @@ export const AppBarMenu = ({ isLogged = false }) => {
   return (
     <Box className="appbar_container">
       <AppBar className="appbar" position="static">
-        <Toolbar className="toolbar">
-          {isLogged ? loggedInButtons() : notLoggedInButtons()}
-        </Toolbar>
+        <Toolbar className="toolbar">{isLogged ? loggedInButtons() : notLoggedInButtons()}</Toolbar>
       </AppBar>
     </Box>
   );

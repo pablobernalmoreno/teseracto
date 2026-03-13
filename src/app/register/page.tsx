@@ -15,7 +15,7 @@ const initialNewUserState: NewUser = {
   confirm_password: "",
 };
 
-const page = () => {
+const Page = () => {
   const [user, setUser] = useState<NewUser>(initialNewUserState);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -114,4 +114,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

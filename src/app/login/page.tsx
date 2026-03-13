@@ -1,12 +1,5 @@
 "use client";
-import {
-  Box,
-  Button,
-  Divider,
-  Link,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import "./loginStyles.css";
 import supabase from "@/config/supabaseClient";
@@ -24,7 +17,7 @@ const initialUserState: User = {
 
 const errorMessageInitialState: string = "";
 
-const page = () => {
+const Page = () => {
   const [user, setUser] = useState<User>(initialUserState);
   const [errorMessage, setErrorMessage] = useState<string>(errorMessageInitialState);
 
@@ -142,4 +135,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

@@ -54,8 +54,7 @@ export const extractCurrencyValues = (pathsArray: string[]): string[] => {
     if (candidates.length === 0) return ""; // Preserve position
 
     const sorted = candidates.sort((a, b) => {
-      const toNumber = (s: string) =>
-        parseFloat(s.replace(/\./g, "").replace(",", "."));
+      const toNumber = (s: string) => parseFloat(s.replace(/\./g, "").replace(",", "."));
       return toNumber(b) - toNumber(a);
     });
 
@@ -65,10 +64,7 @@ export const extractCurrencyValues = (pathsArray: string[]): string[] => {
   });
 };
 
-export const combineDatesAndCurrency = (
-  datesArray: (string | null)[],
-  currencyArray: string[],
-) => {
+export const combineDatesAndCurrency = (datesArray: (string | null)[], currencyArray: string[]) => {
   const combinedArray = [];
 
   for (let i = 0; i < datesArray.length; i++) {
@@ -83,26 +79,16 @@ export const combineDatesAndCurrency = (
 };
 
 export const isCombinedDataValid = (
-  combinedData: { date: string; money: string; id: number }[],
+  combinedData: { date: string; money: string; id: number }[]
 ): boolean => {
   return combinedData.every(
-    (entry) =>
-      entry.date &&
-      entry.date !== "N/A" &&
-      entry.money &&
-      entry.money !== "N/A",
+    (entry) => entry.date && entry.date !== "N/A" && entry.money && entry.money !== "N/A"
   );
 };
 
-export const findInvalidEntries = (
-  combinedData: { date: string; money: string; id: number }[],
-) => {
+export const findInvalidEntries = (combinedData: { date: string; money: string; id: number }[]) => {
   return combinedData.filter(
-    (entry) =>
-      !entry.date ||
-      entry.date === "N/A" ||
-      !entry.money ||
-      entry.money === "N/A",
+    (entry) => !entry.date || entry.date === "N/A" || !entry.money || entry.money === "N/A"
   );
 };
 
@@ -111,7 +97,7 @@ export const findInvalidEntries = (
  * Useful for pre-populating carousel values with valid data.
  */
 export const getValidFieldsFromInvalidEntries = (
-  combinedData: { date: string; money: string; id: number }[],
+  combinedData: { date: string; money: string; id: number }[]
 ): Map<number, { date: string; money: string }> => {
   const validFields = new Map();
 

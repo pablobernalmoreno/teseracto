@@ -6,20 +6,14 @@ import { CarouselValues } from "../InvalidEntryCarousel/InvalidEntryCarousel";
 
 interface NewItemCardProps {
   onAddClick: () => void;
-  dialogProps: Omit<
-    InputDialogProps,
-    "carouselValues" | "onDateChange" | "onMoneyChange"
-  > & {
+  dialogProps: Omit<InputDialogProps, "carouselValues" | "onDateChange" | "onMoneyChange"> & {
     carouselValues: CarouselValues;
     onDateChange: (entryId: number, value: string) => void;
     onMoneyChange: (entryId: number, value: string) => void;
   };
 }
 
-export const NewItemCard: React.FC<NewItemCardProps> = ({
-  onAddClick,
-  dialogProps,
-}) => {
+export const NewItemCard: React.FC<NewItemCardProps> = ({ onAddClick, dialogProps }) => {
   return (
     <>
       <Card

@@ -1,14 +1,7 @@
 "use client";
 import React from "react";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Paper,
-  Typography,
-  Pagination,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Paper, Typography, Pagination } from "@mui/material";
 import { useDashboardPageModel } from "@/modules/dashboard/model/useDashboardPageModel";
 import dynamic from "next/dynamic";
 import "./mainStyles.css";
@@ -20,10 +13,10 @@ import DeleteDialog from "../components/dashboard/Dialog/DeleteDialog";
 const ItemCardPresenter = dynamic(() =>
   import("@/modules/dashboard/presenters/ItemCardPresenter").then((mod) => ({
     default: mod.ItemCardPresenter,
-  })),
+  }))
 );
 
-const page = () => {
+const Page = () => {
   const [state, actions] = useDashboardPageModel();
   const {
     items,
@@ -93,11 +86,7 @@ const page = () => {
                     </Button>
                   </Box>
                 </Box>
-                <DataTable
-                  rows={editedRows}
-                  editable
-                  onRowsChange={actions.setEditedRows}
-                />
+                <DataTable rows={editedRows} editable onRowsChange={actions.setEditedRows} />
               </Paper>
             ) : (
               <Box className="dashboard_cards_grid">
@@ -152,4 +141,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

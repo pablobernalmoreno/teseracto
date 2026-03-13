@@ -50,12 +50,7 @@ export const dashboardService = {
       .single();
   },
 
-  async fetchBookDataPage({
-    ownerId,
-    from,
-    to,
-    searchQuery,
-  }: FetchBookDataPageParams) {
+  async fetchBookDataPage({ ownerId, from, to, searchQuery }: FetchBookDataPageParams) {
     let query = supabase
       .from("user_books")
       .select("*", {
@@ -77,23 +72,14 @@ export const dashboardService = {
 
   // Fetch full content for a single book by id (used for lazy-loading)
   async fetchBookContent(bookId: string | number) {
-    return await supabase
-      .from("user_books")
-      .select("content")
-      .eq("id", bookId)
-      .single();
+    return await supabase.from("user_books").select("content").eq("id", bookId).single();
   },
 
   async deleteBooks(bookIds: Array<string | number>) {
     return await supabase.from("user_books").delete().in("id", bookIds);
   },
 
-  async insertBookData(
-    bookId: string,
-    ownerId: string,
-    title: string,
-    content: MainData[],
-  ) {
+  async insertBookData(bookId: string, ownerId: string, title: string, content: MainData[]) {
     return await supabase
       .from("user_books")
       .insert([
@@ -109,12 +95,7 @@ export const dashboardService = {
   },
 
   async updateBookContent(bookId: string | number, content: MainData[]) {
-    return await supabase
-      .from("user_books")
-      .update({ content })
-      .eq("id", bookId)
-      .select()
-      .single();
+    return await supabase.from("user_books").update({ content }).eq("id", bookId).select().single();
   },
 
   async createUserProfile(userId: string) {
@@ -125,12 +106,13 @@ export const dashboardService = {
       .select();
   },
 
-  async initializeUserProfile(sessionData: any, userData: any) {
-    if (
-      sessionData.session?.user.role === "authenticated" &&
-      userData?.length === 0
-    ) {
-      return await this.createUserProfile(sessionData?.session?.user.id);
+  async initializeUserProfile(
+    sessionData: { session?: { user?: { role?: string; id?: string } } } | null,
+    userData: unknown[] | null | undefined
+  ) {
+    const user = sessionData?.session?.user;
+    if (user?.role === "authenticated" && user?.id && userData?.length === 0) {
+      return await this.createUserProfile(user.id);
     }
   },
 };

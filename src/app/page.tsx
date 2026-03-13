@@ -12,8 +12,8 @@ export default function Home() {
             Titulo!
           </Typography>
           <Typography variant="h6" className="description">
-            Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui
-            lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat.
+            Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat
+            commodo. Elit sunt amet fugiat veniam occaecat.
           </Typography>
           <Box className="main_buttons_container">
             <Button className="get_started" variant="contained">
