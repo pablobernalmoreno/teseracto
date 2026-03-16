@@ -41,6 +41,47 @@ const Page = () => {
       ? items.find((item) => item.id === selectedCardIds[0])?.title || ""
       : "";
 
+  const dashboardContent = selectedCardId ? (
+    <Paper elevation={2} sx={{ width: "100%", padding: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h6">Detalle del libro</Typography>
+        <Box>
+          <Button onClick={actions.handleBackFromDetail} sx={{ mr: 1 }}>
+            Volver
+          </Button>
+          <Button variant="contained" onClick={actions.handleSaveDetail}>
+            Guardar
+          </Button>
+        </Box>
+      </Box>
+      <DataTable rows={editedRows} editable onRowsChange={actions.setEditedRows} />
+    </Paper>
+  ) : (
+    <Box className="dashboard_cards_grid">
+      {currentItems.map((item) => (
+        <ItemCardPresenter
+          key={item.id}
+          cardId={item.id}
+          name={item.title}
+          description={item.description}
+          content={item.content}
+          onOpenDetail={actions.openDetail}
+          onBeforeAddClick={actions.clearCardSelection}
+          onBookCreated={actions.handleBookCreated}
+          isSelected={selectedCardIds.includes(item.id)}
+          onSelectionChange={actions.toggleCardSelection}
+        />
+      ))}
+    </Box>
+  );
+
   return (
     <>
       <AppBarMenu isLogged />
@@ -66,45 +107,8 @@ const Page = () => {
               <Box className="dashboard_loading">
                 <CircularProgress size={150} />
               </Box>
-            ) : selectedCardId ? (
-              <Paper elevation={2} sx={{ width: "100%", padding: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="h6">Detalle del libro</Typography>
-                  <Box>
-                    <Button onClick={actions.handleBackFromDetail} sx={{ mr: 1 }}>
-                      Volver
-                    </Button>
-                    <Button variant="contained" onClick={actions.handleSaveDetail}>
-                      Guardar
-                    </Button>
-                  </Box>
-                </Box>
-                <DataTable rows={editedRows} editable onRowsChange={actions.setEditedRows} />
-              </Paper>
             ) : (
-              <Box className="dashboard_cards_grid">
-                {currentItems.map((item) => (
-                  <ItemCardPresenter
-                    key={item.id}
-                    cardId={item.id}
-                    name={item.title}
-                    description={item.description}
-                    content={item.content}
-                    onOpenDetail={actions.openDetail}
-                    onBeforeAddClick={actions.clearCardSelection}
-                    onBookCreated={actions.handleBookCreated}
-                    isSelected={selectedCardIds.includes(item.id)}
-                    onSelectionChange={actions.toggleCardSelection}
-                  />
-                ))}
-              </Box>
+              dashboardContent
             )}
           </Box>
 
