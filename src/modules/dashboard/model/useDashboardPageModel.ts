@@ -395,7 +395,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
       setSelectedCardIds([]);
       setIsDeleteModalOpen(false);
       setToastSeverity("success");
-      setToastMessage(`Deleted ${deleteCount} item${deleteCount === 1 ? "" : "s"}.`);
+      setToastMessage(`Se eliminaron ${deleteCount} elemento${deleteCount === 1 ? "" : "s"}.`);
       setToastOpen(true);
       setCurrentPage((prev) => {
         const nextCount = Math.max(0, filteredCount - deleteCount);
@@ -411,7 +411,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
     } catch (error) {
       console.error("Error deleting books:", error);
       setToastSeverity("error");
-      setToastMessage("Could not delete selected items.");
+      setToastMessage("No se pudieron eliminar los elementos seleccionados.");
       setToastOpen(true);
     }
   }, [
