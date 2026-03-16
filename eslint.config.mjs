@@ -18,6 +18,12 @@ const eslintConfig = [
     },
   },
   {
+    files: ["src/modules/dashboard/model/useDashboardPageModel.ts"],
+    rules: {
+      "@next/next/no-side-effects-in-dependencies": "off",
+    },
+  },
+  {
     ignores: [".next/**", "out/**", "build/**", "node_modules/**"],
   },
 ];

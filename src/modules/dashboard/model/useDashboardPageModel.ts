@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { dashboardService } from "./dashboardService";
 import { MainData } from "./useItemCardModel";
 
@@ -117,6 +118,7 @@ const normalizeRowsForEdit = (rows: MainData[]): MainData[] => {
 
 export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPageModelActions] => {
   const queryClient = useQueryClient();
+  const previousOwnerIdRef = useRef<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
@@ -218,6 +220,18 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
 
   const ownerId = userProfileQuery.data?.book_id ?? null;
 
+  useEffect(() => {
+    if (previousOwnerIdRef.current === null) {
+      previousOwnerIdRef.current = ownerId;
+      return;
+    }
+
+    if (previousOwnerIdRef.current !== ownerId) {
+      queryClient.removeQueries({ queryKey: ["dashboard", "books"] });
+      previousOwnerIdRef.current = ownerId;
+    }
+  }, [ownerId, queryClient]);
+
   const booksPageQuery = useQuery({
     queryKey: dashboardQueryKeys.booksPage(ownerId || "none", currentPage, searchQuery),
     queryFn: async () => {
@@ -226,17 +240,27 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
       }
       return await fetchBooksPage(ownerId, currentPage, searchQuery);
     },
-    enabled: !!ownerId,
-    placeholderData: keepPreviousData,
+    enabled: true,
+    placeholderData: ownerId ? keepPreviousData : undefined,
     staleTime: 30 * 1000,
   });
 
   const items = booksPageQuery.data?.books || [];
   const filteredCount = booksPageQuery.data?.count || 0;
   const totalPages = getTotalPagesFromCount(filteredCount);
-  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const safeCurrentPage = Math.min(currentPage, totalPages || 1);
   const currentItems = safeCurrentPage === 1 ? [NEW_ITEM_CARD, ...items] : items;
   const isLoading = userProfileQuery.isPending || (!!ownerId && booksPageQuery.isFetching);
+
+  // Ensure currentPage stays within bounds when totalPages changes
+  // This prevents query/UI mismatch when items are deleted and totalPages decreases
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      flushSync(() => {
+        setCurrentPage(totalPages);
+      });
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     if (!ownerId || !booksPageQuery.data) return;
