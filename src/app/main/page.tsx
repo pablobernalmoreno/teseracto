@@ -27,6 +27,7 @@ const Page = () => {
     totalPages,
     currentPage,
     searchQuery,
+    searchPending,
     filteredCount,
     selectedCardIds,
     isDeleteModalOpen,
@@ -94,10 +95,11 @@ const Page = () => {
             <Box className="dashboard_top">
               <SearchNavbar
                 value={searchQuery}
-                onChange={actions.setSearchQuery}
+                onChange={actions.handleSearchChange}
                 matchCount={filteredCount}
                 selectedCount={selectedCardIds.length}
                 onDeleteClick={actions.openDeleteModal}
+                isSearching={searchPending}
               />
             </Box>
           )}

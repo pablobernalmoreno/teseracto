@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { flushSync } from "react-dom";
 import { dashboardService } from "./dashboardService";
 import { MainData } from "./useItemCardModel";
@@ -20,6 +20,7 @@ interface DashboardPageModelState {
   items: DashboardCardItem[];
   isLoading: boolean;
   searchQuery: string;
+  searchPending: boolean;
   filteredCount: number;
   currentPage: number;
   totalPages: number;
@@ -36,6 +37,7 @@ interface DashboardPageModelState {
 interface DashboardPageModelActions {
   handlePageChange: (_event: React.ChangeEvent<unknown>, value: number) => void;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  handleSearchChange: (value: string) => void;
   openDetail: (bookId: string | number) => Promise<void>;
   clearCardSelection: () => void;
   toggleCardSelection: (cardId: string | number, checked: boolean) => void;
@@ -120,6 +122,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
   const queryClient = useQueryClient();
   const previousOwnerIdRef = useRef<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<Array<string | number>>([]);
@@ -310,6 +313,15 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
     setCurrentPage(value);
   };
 
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      startTransition(() => {
+        setSearchQueryAndResetPage(value);
+      });
+    },
+    [setSearchQueryAndResetPage]
+  );
+
   const handleLoadContent = async (bookId: string | number): Promise<MainData[]> => {
     const existing = items.find((it) => it.id === bookId);
     if (!existing) return [];
@@ -489,6 +501,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
     items,
     isLoading,
     searchQuery,
+    searchPending: isPending,
     filteredCount,
     currentPage: safeCurrentPage,
     totalPages,
@@ -505,6 +518,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
   const actions: DashboardPageModelActions = {
     handlePageChange,
     setSearchQuery: setSearchQueryAndResetPage,
+    handleSearchChange,
     openDetail,
     clearCardSelection,
     toggleCardSelection,
