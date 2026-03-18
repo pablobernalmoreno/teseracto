@@ -318,7 +318,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
         setSearchQueryAndResetPage(value);
       });
     },
-    [setSearchQueryAndResetPage]
+    [setSearchQueryAndResetPage, startTransition]
   );
 
   const handleLoadContent = async (bookId: string | number): Promise<MainData[]> => {
