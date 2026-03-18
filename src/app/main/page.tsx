@@ -27,7 +27,6 @@ const Page = () => {
     totalPages,
     currentPage,
     searchQuery,
-    searchPending,
     filteredCount,
     selectedCardIds,
     isDeleteModalOpen,
@@ -99,7 +98,6 @@ const Page = () => {
                 matchCount={filteredCount}
                 selectedCount={selectedCardIds.length}
                 onDeleteClick={actions.openDeleteModal}
-                isSearching={searchPending}
               />
             </Box>
           )}

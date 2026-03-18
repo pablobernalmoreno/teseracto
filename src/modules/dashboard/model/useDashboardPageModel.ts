@@ -20,7 +20,6 @@ interface DashboardPageModelState {
   items: DashboardCardItem[];
   isLoading: boolean;
   searchQuery: string;
-  searchPending: boolean;
   filteredCount: number;
   currentPage: number;
   totalPages: number;
@@ -122,7 +121,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
   const queryClient = useQueryClient();
   const previousOwnerIdRef = useRef<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<Array<string | number>>([]);
@@ -501,7 +500,6 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
     items,
     isLoading,
     searchQuery,
-    searchPending: isPending,
     filteredCount,
     currentPage: safeCurrentPage,
     totalPages,

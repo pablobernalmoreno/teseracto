@@ -9,7 +9,6 @@ interface SearchNavbarProps {
   matchCount: number;
   selectedCount: number;
   onDeleteClick: () => void;
-  isSearching?: boolean;
 }
 
 export const SearchNavbar: React.FC<SearchNavbarProps> = ({
@@ -18,7 +17,6 @@ export const SearchNavbar: React.FC<SearchNavbarProps> = ({
   matchCount,
   selectedCount,
   onDeleteClick,
-  isSearching = false,
 }) => {
   const isDeleteDisabled = selectedCount === 0;
 
