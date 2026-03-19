@@ -1,8 +1,11 @@
+"use client";
+
 import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import React from "react";
+import { useRouter } from "next/navigation";
 import "./AppBarMenuStyles.css";
 import { loginService } from "@/modules/login/model/loginService";
 
@@ -24,11 +27,11 @@ const notLoggedInButtons = () => {
   );
 };
 
-const loggedInButtons = () => {
+const loggedInButtons = (onLogout: () => Promise<void>) => {
   return (
     <>
       <Box>
-        <Button className="appbar_buttons" onClick={loginService.signOut} href="/">
+        <Button className="appbar_buttons" onClick={onLogout}>
           Salir
         </Button>
       </Box>
@@ -45,10 +48,19 @@ const loggedInButtons = () => {
 };
 
 export const AppBarMenu = ({ isLogged = false }) => {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await loginService.signOut();
+    router.replace("/");
+  };
+
   return (
     <Box className="appbar_container">
       <AppBar className="appbar" position="static">
-        <Toolbar className="toolbar">{isLogged ? loggedInButtons() : notLoggedInButtons()}</Toolbar>
+        <Toolbar className="toolbar">
+          {isLogged ? loggedInButtons(handleLogout) : notLoggedInButtons()}
+        </Toolbar>
       </AppBar>
     </Box>
   );

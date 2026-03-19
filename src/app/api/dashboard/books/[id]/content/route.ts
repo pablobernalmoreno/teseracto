@@ -58,8 +58,12 @@ interface RouteParams {
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { supabase, ownerId, response } = await resolveOwnerId(_request);
-  if (response || !ownerId) {
+  if (response) {
     return response;
+  }
+
+  if (!ownerId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -80,8 +84,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { supabase, ownerId, response } = await resolveOwnerId(request);
-  if (response || !ownerId) {
+  if (response) {
     return response;
+  }
+
+  if (!ownerId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;

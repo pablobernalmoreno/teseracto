@@ -55,8 +55,12 @@ async function resolveOwnerId(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const { supabase, ownerId, response } = await resolveOwnerId(request);
-  if (response || !ownerId) {
+  if (response) {
     return response;
+  }
+
+  if (!ownerId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const searchParams = request.nextUrl.searchParams;
@@ -91,8 +95,12 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const { supabase, ownerId, response } = await resolveOwnerId(request);
-  if (response || !ownerId) {
+  if (response) {
     return response;
+  }
+
+  if (!ownerId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = (await request.json().catch(() => null)) as {
@@ -121,8 +129,12 @@ export async function DELETE(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const { supabase, ownerId, response } = await resolveOwnerId(request);
-  if (response || !ownerId) {
+  if (response) {
     return response;
+  }
+
+  if (!ownerId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = (await request.json().catch(() => null)) as {
