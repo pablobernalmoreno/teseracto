@@ -297,25 +297,11 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     return true;
   };
 
-  const validateAndGetOwnerId = async (): Promise<string> => {
-    const { data: sessionData } = await dashboardService.getSession();
-    const sessionUserId = sessionData?.session?.user?.id;
-
-    if (!sessionUserId) {
-      throw new Error("No authenticated user found");
-    }
-
-    const { data: userData } = await dashboardService.fetchUserData();
-    if (!userData || userData.length === 0) {
+  const validateCurrentProfile = async (): Promise<void> => {
+    const { data: currentProfile, error } = await dashboardService.fetchCurrentUserProfile();
+    if (error || !currentProfile?.book_id) {
       throw new Error("User profile not found");
     }
-
-    const userProfile = userData[0];
-    if (userProfile.id !== sessionUserId) {
-      throw new Error("User ID mismatch - unauthorized access attempt");
-    }
-
-    return userProfile.book_id;
   };
 
   const handleSave = async () => {
@@ -328,13 +314,13 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
         return;
       }
 
-      const ownerId = await validateAndGetOwnerId();
+      await validateCurrentProfile();
       const bookId = globalThis.crypto?.randomUUID
         ? globalThis.crypto.randomUUID()
         : String(Date.now());
       const title = computeTitleFromPathData(updatedPathData);
 
-      await dashboardService.insertBookData(bookId, ownerId, title, updatedPathData);
+      await dashboardService.insertBookData(title, updatedPathData, bookId);
     } catch (error) {
       console.error("Error saving book data:", error);
       throw error;

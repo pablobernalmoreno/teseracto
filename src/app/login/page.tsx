@@ -3,7 +3,7 @@ import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material
 import React, { useState } from "react";
 import "./loginStyles.css";
 import supabase from "@/config/supabaseClient";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export interface User {
   email: string;
@@ -18,8 +18,13 @@ const initialUserState: User = {
 const errorMessageInitialState: string = "";
 
 const Page = () => {
+  const router = useRouter();
   const [user, setUser] = useState<User>(initialUserState);
   const [errorMessage, setErrorMessage] = useState<string>(errorMessageInitialState);
+
+  const rollbackClientSession = async () => {
+    await supabase.auth.signOut();
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,15 +33,51 @@ const Page = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: user.email,
       password: user.password,
     });
+
     if (error) {
       setErrorMessage(error.message);
     } else {
+      const accessToken = data?.session?.access_token;
+      const refreshToken = data?.session?.refresh_token;
+
+      if (!accessToken || !refreshToken) {
+        await rollbackClientSession();
+        setErrorMessage("No se pudo sincronizar la sesion. Intentalo nuevamente.");
+        return;
+      }
+
+      try {
+        const syncResponse = await fetch("/api/auth/session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          }),
+        });
+
+        if (!syncResponse.ok) {
+          await rollbackClientSession();
+          const payload = (await syncResponse.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          setErrorMessage(payload?.error || "No se pudo iniciar la sesión.");
+          return;
+        }
+      } catch {
+        await rollbackClientSession();
+        setErrorMessage("No se pudo sincronizar la sesion. Verifica tu conexion.");
+        return;
+      }
+
       setErrorMessage(errorMessageInitialState);
-      redirect("/main");
+      router.replace("/main");
     }
   };
 

@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { flushSync } from "react-dom";
 import { dashboardService } from "./dashboardService";
@@ -118,6 +119,7 @@ const normalizeRowsForEdit = (rows: MainData[]): MainData[] => {
 };
 
 export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPageModelActions] => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const previousOwnerIdRef = useRef<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -165,14 +167,13 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
   );
 
   const fetchBooksPage = useCallback(
-    async (ownerId: string, page: number, query: string): Promise<DashboardBooksPage> => {
+    async (page: number, query: string): Promise<DashboardBooksPage> => {
       const { from, to } = getPageRange(page);
       const {
         data: bookData,
         error: bookError,
         count,
       } = await dashboardService.fetchBookDataPage({
-        ownerId,
         from,
         to,
         searchQuery: query,
@@ -200,6 +201,15 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
   const userProfileQuery = useQuery({
     queryKey: dashboardQueryKeys.userProfile,
     queryFn: async () => {
+      const { data: sessionData, error: sessionError } = await dashboardService.getSession();
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      if (!sessionData?.session?.user?.id) {
+        throw new Error("Unauthorized");
+      }
+
       const { data: currentProfile, error: currentProfileError } =
         await dashboardService.fetchCurrentUserProfile();
       if (currentProfileError) {
@@ -215,10 +225,39 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
         throw userDataError;
       }
 
-      return userData?.[0] ?? null;
+      if (userData?.[0]) {
+        return userData[0];
+      }
+
+      const { data: createdProfile, error: createProfileError } =
+        await dashboardService.createUserProfile("");
+      if (createProfileError) {
+        throw createProfileError;
+      }
+
+      if (createdProfile?.[0]) {
+        return createdProfile[0];
+      }
+
+      const { data: refreshedProfile, error: refreshedProfileError } =
+        await dashboardService.fetchCurrentUserProfile();
+      if (refreshedProfileError) {
+        throw refreshedProfileError;
+      }
+
+      return refreshedProfile ?? null;
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    const queryError = userProfileQuery.error as { message?: string } | null;
+    const isUnauthorized = queryError?.message?.toLowerCase().includes("unauthorized");
+
+    if (isUnauthorized) {
+      router.replace("/login");
+    }
+  }, [router, userProfileQuery.error]);
 
   const ownerId = userProfileQuery.data?.book_id ?? null;
 
@@ -240,7 +279,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
       if (!ownerId) {
         return { books: [], count: 0 };
       }
-      return await fetchBooksPage(ownerId, currentPage, searchQuery);
+      return await fetchBooksPage(currentPage, searchQuery);
     },
     enabled: true,
     placeholderData: ownerId ? keepPreviousData : undefined,
@@ -276,7 +315,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
     targetPages.forEach((targetPage) => {
       void queryClient.prefetchQuery({
         queryKey: dashboardQueryKeys.booksPage(ownerId, targetPage, searchQuery),
-        queryFn: () => fetchBooksPage(ownerId, targetPage, searchQuery),
+        queryFn: () => fetchBooksPage(targetPage, searchQuery),
         staleTime: 30 * 1000,
       });
     });
