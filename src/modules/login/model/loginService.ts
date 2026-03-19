@@ -37,6 +37,12 @@ export const loginService = {
   },
 
   async signOut() {
-    return await supabase.auth.signOut();
+    const clientResult = await supabase.auth.signOut();
+
+    await fetch("/api/auth/session", {
+      method: "DELETE",
+    });
+
+    return clientResult;
   },
 };
