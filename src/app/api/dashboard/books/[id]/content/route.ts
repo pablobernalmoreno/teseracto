@@ -5,6 +5,15 @@ interface UserProfile {
   book_id: string;
 }
 
+interface SupabaseErrorLike {
+  code?: string;
+  message?: string;
+}
+
+function isNoRowsError(error: SupabaseErrorLike | null): boolean {
+  return error?.code === "PGRST116";
+}
+
 function getBearerToken(request: NextRequest): string | null {
   const authorization = request.headers.get("authorization") || "";
   if (!authorization.toLowerCase().startsWith("bearer ")) {
@@ -76,6 +85,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (error) {
+    if (isNoRowsError(error)) {
+      return NextResponse.json({ error: "Book not found" }, { status: 404 });
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -108,6 +121,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (error) {
+    if (isNoRowsError(error)) {
+      return NextResponse.json({ error: "Book not found" }, { status: 404 });
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

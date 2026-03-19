@@ -16,7 +16,6 @@ export interface BookData {
 }
 
 interface FetchBookDataPageParams {
-  ownerId: string;
   from: number;
   to: number;
   searchQuery?: string;

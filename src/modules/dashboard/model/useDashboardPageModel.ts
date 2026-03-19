@@ -167,14 +167,13 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
   );
 
   const fetchBooksPage = useCallback(
-    async (ownerId: string, page: number, query: string): Promise<DashboardBooksPage> => {
+    async (page: number, query: string): Promise<DashboardBooksPage> => {
       const { from, to } = getPageRange(page);
       const {
         data: bookData,
         error: bookError,
         count,
       } = await dashboardService.fetchBookDataPage({
-        ownerId,
         from,
         to,
         searchQuery: query,
@@ -280,7 +279,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
       if (!ownerId) {
         return { books: [], count: 0 };
       }
-      return await fetchBooksPage(ownerId, currentPage, searchQuery);
+      return await fetchBooksPage(currentPage, searchQuery);
     },
     enabled: true,
     placeholderData: ownerId ? keepPreviousData : undefined,
@@ -316,7 +315,7 @@ export const useDashboardPageModel = (): [DashboardPageModelState, DashboardPage
     targetPages.forEach((targetPage) => {
       void queryClient.prefetchQuery({
         queryKey: dashboardQueryKeys.booksPage(ownerId, targetPage, searchQuery),
-        queryFn: () => fetchBooksPage(ownerId, targetPage, searchQuery),
+        queryFn: () => fetchBooksPage(targetPage, searchQuery),
         staleTime: 30 * 1000,
       });
     });

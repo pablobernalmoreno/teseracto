@@ -39,9 +39,18 @@ export const loginService = {
   async signOut() {
     const clientResult = await supabase.auth.signOut();
 
-    await fetch("/api/auth/session", {
-      method: "DELETE",
-    });
+    try {
+      const response = await fetch("/api/auth/session", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        console.warn("Server session cleanup failed:", payload?.error || `HTTP ${response.status}`);
+      }
+    } catch (error) {
+      console.warn("Server session cleanup request failed:", error);
+    }
 
     return clientResult;
   },

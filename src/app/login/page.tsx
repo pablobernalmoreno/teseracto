@@ -22,6 +22,10 @@ const Page = () => {
   const [user, setUser] = useState<User>(initialUserState);
   const [errorMessage, setErrorMessage] = useState<string>(errorMessageInitialState);
 
+  const rollbackClientSession = async () => {
+    await supabase.auth.signOut();
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
@@ -40,7 +44,13 @@ const Page = () => {
       const accessToken = data?.session?.access_token;
       const refreshToken = data?.session?.refresh_token;
 
-      if (accessToken && refreshToken) {
+      if (!accessToken || !refreshToken) {
+        await rollbackClientSession();
+        setErrorMessage("No se pudo sincronizar la sesion. Intentalo nuevamente.");
+        return;
+      }
+
+      try {
         const syncResponse = await fetch("/api/auth/session", {
           method: "POST",
           headers: {
@@ -53,12 +63,17 @@ const Page = () => {
         });
 
         if (!syncResponse.ok) {
+          await rollbackClientSession();
           const payload = (await syncResponse.json().catch(() => null)) as {
             error?: string;
           } | null;
           setErrorMessage(payload?.error || "No se pudo iniciar la sesión.");
           return;
         }
+      } catch {
+        await rollbackClientSession();
+        setErrorMessage("No se pudo sincronizar la sesion. Verifica tu conexion.");
+        return;
       }
 
       setErrorMessage(errorMessageInitialState);

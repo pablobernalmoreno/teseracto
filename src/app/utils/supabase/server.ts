@@ -1,13 +1,34 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+function getSupabaseServerConfig(): { supabaseUrl: string; supabaseKey: string } {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    const missing: string[] = [];
+    if (!supabaseUrl) {
+      missing.push("NEXT_PUBLIC_SUPABASE_URL");
+    }
+    if (!supabaseKey) {
+      missing.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    }
+
+    throw new Error(`Missing Supabase environment variables: ${missing.join(", ")}`);
+  }
+
+  return { supabaseUrl, supabaseKey };
+}
+
 export async function createClient(accessToken?: string) {
   const cookieStore = await cookies();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "";
+  const { supabaseUrl, supabaseKey } = getSupabaseServerConfig();
+  type CookieToSet = {
+    name: string;
+    value: string;
+    options?: Parameters<typeof cookieStore.set>[2];
+  };
 
   return createServerClient(supabaseUrl, supabaseKey, {
     global: accessToken
@@ -21,7 +42,7 @@ export async function createClient(accessToken?: string) {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: CookieToSet[]) {
         try {
           cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
