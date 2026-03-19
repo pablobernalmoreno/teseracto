@@ -56,7 +56,7 @@ const Page = () => {
           const payload = (await syncResponse.json().catch(() => null)) as {
             error?: string;
           } | null;
-          setErrorMessage(payload?.error || "No se pudo iniciar la sesion.");
+          setErrorMessage(payload?.error || "No se pudo iniciar la sesión.");
           return;
         }
       }
