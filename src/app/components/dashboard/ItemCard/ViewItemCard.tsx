@@ -1,29 +1,28 @@
 "use client";
 
 import { Card, CardActionArea, CardContent, Typography, Box, Checkbox } from "@mui/material";
-import DataTable from "../../dataTable/DataTable";
 import type { MainData } from "@/types/dashboard";
+import DataTable from "../../dataTable/DataTable";
 
-interface NormalItemCardProps {
+interface ViewItemCardProps {
   cardId: string | number;
   name: string;
-  description: string;
   content?: MainData[];
   onOpenDetail?: (id: string | number) => void;
   isSelected?: boolean;
   onSelectionChange?: (checked: boolean) => void;
 }
 
-export const NormalItemCard: React.FC<NormalItemCardProps> = ({
+export const ViewItemCard: React.FC<ViewItemCardProps> = ({
   cardId,
   name,
-  description,
   content = [],
   onOpenDetail,
   isSelected = false,
   onSelectionChange,
 }) => {
   const previewData = content.slice(0, 3);
+
   return (
     <Card
       className="dashboard-card-root"
@@ -76,7 +75,7 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
             {name}
           </Typography>
           <Typography variant="body2" sx={{ color: "#6f5c4d", lineHeight: 1.6 }}>
-            {description}
+            Ajusta fechas y ganancias con una vista limpia pensada para revisión rápida.
           </Typography>
         </CardContent>
         <Box

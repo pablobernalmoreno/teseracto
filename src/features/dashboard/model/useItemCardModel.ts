@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { createWorker } from "tesseract.js";
 import { dashboardService } from "./dashboardService";
 import {
   combineDatesAndCurrency,
@@ -9,12 +8,7 @@ import {
   isCombinedDataValid,
   parseDates,
 } from "@/app/utils/data";
-
-export interface MainData {
-  date: string;
-  money: string;
-  id: number;
-}
+import type { MainData } from "@/types/dashboard";
 
 // Format date for display as dd/mm/yyyy
 export const formatDateDisplay = (dateStr: string): string => {
@@ -152,6 +146,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   };
 
   const getImageText = useCallback(async () => {
+    const { createWorker } = await import("tesseract.js");
     const worker = await createWorker("eng");
     const paths: string[] = [];
     const newSources: string[] = [];

@@ -1,15 +1,51 @@
+.dashboard-table-container {
+  border: 1px solid rgba(131, 108, 73, 0.2);
+  border-radius: 16px !important;
+  background: rgba(252, 249, 241, 0.92) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+}
+
+.dashboard-table thead .MuiTableCell-root {
+  border-bottom: 1px solid rgba(131, 108, 73, 0.3);
+  color: #4a3f31;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: rgba(232, 222, 206, 0.6);
+}
+
+.dashboard-table .MuiTableCell-root {
+  border-bottom: 1px solid rgba(131, 108, 73, 0.16);
+}
+
+.dashboard-table .MuiInputBase-input {
+  font-size: 0.94rem;
+}
+
 .data-table-row-new .MuiTableCell-root {
-  background-color: #a3dc9a;
+  background-color: #d8efce;
 }
 
 .data-table-row-edited .MuiTableCell-root {
-  background-color: #fff9bd;
+  background-color: #fff4c2;
 }
 
 .data-table-add-cell {
   text-align: left;
 }
 
+.data-table-add-cell .MuiButton-root {
+  border-radius: 999px;
+  padding: 0.35rem 0.95rem;
+  border: 1px dashed rgba(131, 108, 73, 0.5);
+  color: #4a3f31;
+  font-weight: 700;
+  text-transform: none;
+}
+
 .data-table-total-cell {
   font-weight: 600;
+  color: #3d3227;
 }

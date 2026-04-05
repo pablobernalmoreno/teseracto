@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Alert, AlertColor, Snackbar } from "@mui/material";
 
@@ -15,8 +17,15 @@ const AlertMessage = ({ open, message, severity, onClose }: AlertMessageProps) =
       autoHideDuration={3500}
       onClose={onClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      className="dashboard-alert"
     >
-      <Alert onClose={onClose} severity={severity} variant="filled">
+      <Alert
+        onClose={onClose}
+        severity={severity}
+        variant="filled"
+        role="alert"
+        aria-live="assertive"
+      >
         {message}
       </Alert>
     </Snackbar>

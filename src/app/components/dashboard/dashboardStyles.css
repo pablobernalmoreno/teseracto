@@ -1,19 +1,74 @@
 .file_upload_container {
   min-height: 250px;
-  min-width: 500px;
-  border: dashed 2px gray;
+  min-width: min(500px, 100%);
+  border: 2px dashed rgba(131, 108, 73, 0.55);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.8), rgba(246, 237, 220, 0.75));
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  margin: 2rem;
+  margin: 1.2rem 0;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .file_upload_container:hover {
-  background-color: #f9f9f9;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(246, 237, 220, 0.9));
+  border-color: rgba(107, 84, 54, 0.7);
+  box-shadow: 0 16px 28px rgba(72, 57, 38, 0.16);
+  transform: translateY(-1px);
   cursor: pointer;
 }
 
 .file_upload_hidden_input {
   display: none;
+}
+
+.dashboard-dialog .MuiDialog-paper {
+  border-radius: 20px;
+  border: 1px solid rgba(131, 108, 73, 0.2);
+  background: linear-gradient(165deg, #fffefb, #f4ede0);
+  box-shadow: 0 28px 64px rgba(46, 36, 24, 0.28);
+}
+
+.dashboard-dialog .MuiDialogTitle-root {
+  font-family: var(--dashboard-display-font), "Times New Roman", serif;
+  font-size: 1.5rem;
+  color: #342a1f;
+}
+
+.dashboard-dialog .MuiDialogContent-root {
+  color: #4a3f31;
+}
+
+.dashboard-dialog-button--secondary,
+.dashboard-dialog-button--danger,
+.dashboard-dialog-button--primary {
+  border-radius: 999px !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+  min-width: 120px !important;
+  padding-inline: 1.1rem !important;
+}
+
+.dashboard-dialog-button--secondary {
+  border: 1px solid rgba(131, 108, 73, 0.4) !important;
+  color: #4a3f31 !important;
+}
+
+.dashboard-dialog-button--primary {
+  color: #fff !important;
+  background: linear-gradient(135deg, #6f5a3b, #4f3f2a) !important;
+}
+
+.dashboard-dialog-button--danger {
+  box-shadow: 0 12px 24px rgba(183, 28, 28, 0.28) !important;
+}
+
+.dashboard-alert .MuiPaper-root {
+  border-radius: 14px;
+  box-shadow: 0 16px 28px rgba(46, 36, 24, 0.24);
 }

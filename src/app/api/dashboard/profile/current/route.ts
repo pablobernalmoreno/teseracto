@@ -1,18 +1,9 @@
 import { createClient } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-function getBearerToken(request: NextRequest): string | null {
-  const authorization = request.headers.get("authorization") || "";
-  if (!authorization.toLowerCase().startsWith("bearer ")) {
-    return null;
-  }
-
-  const token = authorization.slice(7).trim();
-  return token || null;
-}
+import { GENERIC_REQUEST_ERROR, getBearerToken } from "@/app/utils/security/validation";
 
 export async function GET(request: NextRequest) {
-  const accessToken = getBearerToken(request);
+  const accessToken = getBearerToken(request.headers.get("authorization"));
   const supabase = await createClient(accessToken || undefined);
   const {
     data: { user },
@@ -30,7 +21,7 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
 
   return NextResponse.json({ data: data ?? null });

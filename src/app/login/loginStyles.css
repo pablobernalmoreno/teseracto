@@ -1,7 +1,10 @@
 .login_container {
-  width: 100vw;
-  height: 100vh;
-  background-color: #e1e1e1;
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(circle at 14% 8%, rgba(255, 255, 255, 0.7), transparent 32%),
+    linear-gradient(150deg, #f2e8d4, #dfccb0 55%, #ceb48f);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -11,26 +14,34 @@
 .login_title,
 .account_confirmation_title,
 .account_confirmation_subtitle {
-  font-weight: bold;
-  color: #434343;
+  color: #3a2e22;
+}
+
+.login_title,
+.account_confirmation_title {
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.75rem !important;
 }
 
 .login_form_container {
-  margin: 2rem;
-  padding: 3rem;
-  background-color: #ffffff;
-  width: 30rem;
-  height: 25rem;
-  border-radius: 5%;
+  margin: 1rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.86);
+  width: min(30rem, 94vw);
+  border-radius: 22px;
+  border: 1px solid rgba(131, 108, 73, 0.22);
+  box-shadow: 0 28px 54px rgba(50, 38, 23, 0.2);
 }
 
 .register_form_container {
-  margin: 2rem;
-  padding: 3rem;
-  background-color: #ffffff;
-  width: 30rem;
-  height: 25rem;
-  border-radius: 5%;
+  margin: 1rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.86);
+  width: min(30rem, 94vw);
+  border-radius: 22px;
+  border: 1px solid rgba(131, 108, 73, 0.22);
+  box-shadow: 0 28px 54px rgba(50, 38, 23, 0.2);
 }
 
 .sso_button {
@@ -38,13 +49,49 @@
 }
 
 .account_confirmation_form_container {
-  margin: 2rem;
-  padding: 3rem;
-  background-color: #ffffff;
-  width: 45rem;
-  height: 30rem;
-  border-radius: 5%;
+  margin: 1rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.86);
+  width: min(45rem, 94vw);
+  border-radius: 22px;
+  border: 1px solid rgba(131, 108, 73, 0.22);
+  box-shadow: 0 28px 54px rgba(50, 38, 23, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+}
+
+.account_confirmation_subtitle {
+  max-width: 60ch;
+  color: #554634;
+}
+
+.get_started,
+.create_account {
+  background: linear-gradient(135deg, #6f5a3b, #4f3f2a) !important;
+  text-transform: none !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 14px 24px rgba(58, 45, 29, 0.24) !important;
+}
+
+.auth_secondary_action {
+  background: linear-gradient(135deg, #8b6d46, #5f4a2f) !important;
+  text-transform: none !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+
+.login_form .MuiOutlinedInput-root {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 600px) {
+  .login_form_container,
+  .register_form_container,
+  .account_confirmation_form_container {
+    padding: 1.25rem;
+  }
 }

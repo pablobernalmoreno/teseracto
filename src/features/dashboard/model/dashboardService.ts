@@ -1,5 +1,5 @@
 import supabase from "@/config/supabaseClient";
-import type { MainData } from "./useItemCardModel";
+import type { MainData } from "@/types/dashboard";
 
 export interface UserData {
   id: string;
@@ -10,7 +10,6 @@ export interface BookData {
   id: string;
   title: string;
   content?: MainData[];
-  description?: string;
   owner_id?: string;
   creationTime?: string;
 }

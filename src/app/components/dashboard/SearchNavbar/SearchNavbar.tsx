@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Badge, Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -28,13 +30,14 @@ export const SearchNavbar: React.FC<SearchNavbarProps> = ({
           size="small"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Search by title or description"
-          aria-label="Search item cards"
+          label="Buscar"
+          placeholder="Buscar por título o descripción"
+          aria-label="Buscar tarjetas por título o descripción"
         />
         <Tooltip title={isDeleteDisabled ? "Select cards to delete" : "Delete selected cards"}>
           <span>
             <IconButton
-              aria-label="Delete selected cards"
+              aria-label={`Borrar ${selectedCount} tarjetas seleccionadas`}
               color="error"
               onClick={onDeleteClick}
               disabled={isDeleteDisabled}
@@ -46,7 +49,7 @@ export const SearchNavbar: React.FC<SearchNavbarProps> = ({
           </span>
         </Tooltip>
       </Box>
-      <Typography variant="body2" className="search_navbar_count">
+      <Typography variant="body2" className="search_navbar_count" aria-live="polite">
         {matchCount} result{matchCount === 1 ? "" : "s"}
       </Typography>
     </Box>
