@@ -1,6 +1,9 @@
+"use client";
+
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { MainData, DialogState } from "@/modules/dashboard/model/useItemCardModel";
+import { DialogState } from "@/features/dashboard/model/useItemCardModel";
+import type { MainData } from "@/types/dashboard";
 import { CarouselValues, InvalidEntryCarousel } from "../InvalidEntryCarousel/InvalidEntryCarousel";
 import {
   Box,
@@ -11,6 +14,7 @@ import {
   DialogContent,
   DialogTitle,
   Fade,
+  Typography,
 } from "@mui/material";
 
 export interface InputDialogProps {
@@ -28,7 +32,6 @@ export interface InputDialogProps {
   onDateChange: (entryId: number, value: string) => void;
   onMoneyChange: (entryId: number, value: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
-  onContentClick: () => void;
 }
 
 export const InputDialog: React.FC<InputDialogProps> = ({
@@ -46,14 +49,11 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   onDateChange,
   onMoneyChange,
   inputRef,
-  onContentClick,
 }) => {
   const allInvalidEntriesFilled = invalidEntries.every((entry) => {
     const v = carouselValues[entry.id] || { date: "", money: "" };
     return Boolean(v.date) && Boolean(v.money);
   });
-
-  const isIdleState = dialogState.type === "idle";
 
   // Render content based on current state
   const renderContent = () => {
@@ -126,16 +126,19 @@ export const InputDialog: React.FC<InputDialogProps> = ({
               gap: 2,
             }}
           >
-            <input
-              ref={inputRef}
-              type="file"
-              multiple
-              accept="image/*,application/pdf"
-              className="file_upload_hidden_input"
-              onChange={onFileChange}
-            />
-            <Button role={undefined} variant="text" tabIndex={-1} startIcon={<CloudUploadIcon />}>
-              Subir Archivos
+            <Typography id="upload-dialog-description" textAlign="center">
+              Selecciona uno o varios archivos de imagen o PDF para continuar.
+            </Typography>
+            <Button component="label" variant="text" startIcon={<CloudUploadIcon />}>
+              <span>Subir Archivos</span>
+              <input
+                ref={inputRef}
+                type="file"
+                multiple
+                accept="image/*,application/pdf"
+                className="file_upload_hidden_input"
+                onChange={onFileChange}
+              />
             </Button>
           </Box>
         );
@@ -143,19 +146,28 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="upload-dialog-description"
+      className="dashboard-dialog"
+    >
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
-      <DialogContent
-        className="file_upload_container"
-        onClick={isIdleState ? onContentClick : undefined}
-        style={{ cursor: isIdleState ? "pointer" : "default" }}
-        sx={{ overflow: "visible" }}
-      >
+      <DialogContent className="file_upload_container" sx={{ overflow: "visible" }}>
         {renderContent()}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
         <Button
+          className="dashboard-dialog-button dashboard-dialog-button--ghost"
+          onClick={onClose}
+        >
+          Cancelar
+        </Button>
+        <Button
+          className="dashboard-dialog-button dashboard-dialog-button--solid"
           onClick={onSave}
           autoFocus
           disabled={

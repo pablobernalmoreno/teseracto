@@ -1,5 +1,12 @@
 import { createClient } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
+import {
+  GENERIC_REQUEST_ERROR,
+  getBearerToken,
+  isJsonContentType,
+  normalizeMainDataArray,
+} from "@/app/utils/security/validation";
 
 interface UserProfile {
   book_id: string;
@@ -14,18 +21,8 @@ function isNoRowsError(error: SupabaseErrorLike | null): boolean {
   return error?.code === "PGRST116";
 }
 
-function getBearerToken(request: NextRequest): string | null {
-  const authorization = request.headers.get("authorization") || "";
-  if (!authorization.toLowerCase().startsWith("bearer ")) {
-    return null;
-  }
-
-  const token = authorization.slice(7).trim();
-  return token || null;
-}
-
 async function resolveOwnerId(request: NextRequest) {
-  const accessToken = getBearerToken(request);
+  const accessToken = getBearerToken(request.headers.get("authorization"));
   const supabase = await createClient(accessToken || undefined);
   const {
     data: { user },
@@ -89,13 +86,25 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Book not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
 
   return NextResponse.json({ data });
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  const rateLimit = takeRateLimit({
+    key: `api:dashboard-book-content:patch:${getClientIdentifier(request.headers)}`,
+    limit: 30,
+    windowMs: 5 * 60 * 1000,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+    );
+  }
+
   const { supabase, ownerId, response } = await resolveOwnerId(request);
   if (response) {
     return response;
@@ -106,15 +115,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   const { id } = await params;
-  const body = (await request.json().catch(() => null)) as { content?: unknown[] } | null;
+  if (!isJsonContentType(request.headers.get("content-type"))) {
+    return NextResponse.json({ error: "Unsupported content type" }, { status: 415 });
+  }
 
-  if (!body || !Array.isArray(body.content)) {
+  const body = (await request.json().catch(() => null)) as { content?: unknown } | null;
+  const content = normalizeMainDataArray(body?.content);
+
+  if (!content) {
     return NextResponse.json({ error: "content must be an array" }, { status: 400 });
   }
 
   const { data, error } = await supabase
     .from("user_books")
-    .update({ content: body.content })
+    .update({ content })
     .eq("id", id)
     .eq("owner_id", ownerId)
     .select()
@@ -125,7 +139,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Book not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
 
   return NextResponse.json({ data });

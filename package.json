@@ -6,7 +6,7 @@
     "node": ">=20.17.0"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -32,7 +32,6 @@
     "@reduxjs/toolkit": "^2.11.2",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.100.1",
-    "@tanstack/react-query": "^5.96.1",
     "date-fns": "^4.1.0",
     "next": "16.2.2",
     "react": "^19.2.4",

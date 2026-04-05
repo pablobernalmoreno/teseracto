@@ -1,9 +1,9 @@
 "use client";
+
 import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import "./loginStyles.css";
-import supabase from "@/config/supabaseClient";
-import { useRouter } from "next/navigation";
+import { signInAction } from "@/app/actions/auth";
 
 export interface User {
   email: string;
@@ -15,79 +15,39 @@ const initialUserState: User = {
   password: "",
 };
 
-const errorMessageInitialState: string = "";
-
 const Page = () => {
-  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState<User>(initialUserState);
-  const [errorMessage, setErrorMessage] = useState<string>(errorMessageInitialState);
-
-  const rollbackClientSession = async () => {
-    await supabase.auth.signOut();
-  };
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: user.password,
+  const handleSubmit = async () => {
+    startTransition(async () => {
+      const result = await signInAction(user.email, user.password);
+      if (!result.success) {
+        setErrorMessage(result.error);
+      }
     });
-
-    if (error) {
-      setErrorMessage(error.message);
-    } else {
-      const accessToken = data?.session?.access_token;
-      const refreshToken = data?.session?.refresh_token;
-
-      if (!accessToken || !refreshToken) {
-        await rollbackClientSession();
-        setErrorMessage("No se pudo sincronizar la sesion. Intentalo nuevamente.");
-        return;
-      }
-
-      try {
-        const syncResponse = await fetch("/api/auth/session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          }),
-        });
-
-        if (!syncResponse.ok) {
-          await rollbackClientSession();
-          const payload = (await syncResponse.json().catch(() => null)) as {
-            error?: string;
-          } | null;
-          setErrorMessage(payload?.error || "No se pudo iniciar la sesión.");
-          return;
-        }
-      } catch {
-        await rollbackClientSession();
-        setErrorMessage("No se pudo sincronizar la sesion. Verifica tu conexion.");
-        return;
-      }
-
-      setErrorMessage(errorMessageInitialState);
-      router.replace("/main");
-    }
   };
 
   return (
-    <div className="login_container">
-      <Typography className="login_title" variant="h4">
+    <main id="main-content" className="login_container">
+      <Typography className="login_title" component="h1" variant="h4">
         Iniciar Sesión
       </Typography>
       <Box className="login_form_container">
-        <form className="login_form">
+        <form
+          className="login_form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSubmit();
+          }}
+          noValidate
+        >
           <Box mb={2}>
             <TextField
               fullWidth
@@ -97,7 +57,9 @@ const Page = () => {
               variant="outlined"
               required
               onChange={handleInputChange}
+              value={user.email}
               error={!!errorMessage}
+              aria-describedby={errorMessage ? "login-error" : undefined}
             />
           </Box>
           <Box mb={2}>
@@ -109,18 +71,24 @@ const Page = () => {
               variant="outlined"
               required
               onChange={handleInputChange}
+              value={user.password}
               error={!!errorMessage}
-              helperText={errorMessage}
+              aria-describedby={errorMessage ? "login-error" : undefined}
             />
           </Box>
+          {errorMessage ? (
+            <Typography id="login-error" role="alert" aria-live="assertive" color="error" mb={2}>
+              {errorMessage}
+            </Typography>
+          ) : null}
           <Button
             type="submit"
             variant="contained"
             fullWidth
             className="get_started"
-            onClick={onSubmit}
+            disabled={isPending}
           >
-            Iniciar Sesión
+            {isPending ? "Iniciando..." : "Iniciar Sesión"}
           </Button>
         </form>
         <Box my={2}>
@@ -165,14 +133,14 @@ const Page = () => {
         </Box> */}
         <Box mt={2} textAlign="center">
           <Typography variant="body2" color="textSecondary">
-            ¿No tienes una cuenta?
+            ¿No tienes una cuenta?{" "}
             <Link href="/register" underline="hover">
               Crear cuenta
             </Link>
           </Typography>
         </Box>
       </Box>
-    </div>
+    </main>
   );
 };
 

@@ -1,8 +1,9 @@
 "use client";
 import React, { useRef, useState } from "react";
-import { useItemCardModel, MainData } from "../model/useItemCardModel";
-import { NormalItemCard } from "@/app/components/dashboard/ItemCard/NormalItemCard";
+import { useItemCardModel } from "../model/useItemCardModel";
+import { ViewItemCard } from "@/app/components/dashboard/ItemCard/ViewItemCard";
 import { NewItemCard } from "@/app/components/dashboard/ItemCard/NewItemCard";
+import type { MainData } from "@/types/dashboard";
 
 interface ItemCardPresenterProps {
   cardId: string | number;
@@ -16,7 +17,7 @@ interface ItemCardPresenterProps {
   onSelectionChange?: (cardId: string | number, checked: boolean) => void;
 }
 
-export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
+const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
   cardId,
   name,
   description,
@@ -41,12 +42,9 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
     actions.handleDialogClose();
   };
 
-  const onContentClick = () => {
-    inputRef.current?.click();
-  };
+  const isCreateVariant = cardId === "new-item";
 
-  if (name?.includes("newItemCard")) {
-    // Convert Map to object for carouselValues prop
+  if (isCreateVariant) {
     const carouselValues: {
       [entryId: number]: { date: string; money: string };
     } = {};
@@ -64,8 +62,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
       onClose: handleInputDialogClose,
       onSave: async () => {
         try {
-          await actions.handleSave();
-          await onBookCreated?.();
+          await Promise.all([actions.handleSave(), onBookCreated?.() ?? Promise.resolve()]);
         } finally {
           setOpen(false);
         }
@@ -79,17 +76,15 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
       onDateChange: actions.onDateChange,
       onMoneyChange: actions.onMoneyChange,
       inputRef,
-      onContentClick,
     };
 
     return <NewItemCard onAddClick={handleInputDialogOpen} dialogProps={dialogProps} />;
   }
 
   return (
-    <NormalItemCard
+    <ViewItemCard
       cardId={cardId}
       name={name}
-      description={description}
       content={content}
       onOpenDetail={onOpenDetail}
       isSelected={isSelected}
@@ -97,3 +92,7 @@ export const ItemCardPresenter: React.FC<ItemCardPresenterProps> = ({
     />
   );
 };
+
+export const ItemCardPresenter = React.memo(ItemCardPresenterComponent);
+
+export default ItemCardPresenter;

@@ -2,29 +2,109 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## 🏗️ Architecture
 
-This project follows the **Model-View-Presenter (MVP)** architecture pattern for clean code organization and scalability.
+This project uses a **feature-oriented architecture** with Next.js App Router as the entrypoint.
+It includes selective MVP-style pieces where they provide value, rather than enforcing MVP for every feature.
 
-### MVP Pattern Overview
+### Current Pattern
 
-- **Model** - Business logic and state management (custom hooks in `src/modules/{feature}/model/`)
-- **View** - Pure presentational components (in `src/modules/{feature}/views/`)
-- **Presenter** - Bridge connecting model to view (in `src/modules/{feature}/presenters/`)
+- **Route layer** (`src/app/**`): pages, layouts, route handlers, server actions
+- **Feature logic** (`src/app/main/*.ts` hooks + `src/features/**`): domain logic and orchestration
+- **UI components** (`src/app/components/**`): reusable UI building blocks
+- **Shared types** (`src/types/**`): cross-feature type contracts
 
-For detailed information about the MVP pattern used in this project, see [START_HERE.md](START_HERE.md) and [MVP_ARCHITECTURE.md](MVP_ARCHITECTURE.md).
+### Presenter Best Practices
+
+Use a presenter only when it adds real orchestration value.
+
+Create a presenter when at least one is true:
+
+- It maps domain data into view-specific props.
+- It coordinates multiple hooks/services.
+- It owns side effects that views should not know about.
+- It provides a stable API between frequently changing model logic and stable UI.
+
+Do **not** create a presenter when all it does is:
+
+- Pass props through unchanged.
+- Render one component without transformation.
+- Exist only to satisfy a folder pattern.
+
+If a presenter ends up empty or pass-through, prefer removing it.
 
 ### Project Structure
 
 ```
 src/
-├── app/               # Next.js pages and components
-├── modules/           # Feature modules following MVP pattern
+├── app/                     # Next.js App Router
+│   ├── actions/             # Server Actions
+│   ├── api/                 # Route Handlers
+│   ├── components/          # UI components
+│   └── main/                # Page-specific hooks/controllers
+├── features/                # Domain features (model/presenter logic)
 │   └── dashboard/
-│       ├── model/     # Business logic hooks
-│       ├── views/     # Pure UI components
-│       └── presenters/ # Bridge components
-├── config/            # Configuration files
-└── utils/             # Utility functions
+├── types/                   # Shared types
+├── config/                  # Configuration files
+└── utils/                   # Utility functions
 ```
+
+### Decision Checklist
+
+Before adding a new layer/file, ask:
+
+1. Is this logic reused across multiple pages/features?
+2. Does this layer reduce coupling or just add indirection?
+3. Can this stay colocated with the route for now?
+4. Is the API clearer after introducing this abstraction?
+
+If the answer to 2 or 4 is no, keep it simpler.
+
+## Cache Strategy (Next.js 16)
+
+This project uses Cache Components and tag-based invalidation for dashboard data.
+
+### Enabled Setting
+
+- `cacheComponents: true` in `next.config.ts`
+
+### Read Caching
+
+Dashboard read actions in `src/app/actions/dashboard.ts` use:
+
+- `'use cache: private'`
+- `cacheLife('minutes')`
+- `cacheTag(...)`
+
+### Cache Tags
+
+- Global books tag: `dashboard-books`
+- Owner-scoped books tag: `dashboard-books:{ownerBookId}`
+- Single-book tag: `dashboard-book:{bookId}`
+
+### Invalidation Map
+
+- `deleteBooks(...)`
+  : updates `dashboard-books`, owner-scoped books tag, and each deleted `dashboard-book:{bookId}`
+- `createBook(...)` (create)
+  : updates `dashboard-books` and owner-scoped books tag
+- `createBook(...)` (update existing)
+  : updates `dashboard-books`, owner-scoped books tag, and the updated `dashboard-book:{bookId}`
+
+### `updateTag` vs `revalidateTag`
+
+- Use `updateTag` when the same request or immediate next render must see fresh data (current behavior).
+- Use `revalidateTag` for stale-while-revalidate behavior when immediate consistency is not required.
+
+### Rule of Thumb
+
+When adding new read actions:
+
+1. Add `use cache` directive and a bounded `cacheLife(...)` profile.
+2. Add one broad tag and one scoped tag when possible.
+
+When adding new write actions:
+
+1. Invalidate all tags impacted by the write.
+2. Prefer exact scoped tags to avoid over-invalidating unrelated data.
 
 ## Getting Started
 

@@ -1,38 +1,100 @@
 .main_box {
-  width: 100vw;
-  height: 100vh;
+  min-height: calc(100vh - 90px);
+  width: min(1120px, 92vw);
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 1rem 0 2rem;
 }
 
-section {
+.hero_section {
   display: flex;
   flex-direction: column;
-  width: 50%;
-  align-items: center;
+  width: min(760px, 100%);
+  align-items: flex-start;
+  gap: 1.2rem;
+  padding: 2.2rem;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.86), transparent 48%),
+    linear-gradient(145deg, rgba(246, 236, 218, 0.92), rgba(228, 214, 188, 0.82));
+  border: 1px solid rgba(131, 108, 73, 0.22);
+  box-shadow: 0 32px 68px rgba(59, 45, 27, 0.2);
 }
 
 .title {
-  color: #2e2e2e;
-  font-weight: bold;
+  color: #2f2418;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 
 .description {
-  color: #2e2e2e;
+  color: #4d4030;
+  max-width: 58ch;
+  font-size: 1.08rem;
 }
 
 .main_buttons_container {
   display: flex;
   flex-direction: row;
+  gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .get_started {
-  background: #464033 !important;
+  background: linear-gradient(135deg, #6f5a3b, #4f3f2a) !important;
+  border-radius: 999px !important;
+  padding: 0.55rem 1.4rem !important;
   text-transform: none !important;
+  box-shadow: 0 16px 26px rgba(56, 43, 27, 0.28) !important;
 }
 
 .more_info {
-  color: #2e2e2e !important;
+  color: #3f3325 !important;
+  border: 1px solid rgba(131, 108, 73, 0.4) !important;
+  border-radius: 999px !important;
+  padding: 0.55rem 1.4rem !important;
   text-transform: none !important;
+}
+
+.hero_metrics {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.6rem;
+}
+
+.hero_metric_card {
+  border-radius: 16px;
+  border: 1px solid rgba(131, 108, 73, 0.22);
+  background: rgba(255, 255, 255, 0.66);
+  padding: 0.9rem;
+}
+
+.hero_metric_value {
+  color: #2e2318;
+  font-weight: 800 !important;
+  font-size: 1.45rem !important;
+}
+
+.hero_metric_label {
+  color: #5b4d3d;
+  font-size: 0.85rem !important;
+}
+
+@media (max-width: 900px) {
+  .hero_section {
+    padding: 1.45rem;
+  }
+
+  .hero_metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 2rem !important;
+  }
 }

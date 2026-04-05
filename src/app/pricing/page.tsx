@@ -1,20 +1,35 @@
 import React from "react";
+import type { Metadata } from "next";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, Button, Paper, Typography } from "@mui/material";
+
+export const metadata: Metadata = {
+  title: "Precios",
+  description: "Conoce los planes de Teseracto para gestionar tu biblioteca financiera.",
+  alternates: {
+    canonical: "/pricing",
+  },
+};
 
 const page = () => {
   return (
     <>
       <AppBarMenu />
       <Box
+        component="main"
+        id="main-content"
         sx={{
           width: "100vw",
           height: "100vh",
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
+        <Typography component="h1" variant="h3" sx={{ color: "#2E2E2E", mt: 4 }}>
+          Precios
+        </Typography>
         <section
           style={{
             display: "flex",
@@ -23,6 +38,7 @@ const page = () => {
         >
           <Paper elevation={1} sx={{ margin: "2rem", padding: "2rem", width: "30%" }}>
             <Typography
+              component="h2"
               variant="h4"
               sx={{
                 color: "#2E2E2E",
@@ -56,6 +72,7 @@ const page = () => {
           </Paper>
           <Paper elevation={3} sx={{ margin: "2rem", padding: "2rem", width: "30%" }}>
             <Typography
+              component="h2"
               variant="h4"
               sx={{
                 color: "#2E2E2E",

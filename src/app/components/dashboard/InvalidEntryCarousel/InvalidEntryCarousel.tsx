@@ -1,4 +1,6 @@
-import { MainData } from "@/modules/dashboard/model/useItemCardModel";
+"use client";
+
+import type { MainData } from "@/types/dashboard";
 import { Box, Fade, IconButton, TextField, Typography } from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -60,7 +62,14 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
             alignItems: "center",
           }}
         >
-          {source && <Image src={source} alt="Invalid Entry" width={150} height={150} />}
+          {source && (
+            <Image
+              src={source}
+              alt={`Vista previa de la entrada inválida ${currentIndex + 1} de ${invalidEntries.length}`}
+              width={150}
+              height={150}
+            />
+          )}
           <Box sx={{ display: "flex", gap: 1, width: "100%" }}>
             <TextField
               key={`date-${currentIndex}`}
@@ -87,10 +96,14 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
         </Box>
       </Fade>
       <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-        <IconButton onClick={onPrev} disabled={currentIndex === 0}>
+        <IconButton onClick={onPrev} disabled={currentIndex === 0} aria-label="Entrada anterior">
           <NavigateBeforeIcon />
         </IconButton>
-        <IconButton onClick={onNext} disabled={currentIndex === invalidEntries.length - 1}>
+        <IconButton
+          onClick={onNext}
+          disabled={currentIndex === invalidEntries.length - 1}
+          aria-label="Entrada siguiente"
+        >
           <NavigateNextIcon />
         </IconButton>
       </Box>

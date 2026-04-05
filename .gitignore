@@ -40,6 +40,13 @@ next-env.d.ts
 *.swp
 *.swo
 
+# local Copilot/autoskills artifacts
+.agents/skills/
+skills-lock.json
+
+# local migrations
+migrations/*.sql
+
 # OS generated files
 .DS_Store
 .DS_Store?

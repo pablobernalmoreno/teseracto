@@ -7,7 +7,13 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import React from "react";
 import { useRouter } from "next/navigation";
 import "./AppBarMenuStyles.css";
-import { loginService } from "@/modules/login/model/loginService";
+import { loginService } from "@/features/login/model/loginService";
+
+type AppBarMenuVariant = "authenticated" | "public";
+
+interface AppBarMenuProps {
+  variant?: AppBarMenuVariant;
+}
 
 const notLoggedInButtons = () => {
   return (
@@ -36,18 +42,18 @@ const loggedInButtons = (onLogout: () => Promise<void>) => {
         </Button>
       </Box>
       <Box>
-        <Button className="appbar_buttons" href="/login">
-          <NotificationsIcon />
+        <Button className="appbar_buttons" href="/login" aria-label="Notificaciones">
+          <NotificationsIcon aria-hidden="true" />
         </Button>
-        <Button className="appbar_buttons" href="/login">
-          <AccountCircleIcon />
+        <Button className="appbar_buttons" href="/login" aria-label="Perfil de usuario">
+          <AccountCircleIcon aria-hidden="true" />
         </Button>
       </Box>
     </>
   );
 };
 
-export const AppBarMenu = ({ isLogged = false }) => {
+export const AppBarMenu = ({ variant = "public" }: AppBarMenuProps) => {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -55,11 +61,13 @@ export const AppBarMenu = ({ isLogged = false }) => {
     router.replace("/");
   };
 
+  const isAuthenticated = variant === "authenticated";
+
   return (
-    <Box className="appbar_container">
+    <Box component="header" className="appbar_container">
       <AppBar className="appbar" position="static">
-        <Toolbar className="toolbar">
-          {isLogged ? loggedInButtons(handleLogout) : notLoggedInButtons()}
+        <Toolbar component="nav" aria-label="Navegación principal" className="toolbar">
+          {isAuthenticated ? loggedInButtons(handleLogout) : notLoggedInButtons()}
         </Toolbar>
       </AppBar>
     </Box>
