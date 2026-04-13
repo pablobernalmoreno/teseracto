@@ -24,12 +24,14 @@ export interface InputDialogProps {
   sources: string[];
   carouselIndex: number;
   carouselValues: CarouselValues;
+  selectedDate: string;
+  excludedEntryIds: number[];
+  entryMessages: Record<number, string>;
   onClose: () => void;
   onSave: () => Promise<void> | void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPrev: () => void;
   onNext: () => void;
-  onDateChange: (entryId: number, value: string) => void;
   onMoneyChange: (entryId: number, value: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
 }
@@ -41,18 +43,22 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   sources,
   carouselIndex,
   carouselValues,
+  selectedDate,
+  excludedEntryIds,
+  entryMessages,
   onClose,
   onSave,
   onFileChange,
   onPrev,
   onNext,
-  onDateChange,
   onMoneyChange,
   inputRef,
 }) => {
+  const excludedSet = new Set(excludedEntryIds);
   const allInvalidEntriesFilled = invalidEntries.every((entry) => {
-    const v = carouselValues[entry.id] || { date: "", money: "" };
-    return Boolean(v.date) && Boolean(v.money);
+    if (excludedSet.has(entry.id)) return true;
+    const v = carouselValues[entry.id] || { money: "" };
+    return Boolean(v.money);
   });
 
   // Render content based on current state
@@ -89,9 +95,11 @@ export const InputDialog: React.FC<InputDialogProps> = ({
               sources={sources}
               currentIndex={carouselIndex}
               carouselValues={carouselValues}
+              selectedDate={selectedDate}
+              isEntryExcluded={excludedSet.has(invalidEntries[carouselIndex]?.id)}
+              entryMessage={entryMessages[invalidEntries[carouselIndex]?.id]}
               onPrev={onPrev}
               onNext={onNext}
-              onDateChange={onDateChange}
               onMoneyChange={onMoneyChange}
             />
           </Box>

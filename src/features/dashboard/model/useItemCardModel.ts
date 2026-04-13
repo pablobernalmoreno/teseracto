@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { dashboardService } from "./dashboardService";
-import {
-  combineDatesAndCurrency,
-  extractCurrencyValues,
-  findInvalidEntries,
-  getValidFieldsFromInvalidEntries,
-  isCombinedDataValid,
-  parseDates,
-} from "@/app/utils/data";
+import { extractCurrencyValues, parseDates } from "@/app/utils/data";
 import type { MainData } from "@/types/dashboard";
 
 // Format date for display as dd/mm/yyyy
@@ -90,6 +83,80 @@ export const formatCurrency = (raw: string | number): string => {
   return parts.fracPart ? `${intFormatted}.${parts.fracPart}` : intFormatted;
 };
 
+interface ParsedUploadState {
+  pathData: MainData[];
+  invalidEntries: MainData[];
+  editedValues: Map<number, { money: string }>;
+  excludedIds: Set<number>;
+  messages: Map<number, string>;
+  selectedDate: string;
+}
+
+function buildParsedUploadState(
+  expectedDatesArray: (string | null)[],
+  expectedCurrencyArray: string[],
+  totalEntries: number
+): ParsedUploadState {
+  const referenceDate = expectedDatesArray[0] ?? null;
+  const pathData: MainData[] = [];
+  const invalidEntries: MainData[] = [];
+  const editedValues = new Map<number, { money: string }>();
+  const excludedIds = new Set<number>();
+  const messages = new Map<number, string>();
+
+  if (referenceDate) {
+    for (let i = 0; i < totalEntries; i += 1) {
+      const detectedDate = expectedDatesArray[i];
+      const money = expectedCurrencyArray[i] || "N/A";
+      const normalizedEntry: MainData = { id: i, date: referenceDate, money };
+      pathData.push(normalizedEntry);
+
+      const isDifferentDate = Boolean(detectedDate && detectedDate !== referenceDate);
+      if (isDifferentDate) {
+        invalidEntries.push(normalizedEntry);
+        excludedIds.add(i);
+        messages.set(
+          i,
+          `Imagen con fecha ${detectedDate}. Solo se guardan datos del dia ${referenceDate}.`
+        );
+        continue;
+      }
+
+      if (!money || money === "N/A") {
+        invalidEntries.push(normalizedEntry);
+        editedValues.set(i, { money: "" });
+        messages.set(i, "Ingresa el valor de dinero para guardar esta imagen.");
+      }
+    }
+
+    return {
+      pathData,
+      invalidEntries,
+      editedValues,
+      excludedIds,
+      messages,
+      selectedDate: referenceDate,
+    };
+  }
+
+  for (let i = 0; i < totalEntries; i += 1) {
+    const money = expectedCurrencyArray[i] || "N/A";
+    pathData.push({ id: i, date: "N/A", money });
+    invalidEntries.push({ id: i, date: "N/A", money });
+    excludedIds.add(i);
+    messages.set(i, "No se detecto fecha en la primera imagen. Esta imagen no se guardara.");
+  }
+
+  return {
+    pathData,
+    invalidEntries,
+    editedValues,
+    excludedIds,
+    messages,
+    selectedDate: "",
+  };
+}
+
 // Dialog state machine types
 export type DialogState =
   | { type: "idle" }
@@ -98,36 +165,39 @@ export type DialogState =
   | { type: "success" };
 
 interface ItemCardModelState {
-  files: FileList | undefined;
+  files: File[] | undefined;
   dialogState: DialogState;
   pathData: MainData[];
   sources: string[];
   invalidEntries: MainData[];
   carouselIndex: number;
-  editedValues: Map<number, { date: string; money: string }>;
+  editedValues: Map<number, { money: string }>;
+  selectedDate: string;
+  excludedEntryIds: Set<number>;
+  entryMessages: Map<number, string>;
 }
 
 interface ItemCardModelActions {
-  setFiles: (files: FileList) => void;
+  setFiles: (files: File[]) => void;
   handleDialogClose: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   getImageText: () => Promise<void>;
   handleSave: () => Promise<void>;
   setCarouselIndex: (index: number) => void;
-  onDateChange: (entryId: number, value: string) => void;
   onMoneyChange: (entryId: number, value: string) => void;
 }
 
 export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] => {
-  const [files, setFiles] = useState<FileList>();
+  const [files, setFiles] = useState<File[]>();
   const [dialogState, setDialogState] = useState<DialogState>({ type: "idle" });
   const [pathData, setPathData] = useState<MainData[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [invalidEntries, setInvalidEntries] = useState<MainData[]>([]);
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
-  const [editedValues, setEditedValues] = useState<Map<number, { date: string; money: string }>>(
-    new Map()
-  );
+  const [editedValues, setEditedValues] = useState<Map<number, { money: string }>>(new Map());
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [excludedEntryIds, setExcludedEntryIds] = useState<Set<number>>(new Set());
+  const [entryMessages, setEntryMessages] = useState<Map<number, string>>(new Map());
 
   const handleDialogClose = () => {
     setDialogState({ type: "idle" });
@@ -135,55 +205,72 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     setInvalidEntries([]);
     setCarouselIndex(0);
     setEditedValues(new Map());
+    setSelectedDate("");
+    setExcludedEntryIds(new Set());
+    setEntryMessages(new Map());
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
-    const file = target.files as FileList;
-    if (file) {
-      setFiles(file);
+    const selectedFiles = Array.from(target.files ?? []);
+    if (selectedFiles.length) {
+      setFiles(selectedFiles);
+      target.value = "";
     }
   };
 
   const getImageText = useCallback(async () => {
-    const { createWorker } = await import("tesseract.js");
-    const worker = await createWorker("eng");
-    const paths: string[] = [];
-    const newSources: string[] = [];
-    if (files?.length) {
+    if (!files?.length) return;
+
+    let worker: Awaited<ReturnType<(typeof import("tesseract.js"))["createWorker"]>> | null = null;
+
+    try {
       setDialogState({ type: "loading" });
-      for (let i = 0; i < files?.length; ++i) {
+      const { createWorker } = await import("tesseract.js");
+      worker = await createWorker("eng");
+
+      const paths: string[] = [];
+      const newSources: string[] = [];
+
+      for (let i = 0; i < files.length; ++i) {
         const file = files[i];
         const ret = await worker.recognize(file);
         const ocrText = ret.data.text;
         newSources.push(URL.createObjectURL(file));
         paths.push(ocrText);
       }
+
       setSources(newSources);
       const expectedDatesArray = parseDates(paths);
       const expectedCurrencyArray = extractCurrencyValues(paths);
-      const result = combineDatesAndCurrency(expectedDatesArray, expectedCurrencyArray);
+      const parsedUploadState = buildParsedUploadState(
+        expectedDatesArray,
+        expectedCurrencyArray,
+        paths.length
+      );
 
-      if (!isCombinedDataValid(result)) {
-        const invalid = findInvalidEntries(result);
-        setInvalidEntries(invalid);
-
-        // Pre-populate carousel with valid fields from invalid entries
-        const validFields = getValidFieldsFromInvalidEntries(result);
-        setEditedValues(validFields);
-        setDialogState({ type: "invalid_entries" });
-      } else {
-        setDialogState({ type: "success" });
+      setPathData(parsedUploadState.pathData);
+      setInvalidEntries(parsedUploadState.invalidEntries);
+      setEditedValues(parsedUploadState.editedValues);
+      setExcludedEntryIds(parsedUploadState.excludedIds);
+      setEntryMessages(parsedUploadState.messages);
+      setSelectedDate(parsedUploadState.selectedDate);
+      setDialogState(
+        parsedUploadState.invalidEntries.length ? { type: "invalid_entries" } : { type: "success" }
+      );
+    } catch (error) {
+      console.error("OCR worker failed:", error);
+      setDialogState({ type: "idle" });
+    } finally {
+      if (worker) {
+        await worker.terminate();
       }
-
-      setPathData(result);
     }
-    await worker.terminate();
   }, [files]);
 
   const formatUpdatedPathData = (
     originalPathData: MainData[],
-    edits: Map<number, { date: string; money: string }>
+    edits: Map<number, { money: string }>
   ): MainData[] => {
     const updated = [...originalPathData];
     const parseNumberFromString = (s: string | number): number => {
@@ -224,10 +311,6 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     };
     edits.forEach((value, entryId) => {
       if (entryId !== undefined) {
-        const formattedDate = value.date
-          ? value.date.split("-").reverse().join("/")
-          : updated[entryId].date;
-
         const formattedMoney = value.money
           ? parseNumberFromString(value.money).toLocaleString("es-CO", {
               minimumFractionDigits: 0,
@@ -237,7 +320,6 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
 
         updated[entryId] = {
           ...updated[entryId],
-          date: formattedDate,
           money: formattedMoney,
         };
       }
@@ -245,50 +327,28 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     return updated;
   };
 
-  const computeTitleFromPathData = (updatedPathData: MainData[]): string => {
-    const dateStrings = updatedPathData.map((d) => d.date).filter(Boolean) as string[];
-
-    const toDate = (s: string): Date | null => {
-      if (!s) return null;
-      const ymd = /^\d{4}-\d{2}-\d{2}$/;
-      const dmy = /^\d{2}\/\d{2}\/\d{4}$/;
-      if (ymd.test(s)) {
-        const [y, m, day] = s.split("-");
-        return new Date(Number(y), Number(m) - 1, Number(day));
-      } else if (dmy.test(s)) {
-        const [day, month, year] = s.split("/");
-        return new Date(Number(year), Number(month) - 1, Number(day));
-      } else {
-        const parsed = new Date(s);
-        return isNaN(parsed.getTime()) ? null : parsed;
-      }
-    };
-
-    const dates = dateStrings
-      .map(toDate)
-      .filter((d): d is Date => d instanceof Date && !isNaN(d.getTime()));
-
-    if (!dates.length) return "Sin fechas";
-
-    const times = dates.map((d) => d.getTime());
-    const min = new Date(Math.min(...times));
-    const max = new Date(Math.max(...times));
-    const fmt = (d: Date) =>
-      [
-        String(d.getDate()).padStart(2, "0"),
-        String(d.getMonth() + 1).padStart(2, "0"),
-        String(d.getFullYear()),
-      ].join("/");
-    return `Del ${fmt(min)} al ${fmt(max)}`;
+  const computeTitleFromDate = (date: string): string => {
+    if (!date) return "Dia sin fecha";
+    return `Dia ${date}`;
   };
 
-  const validateAllEntriesPresent = (updatedPathData: MainData[]): boolean => {
-    const invalid = updatedPathData.filter((d) => !d.date || !d.money);
-    if (invalid.length) {
-      setInvalidEntries(invalid);
+  const validateRequiredMoney = (updatedPathData: MainData[]): boolean => {
+    const missingMoney = updatedPathData.filter(
+      (entry) => !excludedEntryIds.has(entry.id) && (!entry.money || entry.money === "N/A")
+    );
+
+    if (missingMoney.length) {
+      setInvalidEntries((previous) => {
+        const existingById = new Map(previous.map((item) => [item.id, item]));
+        for (const item of missingMoney) {
+          existingById.set(item.id, item);
+        }
+        return Array.from(existingById.values());
+      });
       return false;
     }
-    setInvalidEntries([]);
+
+    setInvalidEntries((previous) => previous.filter((entry) => excludedEntryIds.has(entry.id)));
     return true;
   };
 
@@ -304,8 +364,15 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       const updatedPathData = formatUpdatedPathData(pathData, editedValues);
       setPathData(updatedPathData);
 
-      // Prevent saving if any entry is missing date or money
-      if (!validateAllEntriesPresent(updatedPathData)) {
+      if (!validateRequiredMoney(updatedPathData)) {
+        return;
+      }
+
+      const saveableEntries = updatedPathData.filter(
+        (entry) => !excludedEntryIds.has(entry.id) && entry.money && entry.money !== "N/A"
+      );
+
+      if (!saveableEntries.length) {
         return;
       }
 
@@ -313,9 +380,9 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       const bookId = globalThis.crypto?.randomUUID
         ? globalThis.crypto.randomUUID()
         : String(Date.now());
-      const title = computeTitleFromPathData(updatedPathData);
+      const title = computeTitleFromDate(selectedDate);
 
-      await dashboardService.insertBookData(title, updatedPathData, bookId);
+      await dashboardService.insertBookData(title, saveableEntries, bookId);
     } catch (error) {
       console.error("Error saving book data:", error);
       throw error;
@@ -324,26 +391,16 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     }
   };
 
-  const onDateChange = (entryId: number, value: string) => {
-    const newEdited = new Map(editedValues);
-    newEdited.set(entryId, {
-      date: value,
-      money: newEdited.get(entryId)?.money || "",
-    });
-    setEditedValues(newEdited);
-  };
-
   const onMoneyChange = (entryId: number, value: string) => {
     const newEdited = new Map(editedValues);
     newEdited.set(entryId, {
-      date: newEdited.get(entryId)?.date || "",
       money: value,
     });
     setEditedValues(newEdited);
   };
 
   useEffect(() => {
-    if (files?.length && files?.length !== 0) {
+    if (files?.length && files.length !== 0) {
       getImageText();
     }
   }, [files, getImageText]);
@@ -356,6 +413,9 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     invalidEntries,
     carouselIndex,
     editedValues,
+    selectedDate,
+    excludedEntryIds,
+    entryMessages,
   };
 
   const actions: ItemCardModelActions = {
@@ -365,7 +425,6 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     getImageText,
     handleSave,
     setCarouselIndex,
-    onDateChange,
     onMoneyChange,
   };
 
