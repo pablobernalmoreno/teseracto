@@ -8,7 +8,6 @@ import Image from "next/image";
 
 export interface CarouselValues {
   [entryId: number]: {
-    date: string;
     money: string;
   };
 }
@@ -18,9 +17,11 @@ interface InvalidEntryCarouselProps {
   sources: string[];
   currentIndex: number;
   carouselValues: CarouselValues;
+  selectedDate: string;
+  isEntryExcluded: boolean;
+  entryMessage?: string;
   onPrev: () => void;
   onNext: () => void;
-  onDateChange: (entryId: number, value: string) => void;
   onMoneyChange: (entryId: number, value: string) => void;
 }
 
@@ -29,15 +30,17 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
   sources,
   currentIndex,
   carouselValues,
+  selectedDate,
+  isEntryExcluded,
+  entryMessage,
   onPrev,
   onNext,
-  onDateChange,
   onMoneyChange,
 }) => {
   if (!invalidEntries.length) return null;
   const entry = invalidEntries[currentIndex];
   const source = sources[entry?.id];
-  const currentValues = carouselValues[entry.id] || { date: "", money: "" };
+  const currentValues = carouselValues[entry.id] || { money: "" };
 
   return (
     <Box
@@ -51,6 +54,9 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
     >
       <Typography variant="h6">
         Entrada {currentIndex + 1} de {invalidEntries.length}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Fecha seleccionada: {selectedDate || "No detectada"}
       </Typography>
       <Fade in={true} timeout={500}>
         <Box
@@ -70,18 +76,12 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
               height={150}
             />
           )}
+          {entryMessage ? (
+            <Typography color={isEntryExcluded ? "error" : "warning.main"} textAlign="center">
+              {entryMessage}
+            </Typography>
+          ) : null}
           <Box sx={{ display: "flex", gap: 1, width: "100%" }}>
-            <TextField
-              key={`date-${currentIndex}`}
-              label="Fecha"
-              type="date"
-              variant="outlined"
-              size="small"
-              value={currentValues.date}
-              onChange={(e) => onDateChange(entry.id, e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
-              sx={{ flex: 1 }}
-            />
             <TextField
               key={`money-${currentIndex}`}
               label="Dinero"
@@ -90,6 +90,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
               size="small"
               value={currentValues.money}
               onChange={(e) => onMoneyChange(entry.id, e.target.value)}
+              disabled={isEntryExcluded}
               sx={{ flex: 1 }}
             />
           </Box>

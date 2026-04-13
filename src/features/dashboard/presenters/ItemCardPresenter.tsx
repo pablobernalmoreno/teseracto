@@ -46,10 +46,15 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
 
   if (isCreateVariant) {
     const carouselValues: {
-      [entryId: number]: { date: string; money: string };
+      [entryId: number]: { money: string };
     } = {};
     state.editedValues.forEach((value, entryId) => {
       carouselValues[entryId] = value;
+    });
+
+    const entryMessages: Record<number, string> = {};
+    state.entryMessages.forEach((message, entryId) => {
+      entryMessages[entryId] = message;
     });
 
     const dialogProps = {
@@ -59,6 +64,9 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
       sources: state.sources,
       carouselIndex: state.carouselIndex,
       carouselValues,
+      selectedDate: state.selectedDate,
+      excludedEntryIds: Array.from(state.excludedEntryIds),
+      entryMessages,
       onClose: handleInputDialogClose,
       onSave: async () => {
         try {
@@ -73,7 +81,6 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
         actions.setCarouselIndex(
           Math.min(state.invalidEntries.length - 1, state.carouselIndex + 1)
         ),
-      onDateChange: actions.onDateChange,
       onMoneyChange: actions.onMoneyChange,
       inputRef,
     };

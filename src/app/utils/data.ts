@@ -2,10 +2,12 @@ import { parse, isValid, format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export const parseDates = (pathsArray: string[]): (string | null)[] => {
+  const dateWithDePattern = /(\d{1,2})\s+de\s+([a-zñ]+)\s+de\s+(20\d{2})/i;
+  const dateWithoutDePattern = /(\d{1,2})\s+([a-zñ]+)\s+(20\d{2})/i;
+  const slashDatePattern = /(\d{2})\/(\d{2})\/(20\d{2})/;
+
   return pathsArray.map((entry) => {
-    const match =
-      entry.match(/(\d{1,2})\s+de\s+([a-zA-ZñÑ]+)\s+de\s+(2025)/i) ||
-      entry.match(/(\d{1,2})\s+([a-zA-ZñÑ]+)\s+(2025)/i);
+    const match = dateWithDePattern.exec(entry) || dateWithoutDePattern.exec(entry);
 
     if (match) {
       const rawDate = `${match[1]} ${match[2]} ${match[3]}`;
@@ -20,7 +22,7 @@ export const parseDates = (pathsArray: string[]): (string | null)[] => {
       }
     }
 
-    const slashDateMatch = entry.match(/(\d{2})\/(\d{2})\/(2025)/);
+    const slashDateMatch = slashDatePattern.exec(entry);
     if (slashDateMatch) {
       return `${slashDateMatch[1]}/${slashDateMatch[2]}/${slashDateMatch[3]}`;
     }

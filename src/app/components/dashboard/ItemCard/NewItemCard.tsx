@@ -8,9 +8,8 @@ import { CarouselValues } from "../InvalidEntryCarousel/InvalidEntryCarousel";
 
 interface NewItemCardProps {
   onAddClick: () => void;
-  dialogProps: Omit<InputDialogProps, "carouselValues" | "onDateChange" | "onMoneyChange"> & {
+  dialogProps: Omit<InputDialogProps, "carouselValues" | "onMoneyChange"> & {
     carouselValues: CarouselValues;
-    onDateChange: (entryId: number, value: string) => void;
     onMoneyChange: (entryId: number, value: string) => void;
   };
 }
