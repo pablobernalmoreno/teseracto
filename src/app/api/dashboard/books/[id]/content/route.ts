@@ -1,5 +1,6 @@
 import { createClient } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
 import {
   GENERIC_REQUEST_ERROR,
@@ -141,6 +142,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
+
+  // Revalidate the cache for the updated book
+  revalidateTag("dashboard-books");
+  revalidateTag(`dashboard-books:${ownerId}`);
+  revalidateTag(`dashboard-book:${id}`);
 
   return NextResponse.json({ data });
 }

@@ -3,6 +3,7 @@ import { Box, Button, Link, Typography, TextField } from "@mui/material";
 import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import React, { useEffect, useState, useTransition } from "react";
 import "../login/loginStyles.css";
+import styles from "./page.module.css";
 import { resendConfirmationEmailAction } from "@/app/actions/auth";
 
 const Page = () => {
@@ -40,7 +41,7 @@ const Page = () => {
   return (
     <main id="main-content" className="login_container">
       <Box className="account_confirmation_form_container">
-        <MarkEmailReadIcon aria-hidden="true" style={{ fontSize: 200, color: "#4caf50" }} />
+        <MarkEmailReadIcon aria-hidden="true" className={styles.confirmationIcon} />
         <Typography className="account_confirmation_title" component="h1" variant="h4">
           Confirmación de Cuenta
         </Typography>

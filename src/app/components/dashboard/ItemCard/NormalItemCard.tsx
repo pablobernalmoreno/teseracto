@@ -2,6 +2,7 @@
 
 import { Card, CardActionArea, CardContent, Typography, Box, Checkbox } from "@mui/material";
 import DataTable from "../../dataTable/DataTable";
+import styles from "./NormalItemCard.module.css";
 import type { MainData } from "@/types/dashboard";
 
 interface NormalItemCardProps {
@@ -25,26 +26,8 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
 }) => {
   const previewData = content.slice(0, 3);
   return (
-    <Card
-      className="dashboard-card-root"
-      sx={{
-        maxWidth: "100%",
-        minHeight: 370,
-        borderRadius: "12px",
-        position: "relative",
-      }}
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          zIndex: 2,
-          bgcolor: "rgba(255,255,255,0.85)",
-          borderRadius: "50%",
-        }}
-        onClick={(event) => event.stopPropagation()}
-      >
+    <Card className={`dashboard-card-root ${styles.cardRoot}`}>
+      <Box className={styles.checkboxContainer} onClick={(event) => event.stopPropagation()}>
         <Checkbox
           checked={isSelected}
           onChange={(event) => onSelectionChange?.(event.target.checked)}
@@ -52,43 +35,21 @@ export const NormalItemCard: React.FC<NormalItemCardProps> = ({
         />
       </Box>
       <CardActionArea
-        sx={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "stretch" }}
+        className={styles.cardActionArea}
         aria-label={`Abrir detalle de ${name}`}
         onClick={() => {
           onOpenDetail?.(cardId);
         }}
       >
-        <CardContent
-          sx={{
-            width: "100%",
-            maxHeight: 120,
-            px: 2.2,
-            pt: 2.3,
-            pb: 1.2,
-          }}
-        >
-          <Typography
-            gutterBottom
-            variant="h5"
-            component="div"
-            sx={{ fontFamily: "var(--font-dashboard-display), serif", lineHeight: 0.95 }}
-          >
+        <CardContent className={styles.cardContent}>
+          <Typography gutterBottom variant="h5" component="div" className={styles.cardTitle}>
             {name}
           </Typography>
-          <Typography variant="body2" sx={{ color: "#6f5c4d", lineHeight: 1.6 }}>
+          <Typography variant="body2" className={styles.cardDescription}>
             {description}
           </Typography>
         </CardContent>
-        <Box
-          sx={{
-            bgcolor: "rgba(255,255,255,0.52)",
-            height: 172,
-            overflow: "hidden",
-            px: 1.1,
-            pb: 1,
-            width: "100%",
-          }}
-        >
+        <Box className={styles.cardPreview}>
           <DataTable rows={previewData} mode="view" />
         </Box>
       </CardActionArea>

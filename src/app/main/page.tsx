@@ -33,13 +33,6 @@ const DashboardLoadingFallback = () => (
 );
 
 async function DashboardContent() {
-  // Fetch initial books page
-  const { data: initialBooks, count: totalBooksCount } = await fetchBooksPage(0, "");
-
-  return <MainPageClient initialBooks={initialBooks || []} initialBooksCount={totalBooksCount} />;
-}
-
-const Page = async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -49,6 +42,13 @@ const Page = async () => {
     redirect("/login");
   }
 
+  // Fetch initial books page
+  const { data: initialBooks, count: totalBooksCount } = await fetchBooksPage(0, "");
+
+  return <MainPageClient initialBooks={initialBooks || []} initialBooksCount={totalBooksCount} />;
+}
+
+const Page = async () => {
   return (
     <Suspense fallback={<DashboardLoadingFallback />}>
       <DashboardContent />

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { dashboardService } from "./dashboardService";
+import type { BookData } from "@/app/actions/dashboard";
 import { extractCurrencyValues, parseDates } from "@/app/utils/data";
 import type { MainData } from "@/types/dashboard";
 
@@ -182,7 +183,7 @@ interface ItemCardModelActions {
   handleDialogClose: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   getImageText: () => Promise<void>;
-  handleSave: () => Promise<void>;
+  handleSave: () => Promise<BookData | null>;
   setCarouselIndex: (index: number) => void;
   onMoneyChange: (entryId: number, value: string) => void;
 }
@@ -365,7 +366,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       setPathData(updatedPathData);
 
       if (!validateRequiredMoney(updatedPathData)) {
-        return;
+        return null;
       }
 
       const saveableEntries = updatedPathData.filter(
@@ -373,7 +374,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       );
 
       if (!saveableEntries.length) {
-        return;
+        return null;
       }
 
       await validateCurrentProfile();
@@ -382,7 +383,8 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
         : String(Date.now());
       const title = computeTitleFromDate(selectedDate);
 
-      await dashboardService.insertBookData(title, saveableEntries, bookId);
+      const result = await dashboardService.insertBookData(title, saveableEntries, bookId);
+      return result.data && result.data.length > 0 ? result.data[0] : null;
     } catch (error) {
       console.error("Error saving book data:", error);
       throw error;

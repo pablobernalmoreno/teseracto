@@ -28,8 +28,9 @@ interface UseDashboardBooksDataResult {
   libraryCount: number;
   handlePageChange: (_: unknown, page: number) => void;
   handleSearchChange: (query: string) => void;
-  refreshCurrentPage: () => void;
-  refreshFirstPage: () => void;
+  refreshCurrentPage: () => Promise<void>;
+  refreshFirstPage: () => Promise<void>;
+  addNewBook: (book: BookData) => void;
   fetchDetailRows: (bookId: string | number) => Promise<MainData[]>;
   saveDetailRows: (bookId: string | number, rows: MainData[]) => Promise<{ error: string | null }>;
 }
@@ -49,34 +50,44 @@ export const useDashboardBooksData = ({
   const allItems: BookData[] = [{ id: "new-item", title: "newItemCard", content: [] }, ...books];
   const libraryCount = books.length;
 
-  const loadPage = (page: number, query: string) => {
-    startTransition(async () => {
-      const result = await fetchBooksPage(page, query, ITEMS_PER_PAGE);
-      if (result.data) {
-        setBooks(result.data);
-        setBooksCount(result.count);
-      }
+  const loadPage = (page: number, query: string): Promise<void> => {
+    return new Promise<void>((resolve) => {
+      startTransition(async () => {
+        const result = await fetchBooksPage(page, query, ITEMS_PER_PAGE);
+        if (result.data) {
+          setBooks(result.data);
+          setBooksCount(result.count);
+        }
+        resolve();
+      });
     });
   };
 
   const handlePageChange = (_: unknown, page: number) => {
     setCurrentPage(page);
-    loadPage(page - 1, searchQuery);
+    void loadPage(page - 1, searchQuery);
   };
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
-    loadPage(0, query);
+    void loadPage(0, query);
   };
 
-  const refreshCurrentPage = () => {
-    loadPage(Math.max(0, currentPage - 1), searchQuery);
+  const refreshCurrentPage = (): Promise<void> => {
+    return loadPage(Math.max(0, currentPage - 1), searchQuery);
   };
 
-  const refreshFirstPage = () => {
+  const refreshFirstPage = (): Promise<void> => {
     setCurrentPage(1);
-    loadPage(0, searchQuery);
+    return loadPage(0, searchQuery);
+  };
+
+  const addNewBook = (book: BookData) => {
+    // Add the new book to the beginning of the list
+    setBooks((prevBooks) => [book, ...prevBooks]);
+    // Increment the count
+    setBooksCount((prevCount) => prevCount + 1);
   };
 
   const fetchDetailRows = async (bookId: string | number): Promise<MainData[]> => {
@@ -109,6 +120,7 @@ export const useDashboardBooksData = ({
     handleSearchChange,
     refreshCurrentPage,
     refreshFirstPage,
+    addNewBook,
     fetchDetailRows,
     saveDetailRows,
   };

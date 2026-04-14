@@ -1,6 +1,7 @@
 import { createClient } from "@/app/utils/supabase/server";
 import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
 import {
   GENERIC_REQUEST_ERROR,
@@ -176,6 +177,13 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
 
+  // Revalidate the dashboard books cache after deletion
+  revalidateTag("dashboard-books");
+  revalidateTag(`dashboard-books:${ownerId}`);
+  for (const deleted of data) {
+    revalidateTag(`dashboard-book:${deleted.id}`);
+  }
+
   return NextResponse.json({ data: data ?? [] });
 }
 
@@ -242,6 +250,10 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
+
+  // Revalidate the dashboard books cache so the new book appears immediately
+  revalidateTag("dashboard-books");
+  revalidateTag(`dashboard-books:${ownerId}`);
 
   return NextResponse.json({ data });
 }
