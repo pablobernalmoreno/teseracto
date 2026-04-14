@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { AppBarMenu } from "./components/appBarMenu/AppBarMenu";
 import { HomeHeroButtons } from "./HomeHeroButtons";
 import { Box, Typography } from "@mui/material";
@@ -34,9 +35,11 @@ function serializeJsonLd(data: unknown): string {
 export default function Home() {
   return (
     <>
-      <script
+      <Script
+        id="organization-json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
+        strategy="beforeInteractive"
       />
       <AppBarMenu />
       <Box component="main" id="main-content" className="main_box">

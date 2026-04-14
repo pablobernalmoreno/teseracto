@@ -1,0 +1,41 @@
+.cardRoot {
+  max-width: 100%;
+  min-height: 370px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardActionArea {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1.2rem;
+}
+
+.cardTitle {
+  font-family: var(--font-dashboard-display), serif;
+  font-size: 2rem;
+  color: #6f3417;
+}
+
+.cardDescription {
+  color: #6f5c4d;
+  text-align: center;
+  max-width: 18ch;
+}
+
+.cardIcon {
+  width: 50px;
+  height: 50px;
+}

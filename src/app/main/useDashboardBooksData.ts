@@ -28,8 +28,9 @@ interface UseDashboardBooksDataResult {
   libraryCount: number;
   handlePageChange: (_: unknown, page: number) => void;
   handleSearchChange: (query: string) => void;
-  refreshCurrentPage: () => void;
-  refreshFirstPage: () => void;
+  refreshCurrentPage: () => Promise<void>;
+  refreshFirstPage: () => Promise<void>;
+  addNewBook: (book: BookData) => void;
   fetchDetailRows: (bookId: string | number) => Promise<MainData[]>;
   saveDetailRows: (bookId: string | number, rows: MainData[]) => Promise<{ error: string | null }>;
 }
@@ -59,6 +60,14 @@ export const useDashboardBooksData = ({
     });
   };
 
+  const loadPageAsync = async (page: number, query: string): Promise<void> => {
+    const result = await fetchBooksPage(page, query, ITEMS_PER_PAGE);
+    if (result.data) {
+      setBooks(result.data);
+      setBooksCount(result.count);
+    }
+  };
+
   const handlePageChange = (_: unknown, page: number) => {
     setCurrentPage(page);
     loadPage(page - 1, searchQuery);
@@ -70,13 +79,20 @@ export const useDashboardBooksData = ({
     loadPage(0, query);
   };
 
-  const refreshCurrentPage = () => {
-    loadPage(Math.max(0, currentPage - 1), searchQuery);
+  const refreshCurrentPage = async (): Promise<void> => {
+    return loadPageAsync(Math.max(0, currentPage - 1), searchQuery);
   };
 
-  const refreshFirstPage = () => {
+  const refreshFirstPage = async (): Promise<void> => {
     setCurrentPage(1);
-    loadPage(0, searchQuery);
+    return loadPageAsync(0, searchQuery);
+  };
+
+  const addNewBook = (book: BookData) => {
+    // Add the new book to the beginning of the list
+    setBooks((prevBooks) => [book, ...prevBooks]);
+    // Increment the count
+    setBooksCount((prevCount) => prevCount + 1);
   };
 
   const fetchDetailRows = async (bookId: string | number): Promise<MainData[]> => {
@@ -109,6 +125,7 @@ export const useDashboardBooksData = ({
     handleSearchChange,
     refreshCurrentPage,
     refreshFirstPage,
+    addNewBook,
     fetchDetailRows,
     saveDetailRows,
   };

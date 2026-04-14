@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { useItemCardModel } from "../model/useItemCardModel";
+import { type BookData } from "@/features/dashboard/model/dashboardService";
 import { ViewItemCard } from "@/app/components/dashboard/ItemCard/ViewItemCard";
 import { NewItemCard } from "@/app/components/dashboard/ItemCard/NewItemCard";
 import type { MainData } from "@/types/dashboard";
@@ -12,7 +13,7 @@ interface ItemCardPresenterProps {
   content?: MainData[];
   onOpenDetail?: (id: string | number) => void;
   onBeforeAddClick?: () => void;
-  onBookCreated?: () => Promise<void> | void;
+  onBookCreated?: (newBook?: BookData | null) => Promise<void> | void;
   isSelected?: boolean;
   onSelectionChange?: (cardId: string | number, checked: boolean) => void;
 }
@@ -39,6 +40,9 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
 
   const handleInputDialogClose = () => {
     setOpen(false);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
     actions.handleDialogClose();
   };
 
@@ -70,7 +74,11 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
       onClose: handleInputDialogClose,
       onSave: async () => {
         try {
-          await Promise.all([actions.handleSave(), onBookCreated?.() ?? Promise.resolve()]);
+          const newBook = await actions.handleSave();
+          // Call onBookCreated with the newly created book for optimistic update
+          if (onBookCreated) {
+            await onBookCreated(newBook);
+          }
         } finally {
           setOpen(false);
         }

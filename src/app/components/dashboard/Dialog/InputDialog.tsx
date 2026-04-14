@@ -16,6 +16,7 @@ import {
   Fade,
   Typography,
 } from "@mui/material";
+import styles from "./InputDialog.module.css";
 
 export interface InputDialogProps {
   open: boolean;
@@ -66,30 +67,14 @@ export const InputDialog: React.FC<InputDialogProps> = ({
     switch (dialogState.type) {
       case "loading":
         return (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: 200,
-            }}
-          >
+          <Box className={styles.loadingContainer}>
             <CircularProgress />
           </Box>
         );
 
       case "invalid_entries":
         return (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: 200,
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
+          <Box className={styles.invalidEntriesContainer}>
             <InvalidEntryCarousel
               invalidEntries={invalidEntries}
               sources={sources}
@@ -107,18 +92,9 @@ export const InputDialog: React.FC<InputDialogProps> = ({
 
       case "success":
         return (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: 200,
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
+          <Box className={styles.successContainer}>
             <Fade in={true} timeout={500}>
-              <CheckCircleIcon style={{ fontSize: 80, color: "#4caf50" }} />
+              <CheckCircleIcon className={styles.successIcon} />
             </Fade>
           </Box>
         );
@@ -126,18 +102,16 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       case "idle":
       default:
         return (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
+          <Box className={styles.idleContainer}>
             <Typography id="upload-dialog-description" textAlign="center">
               Selecciona uno o varios archivos de imagen o PDF para continuar.
             </Typography>
-            <Button component="label" variant="text" startIcon={<CloudUploadIcon />}>
+            <Button
+              component="label"
+              variant="text"
+              startIcon={<CloudUploadIcon />}
+              onClick={(e) => e.stopPropagation()}
+            >
               <span>Subir Archivos</span>
               <input
                 ref={inputRef}
@@ -164,7 +138,12 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       className="dashboard-dialog"
     >
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
-      <DialogContent className="file_upload_container" sx={{ overflow: "visible" }}>
+      <DialogContent
+        className={`file_upload_container ${styles.dialogContent} ${
+          dialogState.type === "idle" ? styles.dialogContentClickable : ""
+        }`}
+        onClick={() => dialogState.type === "idle" && inputRef.current?.click()}
+      >
         {renderContent()}
       </DialogContent>
       <DialogActions>

@@ -111,7 +111,11 @@ export const useMainDashboardState = ({
     })();
   };
 
-  const handleBookCreated = () => {
+  const handleBookCreated = (newBook?: BookData | null) => {
+    if (newBook) {
+      // Optimistically add the new book to the list
+      booksData.addNewBook(newBook);
+    }
     booksData.refreshFirstPage();
   };
 
