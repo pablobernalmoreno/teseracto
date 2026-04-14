@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { dashboardService, type BookData } from "./dashboardService";
+import { dashboardService } from "./dashboardService";
+import type { BookData } from "@/app/actions/dashboard";
 import { extractCurrencyValues, parseDates } from "@/app/utils/data";
 import type { MainData } from "@/types/dashboard";
 

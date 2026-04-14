@@ -179,6 +179,10 @@ export async function DELETE(request: NextRequest) {
 
   // Revalidate the dashboard books cache after deletion
   revalidateTag("dashboard-books");
+  revalidateTag(`dashboard-books:${ownerId}`);
+  for (const deleted of data) {
+    revalidateTag(`dashboard-book:${deleted.id}`);
+  }
 
   return NextResponse.json({ data: data ?? [] });
 }
@@ -249,6 +253,7 @@ export async function POST(request: NextRequest) {
 
   // Revalidate the dashboard books cache so the new book appears immediately
   revalidateTag("dashboard-books");
+  revalidateTag(`dashboard-books:${ownerId}`);
 
   return NextResponse.json({ data });
 }

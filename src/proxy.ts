@@ -34,11 +34,10 @@ export function proxy(request: NextRequest) {
   });
 
   response.headers.set("Content-Security-Policy", csp);
-  response.headers.set("Content-Security-Policy-Report-Only", csp);
 
   return response;
 }
 
-export const config = {
+export const proxyConfig = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
 };

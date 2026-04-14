@@ -50,42 +50,37 @@ export const useDashboardBooksData = ({
   const allItems: BookData[] = [{ id: "new-item", title: "newItemCard", content: [] }, ...books];
   const libraryCount = books.length;
 
-  const loadPage = (page: number, query: string) => {
-    startTransition(async () => {
-      const result = await fetchBooksPage(page, query, ITEMS_PER_PAGE);
-      if (result.data) {
-        setBooks(result.data);
-        setBooksCount(result.count);
-      }
+  const loadPage = (page: number, query: string): Promise<void> => {
+    return new Promise<void>((resolve) => {
+      startTransition(async () => {
+        const result = await fetchBooksPage(page, query, ITEMS_PER_PAGE);
+        if (result.data) {
+          setBooks(result.data);
+          setBooksCount(result.count);
+        }
+        resolve();
+      });
     });
-  };
-
-  const loadPageAsync = async (page: number, query: string): Promise<void> => {
-    const result = await fetchBooksPage(page, query, ITEMS_PER_PAGE);
-    if (result.data) {
-      setBooks(result.data);
-      setBooksCount(result.count);
-    }
   };
 
   const handlePageChange = (_: unknown, page: number) => {
     setCurrentPage(page);
-    loadPage(page - 1, searchQuery);
+    void loadPage(page - 1, searchQuery);
   };
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
-    loadPage(0, query);
+    void loadPage(0, query);
   };
 
-  const refreshCurrentPage = async (): Promise<void> => {
-    return loadPageAsync(Math.max(0, currentPage - 1), searchQuery);
+  const refreshCurrentPage = (): Promise<void> => {
+    return loadPage(Math.max(0, currentPage - 1), searchQuery);
   };
 
-  const refreshFirstPage = async (): Promise<void> => {
+  const refreshFirstPage = (): Promise<void> => {
     setCurrentPage(1);
-    return loadPageAsync(0, searchQuery);
+    return loadPage(0, searchQuery);
   };
 
   const addNewBook = (book: BookData) => {

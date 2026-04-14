@@ -44,7 +44,7 @@ interface DashboardActions {
   selectCard: (cardId: string | number) => void;
   deselectCard: (cardId: string | number) => void;
   clearCardSelection: () => void;
-  handleBookCreated: () => void;
+  handleBookCreated: (newBook?: BookData | null) => void;
   closeToast: () => void;
   setEditedRows: React.Dispatch<React.SetStateAction<MainData[]>>;
 }
@@ -106,7 +106,7 @@ export const useMainDashboardState = ({
       } else {
         uiState.clearCardSelection();
         modals.showToast("Elementos eliminados correctamente", "success");
-        booksData.refreshCurrentPage();
+        void booksData.refreshCurrentPage();
       }
     })();
   };
@@ -116,7 +116,7 @@ export const useMainDashboardState = ({
       // Optimistically add the new book to the list
       booksData.addNewBook(newBook);
     }
-    booksData.refreshFirstPage();
+    void booksData.refreshFirstPage();
   };
 
   return {

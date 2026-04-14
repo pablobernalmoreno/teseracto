@@ -143,6 +143,17 @@ export const InputDialog: React.FC<InputDialogProps> = ({
           dialogState.type === "idle" ? styles.dialogContentClickable : ""
         }`}
         onClick={() => dialogState.type === "idle" && inputRef.current?.click()}
+        {...(dialogState.type === "idle" && {
+          role: "button",
+          tabIndex: 0,
+          "aria-label": "Seleccionar archivos para subir",
+          onKeyDown: (e: React.KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          },
+        })}
       >
         {renderContent()}
       </DialogContent>
