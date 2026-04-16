@@ -71,14 +71,14 @@ importers:
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
       baseline-browser-mapping:
-        specifier: ^2.10.16
+        specifier: ^2.10.19
         version: 2.10.19
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.6.1)
       eslint-config-next:
-        specifier: 16.2.3
-        version: 16.2.3(@typescript-eslint/parser@8.58.2(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+        specifier: 16.2.4
+        version: 16.2.4(@typescript-eslint/parser@8.58.2(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -3686,7 +3686,7 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-config-next@16.2.3(@typescript-eslint/parser@8.58.2(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2):
+  eslint-config-next@16.2.4(@typescript-eslint/parser@8.58.2(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2):
     dependencies:
       '@next/eslint-plugin-next': 16.2.4
       eslint: 9.39.4(jiti@2.6.1)
