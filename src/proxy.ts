@@ -1,13 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 
-function buildCsp(nonce: string): string {
+function buildCsp(nonce: string, allowUnsafeEval: boolean): string {
+  const scriptSrc = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    "'wasm-unsafe-eval'",
+    "blob:",
+    "https://cdn.jsdelivr.net",
+  ];
+
+  if (allowUnsafeEval) {
+    scriptSrc.push("'unsafe-eval'");
+  }
+
   return [
     "default-src 'self'",
     "base-uri 'self'",
     "frame-ancestors 'none'",
     "object-src 'none'",
     "form-action 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net`,
+    `script-src ${scriptSrc.join(" ")}`,
     `script-src-elem 'self' 'nonce-${nonce}' blob: https://cdn.jsdelivr.net`,
     "worker-src 'self' blob:",
     "child-src 'self' blob:",
@@ -22,7 +34,7 @@ function buildCsp(nonce: string): string {
 
 export function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID().replaceAll("-", "");
-  const csp = buildCsp(nonce);
+  const csp = buildCsp(nonce, process.env.NODE_ENV === "development");
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);

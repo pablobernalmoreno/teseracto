@@ -103,7 +103,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       default:
         return (
           <Box className={styles.idleContainer}>
-            <Typography id="upload-dialog-description" textAlign="center">
+            <Typography id="upload-dialog-description" sx={{ textAlign: "center" }}>
               Selecciona uno o varios archivos de imagen o PDF para continuar.
             </Typography>
             <Button

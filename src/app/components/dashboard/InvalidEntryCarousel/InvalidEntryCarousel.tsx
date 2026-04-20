@@ -77,7 +77,10 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
             />
           )}
           {entryMessage ? (
-            <Typography color={isEntryExcluded ? "error" : "warning.main"} textAlign="center">
+            <Typography
+              color={isEntryExcluded ? "error" : "warning.main"}
+              sx={{ textAlign: "center" }}
+            >
               {entryMessage}
             </Typography>
           ) : null}

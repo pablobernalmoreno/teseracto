@@ -131,7 +131,7 @@ const Page = () => {
             Continuar con Facebook
           </Button>
         </Box> */}
-        <Box mt={2} textAlign="center">
+        <Box mt={2} sx={{ textAlign: "center" }}>
           <Typography variant="body2" color="textSecondary">
             ¿No tienes una cuenta?{" "}
             <Link href="/register" underline="hover">

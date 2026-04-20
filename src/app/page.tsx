@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { headers } from "next/headers";
 import { AppBarMenu } from "./components/appBarMenu/AppBarMenu";
 import { HomeHeroButtons } from "./HomeHeroButtons";
@@ -35,14 +34,14 @@ function serializeJsonLd(data: unknown): string {
 
 export default async function Home() {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <>
-      <Script
+      <script
         id="organization-json-ld"
         type="application/ld+json"
         nonce={nonce}
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
-        strategy="beforeInteractive"
       />
       <AppBarMenu />
       <Box component="main" id="main-content" className="main_box">
