@@ -55,7 +55,7 @@ const Page = () => {
           .
         </Typography>
       </Box>
-      <Box textAlign="center">
+      <Box sx={{ textAlign: "center" }}>
         <Typography variant="body2" color="textSecondary" mb={2}>
           ¿No te llegó el correo?
         </Typography>

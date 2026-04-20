@@ -105,7 +105,7 @@ const Page = () => {
             {isPending ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
         </form>
-        <Box mt={8} textAlign="center">
+        <Box mt={8} sx={{ textAlign: "center" }}>
           <Typography variant="body2" color="textSecondary">
             ¿Ya tienes cuenta?{" "}
             <Link href="/login" underline="hover">
