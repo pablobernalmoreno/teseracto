@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { AppBarMenu } from "./components/appBarMenu/AppBarMenu";
 import { HomeHeroButtons } from "./HomeHeroButtons";
 import { Box, Typography } from "@mui/material";
@@ -31,12 +32,15 @@ function serializeJsonLd(data: unknown): string {
     .replaceAll("\u2029", String.raw`\u2029`);
 }
 
-export default function Home() {
+export default async function Home() {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <>
       <script
         id="organization-json-ld"
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
       />
       <AppBarMenu />

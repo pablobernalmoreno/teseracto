@@ -34,7 +34,7 @@ function buildCsp(nonce: string, allowUnsafeEval: boolean): string {
 
 export function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID().replaceAll("-", "");
-  const csp = buildCsp(nonce, process.env.NODE_ENV !== "production");
+  const csp = buildCsp(nonce, process.env.NODE_ENV === "development");
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
