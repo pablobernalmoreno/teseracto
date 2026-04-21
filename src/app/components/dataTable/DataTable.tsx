@@ -18,11 +18,12 @@ import "./DataTableStyles.css";
 interface DataTableProps {
   rows: MainData[];
   mode?: "view" | "edit";
+  fixedDate?: string;
   onRowsChange?: (rows: MainData[]) => void;
 }
 
 export const DataTable: React.FC<DataTableProps> = React.memo(
-  ({ rows, mode = "view", onRowsChange }) => {
+  ({ rows, mode = "view", fixedDate, onRowsChange }) => {
     const editable = mode === "edit";
     const [focusedMoneyIndex, setFocusedMoneyIndex] = useState<number | null>(null);
     const [newRowIds, setNewRowIds] = useState<Set<number>>(new Set());
@@ -80,12 +81,11 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
     );
 
     const handleChange = useCallback(
-      (index: number, field: "date" | "money", value: string) => {
+      (index: number, value: string) => {
         if (!onRowsChange) return;
         const rowId = rows[index]?.id;
         const copy = rows.map((r) => ({ ...r }));
-        if (field === "date") copy[index] = { ...copy[index], date: value } as MainData;
-        else copy[index] = { ...copy[index], money: value } as MainData;
+        copy[index] = { ...copy[index], money: value } as MainData;
         if (typeof rowId === "number") {
           setEditedRowIds((prev) => new Set(prev).add(rowId));
         }
@@ -97,9 +97,23 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
     const handleMoneyChange = useCallback(
       (index: number, value: string) => {
         const numericOnlyValue = value.replaceAll(/[^0-9.,]/g, "");
-        handleChange(index, "money", numericOnlyValue);
+        handleChange(index, numericOnlyValue);
       },
       [handleChange]
+    );
+
+    const handleDateChange = useCallback(
+      (index: number, value: string) => {
+        if (!onRowsChange) return;
+        const rowId = rows[index]?.id;
+        const copy = rows.map((r) => ({ ...r }));
+        copy[index] = { ...copy[index], date: value } as MainData;
+        if (typeof rowId === "number") {
+          setEditedRowIds((prev) => new Set(prev).add(rowId));
+        }
+        onRowsChange(copy);
+      },
+      [rows, onRowsChange]
     );
 
     const handleAddRow = useCallback(() => {
@@ -107,12 +121,12 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
       const newRowId = Date.now();
       const newRow: MainData = {
         id: newRowId,
-        date: "",
+        date: fixedDate || rows[0]?.date || "",
         money: "",
       };
       setNewRowIds((prev) => new Set(prev).add(newRowId));
       onRowsChange([...rows, newRow]);
-    }, [rows, onRowsChange]);
+    }, [fixedDate, rows, onRowsChange]);
 
     const handleFocusMoneyIndex = useCallback((idx: number) => {
       setFocusedMoneyIndex(idx);
@@ -122,16 +136,25 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
       setFocusedMoneyIndex(null);
     }, []);
 
-    const renderDateCell = (row: MainData, idx: number) => {
-      if (!editable) return <span>{formatDateDisplay(row.date)}</span>;
+    const renderDateCell = (row: MainData) => {
+      const effectiveDate = row.date || fixedDate || "";
+
+      if (!editable || fixedDate) {
+        return <span>{formatDateDisplay(effectiveDate)}</span>;
+      }
+
+      const rowIndex = rows.findIndex((currentRow) => currentRow.id === row.id);
+      if (rowIndex === -1) {
+        return <span>{formatDateDisplay(effectiveDate)}</span>;
+      }
 
       return (
         <TextField
           label="Fecha"
           size="small"
           type="date"
-          value={row.date}
-          onChange={(e) => handleChange(idx, "date", e.target.value)}
+          value={row.date || ""}
+          onChange={(e) => handleDateChange(rowIndex, e.target.value)}
           slotProps={{ inputLabel: { shrink: true } }}
         />
       );
@@ -163,7 +186,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
 
       return (
         <TableRow key={row.id ?? idx} className={rowClassName}>
-          <TableCell>{renderDateCell(row, idx)}</TableCell>
+          <TableCell>{renderDateCell(row)}</TableCell>
           <TableCell align="right">{renderMoneyCell(row, idx)}</TableCell>
         </TableRow>
       );

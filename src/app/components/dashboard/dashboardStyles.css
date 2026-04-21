@@ -1,9 +1,9 @@
 .file_upload_container {
   min-height: 250px;
   min-width: min(500px, 100%);
-  border: 2px dashed rgba(131, 108, 73, 0.55);
+  border: 2px dashed rgba(var(--rgb-accent), 0.45);
   border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.8), rgba(246, 237, 220, 0.75));
+  background: linear-gradient(160deg, rgba(var(--rgb-white), 0.9), rgba(var(--rgb-white), 0.75));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,9 +16,9 @@
 }
 
 .file_upload_container:hover {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(246, 237, 220, 0.9));
-  border-color: rgba(107, 84, 54, 0.7);
-  box-shadow: 0 16px 28px rgba(72, 57, 38, 0.16);
+  background: linear-gradient(160deg, rgba(var(--rgb-white), 0.98), rgba(var(--rgb-white), 0.82));
+  border-color: rgba(var(--rgb-accent-strong), 0.7);
+  box-shadow: 0 16px 28px rgba(21, 57, 31, 0.14);
   transform: translateY(-1px);
   cursor: pointer;
 }
@@ -29,19 +29,19 @@
 
 .dashboard-dialog .MuiDialog-paper {
   border-radius: 20px;
-  border: 1px solid rgba(131, 108, 73, 0.2);
-  background: linear-gradient(165deg, #fffefb, #f4ede0);
-  box-shadow: 0 28px 64px rgba(46, 36, 24, 0.28);
+  border: 1px solid rgba(var(--rgb-border), 0.2);
+  background: linear-gradient(165deg, rgba(var(--rgb-white), 0.98), rgba(var(--rgb-white), 0.8));
+  box-shadow: 0 28px 64px rgba(20, 38, 25, 0.2);
 }
 
 .dashboard-dialog .MuiDialogTitle-root {
-  font-family: var(--dashboard-display-font), "Times New Roman", serif;
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
   font-size: 1.5rem;
-  color: #342a1f;
+  color: var(--color-text-primary);
 }
 
 .dashboard-dialog .MuiDialogContent-root {
-  color: #4a3f31;
+  color: var(--color-text-secondary);
 }
 
 .dashboard-dialog-button--secondary,
@@ -55,13 +55,13 @@
 }
 
 .dashboard-dialog-button--secondary {
-  border: 1px solid rgba(131, 108, 73, 0.4) !important;
-  color: #4a3f31 !important;
+  border: 1px solid rgba(var(--rgb-border), 0.35) !important;
+  color: var(--color-text-primary) !important;
 }
 
 .dashboard-dialog-button--primary {
   color: #fff !important;
-  background: linear-gradient(135deg, #6f5a3b, #4f3f2a) !important;
+  background: linear-gradient(120deg, #1f6f2c, #12471d) !important;
 }
 
 .dashboard-dialog-button--danger {
@@ -70,5 +70,5 @@
 
 .dashboard-alert .MuiPaper-root {
   border-radius: 14px;
-  box-shadow: 0 16px 28px rgba(46, 36, 24, 0.24);
+  box-shadow: 0 16px 28px rgba(20, 38, 25, 0.2);
 }

@@ -1,23 +1,23 @@
 .dashboard-table-container {
-  border: 1px solid rgba(131, 108, 73, 0.2);
+  border: 1px solid rgba(var(--rgb-border), 0.2);
   border-radius: 16px !important;
-  background: rgba(252, 249, 241, 0.92) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: rgba(var(--rgb-white), 0.94) !important;
+  box-shadow: inset 0 1px 0 rgba(var(--rgb-white), 0.9);
   overflow: hidden;
 }
 
 .dashboard-table thead .MuiTableCell-root {
-  border-bottom: 1px solid rgba(131, 108, 73, 0.3);
-  color: #4a3f31;
+  border-bottom: 1px solid rgba(var(--rgb-border), 0.3);
+  color: var(--color-text-primary);
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
-  background: rgba(232, 222, 206, 0.6);
+  background: rgba(var(--rgb-accent), 0.16);
 }
 
 .dashboard-table .MuiTableCell-root {
-  border-bottom: 1px solid rgba(131, 108, 73, 0.16);
+  border-bottom: 1px solid rgba(var(--rgb-border), 0.16);
 }
 
 .dashboard-table .MuiInputBase-input {
@@ -25,11 +25,16 @@
 }
 
 .data-table-row-new .MuiTableCell-root {
-  background-color: #d8efce;
+  background-color: var(--color-row-new-bg);
+}
+
+.data-table-row-new .MuiTableCell-root:first-child {
+  box-shadow: inset 4px 0 0 var(--color-row-new-accent);
+  font-weight: 600;
 }
 
 .data-table-row-edited .MuiTableCell-root {
-  background-color: #fff4c2;
+  background-color: var(--color-row-edited-bg);
 }
 
 .data-table-add-cell {
@@ -39,13 +44,13 @@
 .data-table-add-cell .MuiButton-root {
   border-radius: 999px;
   padding: 0.35rem 0.95rem;
-  border: 1px dashed rgba(131, 108, 73, 0.5);
-  color: #4a3f31;
+  border: 1px dashed rgba(var(--rgb-border), 0.5);
+  color: var(--color-text-primary);
   font-weight: 700;
   text-transform: none;
 }
 
 .data-table-total-cell {
   font-weight: 600;
-  color: #3d3227;
+  color: var(--color-text-primary);
 }

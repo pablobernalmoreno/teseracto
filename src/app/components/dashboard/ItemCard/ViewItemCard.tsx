@@ -70,11 +70,11 @@ export const ViewItemCard: React.FC<ViewItemCardProps> = ({
             gutterBottom
             variant="h5"
             component="div"
-            sx={{ fontFamily: "var(--font-dashboard-display), serif", lineHeight: 0.95 }}
+            sx={{ fontFamily: "var(--font-geist-sans), Segoe UI, sans-serif", lineHeight: 0.95 }}
           >
             {name}
           </Typography>
-          <Typography variant="body2" sx={{ color: "#6f5c4d", lineHeight: 1.6 }}>
+          <Typography variant="body2" sx={{ color: "#60706a", lineHeight: 1.6 }}>
             Ajusta fechas y ganancias con una vista limpia pensada para revisión rápida.
           </Typography>
         </CardContent>

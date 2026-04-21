@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { AppBarMenu } from "./components/appBarMenu/AppBarMenu";
-import { HomeHeroButtons } from "./HomeHeroButtons";
 import { Box, Typography } from "@mui/material";
+import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
 import "./page.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -46,27 +48,66 @@ export default async function Home() {
       <AppBarMenu />
       <Box component="main" id="main-content" className="main_box">
         <section className="hero_section">
-          <Typography className="title" component="h1" variant="h2">
-            Tu biblioteca financiera, clara y viva.
-          </Typography>
-          <Typography variant="h6" className="description">
-            Organiza ingresos, registra movimientos y descubre patrones sin hojas de cálculo
-            infinitas. Diseñado para leer tus números como una historia.
-          </Typography>
-          <HomeHeroButtons />
-          <Box className="hero_metrics" aria-label="Indicadores principales de la plataforma">
-            <article className="hero_metric_card">
-              <Typography className="hero_metric_value">3 min</Typography>
-              <Typography className="hero_metric_label">para cargar tu primer libro</Typography>
+          <Box className="hero_text_block">
+            <Typography className="title" component="h1" variant="h2">
+              Lecciones e insights
+              <br />
+              <span className="title_accent">de tus finanzas en minutos</span>
+            </Typography>
+            <Typography variant="h6" className="description">
+              Crea libros, registra movimientos y visualiza patrones de forma limpia. Todo en una
+              experiencia ligera, clara y pensada para equipos modernos.
+            </Typography>
+          </Box>
+          <Box className="hero_visual" aria-hidden="true">
+            <article className="visual_panel visual_panel_main">
+              <span className="visual_chip">+12.5%</span>
+              <span className="visual_line" />
+              <span className="visual_line visual_line_short" />
+              <span className="visual_line" />
             </article>
-            <article className="hero_metric_card">
-              <Typography className="hero_metric_value">100%</Typography>
-              <Typography className="hero_metric_label">enfocado en claridad visual</Typography>
+            <article className="visual_panel visual_panel_side" />
+            <article className="visual_circle" />
+          </Box>
+        </section>
+
+        <section className="segments_section" aria-label="Tipos de organizaciones">
+          <Typography className="section_title" component="h2" variant="h4">
+            Gestiona toda tu comunidad
+          </Typography>
+          <Typography className="section_subtitle">en un sistema simple y potente</Typography>
+          <Box className="segment_cards">
+            <article className="segment_card">
+              <Groups2OutlinedIcon className="segment_icon" />
+              <Typography component="h3" className="segment_title">
+                Organizaciones
+                <br />
+                comunitarias
+              </Typography>
+              <Typography className="segment_text">
+                Consolida movimientos y reportes con un panel operativo central.
+              </Typography>
             </article>
-            <article className="hero_metric_card">
-              <Typography className="hero_metric_value">24/7</Typography>
-              <Typography className="hero_metric_label">
-                acceso desde cualquier dispositivo
+            <article className="segment_card">
+              <ApartmentOutlinedIcon className="segment_icon" />
+              <Typography component="h3" className="segment_title">
+                Asociaciones
+                <br />
+                nacionales
+              </Typography>
+              <Typography className="segment_text">
+                Estandariza el seguimiento por regiones y comparte métricas clave.
+              </Typography>
+            </article>
+            <article className="segment_card">
+              <HubOutlinedIcon className="segment_icon" />
+              <Typography component="h3" className="segment_title">
+                Grupos y clubes
+                <br />
+                locales
+              </Typography>
+              <Typography className="segment_text">
+                Visualiza desempeño y detecta cambios en el momento correcto.
               </Typography>
             </article>
           </Box>

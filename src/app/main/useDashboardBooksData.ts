@@ -31,7 +31,7 @@ interface UseDashboardBooksDataResult {
   refreshCurrentPage: () => Promise<void>;
   refreshFirstPage: () => Promise<void>;
   addNewBook: (book: BookData) => void;
-  fetchDetailRows: (bookId: string | number) => Promise<MainData[]>;
+  fetchDetailRows: (bookId: string | number, fixedDate?: string) => Promise<MainData[]>;
   saveDetailRows: (bookId: string | number, rows: MainData[]) => Promise<{ error: string | null }>;
 }
 
@@ -90,12 +90,24 @@ export const useDashboardBooksData = ({
     setBooksCount((prevCount) => prevCount + 1);
   };
 
-  const fetchDetailRows = async (bookId: string | number): Promise<MainData[]> => {
+  const fetchDetailRows = async (
+    bookId: string | number,
+    fixedDate?: string
+  ): Promise<MainData[]> => {
     const result = await fetchBookContent(String(bookId));
     if (!result.data) {
       return [];
     }
-    return result.data.content || [];
+    const rows = result.data.content || [];
+
+    if (!fixedDate) {
+      return rows;
+    }
+
+    return rows.map((row) => ({
+      ...row,
+      date: row.date === undefined || row.date === null || row.date === "" ? fixedDate : row.date,
+    }));
   };
 
   const saveDetailRows = async (
