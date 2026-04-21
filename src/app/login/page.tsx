@@ -48,7 +48,7 @@ const Page = () => {
           }}
           noValidate
         >
-          <Box mb={2}>
+          <Box className="auth_field_spacing_lg">
             <TextField
               fullWidth
               type="email"
@@ -62,7 +62,7 @@ const Page = () => {
               aria-describedby={errorMessage ? "login-error" : undefined}
             />
           </Box>
-          <Box mb={2}>
+          <Box className="auth_field_spacing_lg">
             <TextField
               fullWidth
               type="password"
@@ -77,7 +77,13 @@ const Page = () => {
             />
           </Box>
           {errorMessage ? (
-            <Typography id="login-error" role="alert" aria-live="assertive" color="error" mb={2}>
+            <Typography
+              className="auth_error_message"
+              id="login-error"
+              role="alert"
+              aria-live="assertive"
+              color="error"
+            >
               {errorMessage}
             </Typography>
           ) : null}
@@ -91,47 +97,14 @@ const Page = () => {
             {isPending ? "Iniciando..." : "Iniciar Sesión"}
           </Button>
         </form>
-        <Box my={2}>
+        <Box className="auth_divider_spacing">
           <Divider>
             <Typography variant="body2" color="textSecondary">
               O continuar con
             </Typography>
           </Divider>
         </Box>
-
-        {/* <Box className="sso_buttons">
-          <Button
-            fullWidth
-            variant="outlined"
-            className="sso_button"
-            startIcon={
-              <Image
-                src="/login/google_login.png"
-                alt="Google"
-                width={24}
-                height={24}
-              />
-            }
-          >
-            Continuar con Google
-          </Button>
-          <Button
-            fullWidth
-            variant="outlined"
-            className="sso_button"
-            startIcon={
-              <Image
-                src="/login/facebook_login.png"
-                alt="Facebook"
-                width={24}
-                height={24}
-              />
-            }
-          >
-            Continuar con Facebook
-          </Button>
-        </Box> */}
-        <Box mt={2} sx={{ textAlign: "center" }}>
+        <Box className="auth_footer_spacing auth_text_center">
           <Typography variant="body2" color="textSecondary">
             ¿No tienes una cuenta?{" "}
             <Link href="/register" underline="hover">

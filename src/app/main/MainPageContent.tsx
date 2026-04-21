@@ -10,20 +10,8 @@ import "./mainStyles.css";
 import { SearchNavbar } from "../components/dashboard/SearchNavbar/SearchNavbar";
 import AlertMessage from "../components/dashboard/Dialog/AlertMessage";
 import DeleteDialog from "../components/dashboard/Dialog/DeleteDialog";
-import { Cormorant_Garamond, Work_Sans } from "next/font/google";
+import UnsavedChangesDialog from "../components/dashboard/Dialog/UnsavedChangesDialog";
 import { type BookData } from "@/app/actions/dashboard";
-
-const dashboardDisplay = Cormorant_Garamond({
-  subsets: ["latin"],
-  variable: "--font-dashboard-display",
-  weight: ["500", "600", "700"],
-});
-
-const dashboardSans = Work_Sans({
-  subsets: ["latin"],
-  variable: "--font-dashboard-sans",
-  weight: ["400", "500", "600", "700"],
-});
 
 interface MainPageContentProps {
   initialBooks: BookData[];
@@ -57,15 +45,22 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
     selectedCardTitle,
     activeItem,
     libraryCount,
+    isUnsavedDialogOpen,
+    hasUnsavedChanges,
   } = state;
+
+  const activeCardDate = activeItem?.creationTime ? activeItem.creationTime.slice(0, 10) : "";
 
   const dashboardContent = selectedCardId ? (
     <DashboardDetailPanel
       title={activeItem?.title || "Detalle del libro"}
+      fixedDate={activeCardDate}
+      hasUnsavedChanges={hasUnsavedChanges}
       editedRows={editedRows}
       isPending={isPending}
       onBack={actions.handleBackFromDetail}
       onSave={actions.handleSaveDetail}
+      onSaveAndExit={actions.handleSaveAndExitDetail}
       onRowsChange={actions.setEditedRows}
     />
   ) : (
@@ -82,10 +77,7 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
 
   return (
     <>
-      <main
-        id="main-content"
-        className={`dashboard_shell ${dashboardDisplay.variable} ${dashboardSans.variable}`}
-      >
+      <main id="main-content" className="dashboard_shell">
         <Box className="dashboard_hero">
           <Box className="dashboard_hero_copy">
             <Typography className="dashboard_hero_eyebrow" component="p">
@@ -164,6 +156,14 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
         message={toastMessage}
         severity={toastSeverity}
         onClose={actions.closeToast}
+      />
+
+      <UnsavedChangesDialog
+        open={isUnsavedDialogOpen}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onClose={actions.closeUnsavedChangesDialog}
+        onSave={actions.saveAndContinueWithUnsavedChanges}
+        onDiscard={actions.discardAndContinueWithUnsavedChanges}
       />
     </>
   );

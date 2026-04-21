@@ -3,8 +3,9 @@
   width: 100%;
   padding: 2rem 1rem;
   background:
-    radial-gradient(circle at 14% 8%, rgba(255, 255, 255, 0.7), transparent 32%),
-    linear-gradient(150deg, #f2e8d4, #dfccb0 55%, #ceb48f);
+    radial-gradient(circle at 14% 8%, rgba(var(--rgb-white), 0.78), transparent 32%),
+    radial-gradient(circle at 86% 18%, rgba(var(--rgb-accent), 0.1), transparent 24%),
+    linear-gradient(160deg, #eef3ef, #e6efe8 52%, #dde9df);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -14,7 +15,7 @@
 .login_title,
 .account_confirmation_title,
 .account_confirmation_subtitle {
-  color: #3a2e22;
+  color: var(--color-text-primary);
 }
 
 .login_title,
@@ -27,21 +28,21 @@
 .login_form_container {
   margin: 1rem;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(var(--rgb-white), 0.9);
   width: min(30rem, 94vw);
-  border-radius: 22px;
-  border: 1px solid rgba(131, 108, 73, 0.22);
-  box-shadow: 0 28px 54px rgba(50, 38, 23, 0.2);
+  border-radius: 18px;
+  border: 1px solid rgba(var(--rgb-border), 0.22);
+  box-shadow: 0 24px 44px rgba(14, 31, 21, 0.12);
 }
 
 .register_form_container {
   margin: 1rem;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(var(--rgb-white), 0.9);
   width: min(30rem, 94vw);
-  border-radius: 22px;
-  border: 1px solid rgba(131, 108, 73, 0.22);
-  box-shadow: 0 28px 54px rgba(50, 38, 23, 0.2);
+  border-radius: 18px;
+  border: 1px solid rgba(var(--rgb-border), 0.22);
+  box-shadow: 0 24px 44px rgba(14, 31, 21, 0.12);
 }
 
 .sso_button {
@@ -51,11 +52,11 @@
 .account_confirmation_form_container {
   margin: 1rem;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(var(--rgb-white), 0.9);
   width: min(45rem, 94vw);
-  border-radius: 22px;
-  border: 1px solid rgba(131, 108, 73, 0.22);
-  box-shadow: 0 28px 54px rgba(50, 38, 23, 0.2);
+  border-radius: 18px;
+  border: 1px solid rgba(var(--rgb-border), 0.22);
+  box-shadow: 0 24px 44px rgba(14, 31, 21, 0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -64,28 +65,81 @@
 
 .account_confirmation_subtitle {
   max-width: 60ch;
-  color: #554634;
+  color: var(--color-text-secondary);
 }
 
 .get_started,
 .create_account {
-  background: linear-gradient(135deg, #6f5a3b, #4f3f2a) !important;
+  background: linear-gradient(120deg, var(--color-focus), var(--color-accent-strong)) !important;
   text-transform: none !important;
-  border-radius: 999px !important;
+  border-radius: 10px !important;
   font-weight: 700 !important;
-  box-shadow: 0 14px 24px rgba(58, 45, 29, 0.24) !important;
+  box-shadow: 0 14px 24px rgba(28, 84, 42, 0.24) !important;
 }
 
 .auth_secondary_action {
-  background: linear-gradient(135deg, #8b6d46, #5f4a2f) !important;
+  background: linear-gradient(120deg, #4ea35c, var(--color-focus)) !important;
   text-transform: none !important;
-  border-radius: 999px !important;
+  border-radius: 10px !important;
   font-weight: 700 !important;
 }
 
 .login_form .MuiOutlinedInput-root {
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  background: rgba(var(--rgb-white), 0.94);
+}
+
+.login_form .MuiInputLabel-root {
+  color: var(--color-text-secondary);
+}
+
+.login_form .MuiInputLabel-root.Mui-focused {
+  color: var(--color-focus);
+}
+
+.login_form .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(var(--rgb-border), 0.28);
+}
+
+.login_form .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(var(--rgb-accent), 0.5);
+}
+
+.login_form .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-focus);
+  border-width: 2px;
+}
+
+.login_form .MuiOutlinedInput-input {
+  caret-color: var(--color-focus-outline);
+}
+
+.auth_field_spacing_lg {
+  margin-bottom: 2rem;
+}
+
+.auth_field_spacing_md {
+  margin-bottom: 1rem;
+}
+
+.auth_error_message {
+  margin-bottom: 1rem !important;
+}
+
+.auth_divider_spacing {
+  margin-block: 1rem;
+}
+
+.auth_footer_spacing {
+  margin-top: 1rem;
+}
+
+.auth_footer_spacing_lg {
+  margin-top: 4rem;
+}
+
+.auth_text_center {
+  text-align: center;
 }
 
 @media (max-width: 600px) {

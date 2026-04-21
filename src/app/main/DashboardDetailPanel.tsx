@@ -9,15 +9,31 @@ import type { MainData } from "@/types/dashboard";
 
 interface DashboardDetailPanelProps {
   title: string;
+  fixedDate?: string;
+  hasUnsavedChanges: boolean;
   editedRows: MainData[];
   isPending: boolean;
   onBack: () => void;
   onSave: () => void;
+  onSaveAndExit: () => void;
   onRowsChange: (rows: MainData[]) => void;
 }
 
 export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.memo(
-  ({ title, editedRows, isPending, onBack, onSave, onRowsChange }) => {
+  ({
+    title,
+    fixedDate,
+    hasUnsavedChanges,
+    editedRows,
+    isPending,
+    onBack,
+    onSave,
+    onSaveAndExit,
+    onRowsChange,
+  }) => {
+    const saveLabel = hasUnsavedChanges ? "Guardar *" : "Guardar";
+    const saveAndExitLabel = hasUnsavedChanges ? "Guardar y salir *" : "Guardar y salir";
+
     return (
       <Paper elevation={0} className="dashboard_detail_panel">
         <Box className="dashboard_detail_header">
@@ -38,18 +54,32 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
               Volver al catálogo
             </Button>
             <Button
-              className="dashboard_button dashboard_button--solid"
+              className="dashboard_button dashboard_button--soft"
               variant="contained"
               onClick={onSave}
               disabled={isPending}
             >
               <SaveRoundedIcon fontSize="small" />
-              Guardar
+              {saveLabel}
+            </Button>
+            <Button
+              className="dashboard_button dashboard_button--solid"
+              variant="contained"
+              onClick={onSaveAndExit}
+              disabled={isPending}
+            >
+              <SaveRoundedIcon fontSize="small" />
+              {saveAndExitLabel}
             </Button>
           </Box>
         </Box>
         <Box className="dashboard_detail_tableWrap">
-          <DataTable rows={editedRows} mode="edit" onRowsChange={onRowsChange} />
+          <DataTable
+            rows={editedRows}
+            mode="edit"
+            fixedDate={fixedDate}
+            onRowsChange={onRowsChange}
+          />
         </Box>
       </Paper>
     );

@@ -31,12 +31,12 @@
 }
 
 .cardTitle {
-  font-family: var(--font-dashboard-display), serif;
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
   line-height: 0.95;
 }
 
 .cardDescription {
-  color: #6f5c4d;
+  color: #60706a;
   line-height: 1.6;
 }
 

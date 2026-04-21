@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { deleteBooks as deleteBooksFn, type BookData } from "@/app/actions/dashboard";
 import type { MainData } from "@/types/dashboard";
 import { useDashboardBooksData } from "./useDashboardBooksData";
@@ -30,6 +31,8 @@ interface DashboardState {
   selectedCardTitle: string;
   activeItem: BookData | null;
   libraryCount: number;
+  isUnsavedDialogOpen: boolean;
+  hasUnsavedChanges: boolean;
 }
 
 interface DashboardActions {
@@ -38,6 +41,7 @@ interface DashboardActions {
   openDetail: (bookId: string | number) => Promise<void>;
   handleBackFromDetail: () => void;
   handleSaveDetail: () => void;
+  handleSaveAndExitDetail: () => void;
   openDeleteModal: () => void;
   closeDeleteModal: () => void;
   deleteSelectedCards: () => void;
@@ -47,6 +51,9 @@ interface DashboardActions {
   handleBookCreated: (newBook?: BookData | null) => void;
   closeToast: () => void;
   setEditedRows: React.Dispatch<React.SetStateAction<MainData[]>>;
+  saveAndContinueWithUnsavedChanges: () => void;
+  discardAndContinueWithUnsavedChanges: () => void;
+  closeUnsavedChangesDialog: () => void;
 }
 
 interface UseMainDashboardStateResult {
@@ -61,6 +68,8 @@ export const useMainDashboardState = ({
   const booksData = useDashboardBooksData({ initialBooks, initialBooksCount });
   const uiState = useDashboardUiState();
   const modals = useDashboardModals();
+  const [initialDetailRows, setInitialDetailRows] = useState<MainData[]>([]);
+  const [pendingNavigationAction, setPendingNavigationAction] = useState<(() => void) | null>(null);
 
   const currentItems = booksData.books;
   const selectedDeleteCount = uiState.selectedDeleteCount;
@@ -72,27 +81,152 @@ export const useMainDashboardState = ({
     ? (currentItems.find((item) => item.id === uiState.selectedCardId) ?? null)
     : null;
 
-  const openDetail = async (bookId: string | number) => {
+  const normalizeRows = (rows: MainData[]) =>
+    rows.map((row) => ({
+      id: row.id,
+      date: row.date ?? "",
+      money: row.money ?? "",
+    }));
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (!uiState.selectedCardId) {
+      return false;
+    }
+
+    return (
+      JSON.stringify(normalizeRows(uiState.editedRows)) !==
+      JSON.stringify(normalizeRows(initialDetailRows))
+    );
+  }, [uiState.selectedCardId, uiState.editedRows, initialDetailRows]);
+
+  const isUnsavedDialogOpen = pendingNavigationAction !== null;
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) {
+      return;
+    }
+
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
+
+  const normalizeCardDate = (creationTime?: string): string => {
+    if (!creationTime) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(creationTime)) return creationTime;
+
+    const parsed = new Date(creationTime);
+    if (Number.isNaN(parsed.getTime())) {
+      return "";
+    }
+
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, "0");
+    const day = String(parsed.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const openDetailInternal = async (bookId: string | number) => {
+    const selectedBook = currentItems.find((item) => item.id === bookId);
+    const cardDate = normalizeCardDate(selectedBook?.creationTime);
     // Fetch data before updating UI to avoid waterfall
-    const rows = await booksData.fetchDetailRows(bookId);
+    const rows = await booksData.fetchDetailRows(bookId, cardDate);
     // Set both states together (they're independent)
     uiState.setActiveCard(bookId);
     uiState.setEditedRows(rows);
+    setInitialDetailRows(rows);
+  };
+
+  const openDetail = async (bookId: string | number) => {
+    if (hasUnsavedChanges && uiState.selectedCardId && uiState.selectedCardId !== bookId) {
+      setPendingNavigationAction(() => {
+        return () => {
+          void openDetailInternal(bookId);
+        };
+      });
+      return;
+    }
+
+    await openDetailInternal(bookId);
+  };
+
+  const saveDetailInternal = async (exitAfterSave: boolean): Promise<boolean> => {
+    if (!uiState.selectedCardId) return false;
+    const bookId = uiState.selectedCardId;
+    const selectedBook = currentItems.find((item) => item.id === bookId);
+    const cardDate = normalizeCardDate(selectedBook?.creationTime);
+    const rowsToSave = cardDate
+      ? uiState.editedRows.map((row) => ({ ...row, date: cardDate }))
+      : uiState.editedRows;
+
+    const result = await booksData.saveDetailRows(bookId, rowsToSave);
+    if (result.error) {
+      modals.showToast("Error al guardar", "error");
+      return false;
+    }
+
+    modals.showToast("Guardado correctamente", "success");
+
+    if (exitAfterSave) {
+      uiState.clearDetail();
+      setInitialDetailRows([]);
+      return true;
+    }
+
+    uiState.setEditedRows(rowsToSave);
+    setInitialDetailRows(rowsToSave);
+    return true;
   };
 
   const handleSaveDetail = () => {
-    if (!uiState.selectedCardId) return;
-    const bookId = uiState.selectedCardId;
+    void saveDetailInternal(false);
+  };
+
+  const handleSaveAndExitDetail = () => {
+    void saveDetailInternal(true);
+  };
+
+  const handleBackFromDetail = () => {
+    if (hasUnsavedChanges) {
+      setPendingNavigationAction(() => {
+        return () => {
+          uiState.clearDetail();
+          setInitialDetailRows([]);
+        };
+      });
+      return;
+    }
+
+    uiState.clearDetail();
+    setInitialDetailRows([]);
+  };
+
+  const closeUnsavedChangesDialog = () => {
+    setPendingNavigationAction(null);
+  };
+
+  const discardAndContinueWithUnsavedChanges = () => {
+    const pendingAction = pendingNavigationAction;
+    setPendingNavigationAction(null);
+    uiState.clearDetail();
+    setInitialDetailRows([]);
+    pendingAction?.();
+  };
+
+  const saveAndContinueWithUnsavedChanges = () => {
+    const pendingAction = pendingNavigationAction;
+    setPendingNavigationAction(null);
 
     void (async () => {
-      const result = await booksData.saveDetailRows(bookId, uiState.editedRows);
-      if (result.error) {
-        modals.showToast("Error al guardar", "error");
-        return;
+      const saved = await saveDetailInternal(false);
+      if (saved) {
+        pendingAction?.();
       }
-
-      modals.showToast("Guardado correctamente", "success");
-      uiState.clearDetail();
     })();
   };
 
@@ -139,13 +273,16 @@ export const useMainDashboardState = ({
       selectedCardTitle,
       activeItem,
       libraryCount: booksData.libraryCount,
+      isUnsavedDialogOpen,
+      hasUnsavedChanges,
     },
     actions: {
       handlePageChange: booksData.handlePageChange,
       handleSearchChange: booksData.handleSearchChange,
       openDetail,
-      handleBackFromDetail: uiState.clearDetail,
+      handleBackFromDetail,
       handleSaveDetail,
+      handleSaveAndExitDetail,
       openDeleteModal: modals.openDeleteModal,
       closeDeleteModal: modals.closeDeleteModal,
       deleteSelectedCards,
@@ -155,6 +292,9 @@ export const useMainDashboardState = ({
       handleBookCreated,
       closeToast: modals.closeToast,
       setEditedRows: uiState.setEditedRows,
+      saveAndContinueWithUnsavedChanges,
+      discardAndContinueWithUnsavedChanges,
+      closeUnsavedChangesDialog,
     },
   };
 };

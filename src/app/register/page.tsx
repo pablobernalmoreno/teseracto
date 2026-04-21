@@ -48,7 +48,7 @@ const Page = () => {
           }}
           noValidate
         >
-          <Box mb={2}>
+          <Box className="auth_field_spacing_md">
             <TextField
               fullWidth
               type="email"
@@ -62,7 +62,7 @@ const Page = () => {
               required
             />
           </Box>
-          <Box mb={2}>
+          <Box className="auth_field_spacing_md">
             <TextField
               fullWidth
               type="password"
@@ -76,7 +76,7 @@ const Page = () => {
               required
             />
           </Box>
-          <Box mb={2}>
+          <Box className="auth_field_spacing_md">
             <TextField
               fullWidth
               type="password"
@@ -91,7 +91,13 @@ const Page = () => {
             />
           </Box>
           {errorMessage ? (
-            <Typography id="register-error" role="alert" aria-live="assertive" color="error" mb={2}>
+            <Typography
+              className="auth_error_message"
+              id="register-error"
+              role="alert"
+              aria-live="assertive"
+              color="error"
+            >
               {errorMessage}
             </Typography>
           ) : null}
@@ -105,7 +111,7 @@ const Page = () => {
             {isPending ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
         </form>
-        <Box mt={8} sx={{ textAlign: "center" }}>
+        <Box className="auth_footer_spacing_lg auth_text_center">
           <Typography variant="body2" color="textSecondary">
             ¿Ya tienes cuenta?{" "}
             <Link href="/login" underline="hover">
