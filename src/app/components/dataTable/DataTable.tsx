@@ -102,6 +102,20 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
       [handleChange]
     );
 
+    const handleDateChange = useCallback(
+      (index: number, value: string) => {
+        if (!onRowsChange) return;
+        const rowId = rows[index]?.id;
+        const copy = rows.map((r) => ({ ...r }));
+        copy[index] = { ...copy[index], date: value } as MainData;
+        if (typeof rowId === "number") {
+          setEditedRowIds((prev) => new Set(prev).add(rowId));
+        }
+        onRowsChange(copy);
+      },
+      [rows, onRowsChange]
+    );
+
     const handleAddRow = useCallback(() => {
       if (!onRowsChange) return;
       const newRowId = Date.now();
@@ -124,7 +138,26 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
 
     const renderDateCell = (row: MainData) => {
       const effectiveDate = row.date || fixedDate || "";
-      return <span>{formatDateDisplay(effectiveDate)}</span>;
+
+      if (!editable || fixedDate) {
+        return <span>{formatDateDisplay(effectiveDate)}</span>;
+      }
+
+      const rowIndex = rows.findIndex((currentRow) => currentRow.id === row.id);
+      if (rowIndex === -1) {
+        return <span>{formatDateDisplay(effectiveDate)}</span>;
+      }
+
+      return (
+        <TextField
+          label="Fecha"
+          size="small"
+          type="date"
+          value={row.date || ""}
+          onChange={(e) => handleDateChange(rowIndex, e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
+        />
+      );
     };
 
     const renderMoneyCell = (row: MainData, idx: number) => {

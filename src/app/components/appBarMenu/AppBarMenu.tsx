@@ -53,8 +53,10 @@ const notLoggedInButtons = () => {
         <Button className="appbar_buttons" component={Link} href="/">
           Inicio
         </Button>
-        <Button className="appbar_buttons">Nosotros</Button>
-        <Button href="/pricing" className="appbar_buttons">
+        <Button className="appbar_buttons" disabled>
+          Nosotros
+        </Button>
+        <Button className="appbar_buttons" component={Link} href="/pricing">
           Precios
         </Button>
       </Box>

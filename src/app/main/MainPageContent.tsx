@@ -44,12 +44,11 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
     selectedDeleteCount,
     selectedCardTitle,
     activeItem,
+    activeCardDate,
     libraryCount,
     isUnsavedDialogOpen,
     hasUnsavedChanges,
   } = state;
-
-  const activeCardDate = activeItem?.creationTime ? activeItem.creationTime.slice(0, 10) : "";
 
   const dashboardContent = selectedCardId ? (
     <DashboardDetailPanel

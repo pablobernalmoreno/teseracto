@@ -30,6 +30,7 @@ interface DashboardState {
   selectedDeleteCount: number;
   selectedCardTitle: string;
   activeItem: BookData | null;
+  activeCardDate: string;
   libraryCount: number;
   isUnsavedDialogOpen: boolean;
   hasUnsavedChanges: boolean;
@@ -81,22 +82,35 @@ export const useMainDashboardState = ({
     ? (currentItems.find((item) => item.id === uiState.selectedCardId) ?? null)
     : null;
 
-  const normalizeRows = (rows: MainData[]) =>
-    rows.map((row) => ({
-      id: row.id,
-      date: row.date ?? "",
-      money: row.money ?? "",
-    }));
+  const activeCardDate = normalizeCardDate(activeItem?.creationTime);
+
+  const areDetailRowsEqual = (left: MainData[], right: MainData[]) => {
+    if (left.length !== right.length) {
+      return false;
+    }
+
+    for (let index = 0; index < left.length; index += 1) {
+      const leftRow = left[index];
+      const rightRow = right[index];
+
+      if (
+        leftRow.id !== rightRow.id ||
+        (leftRow.date ?? "") !== (rightRow.date ?? "") ||
+        (leftRow.money ?? "") !== (rightRow.money ?? "")
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   const hasUnsavedChanges = useMemo(() => {
     if (!uiState.selectedCardId) {
       return false;
     }
 
-    return (
-      JSON.stringify(normalizeRows(uiState.editedRows)) !==
-      JSON.stringify(normalizeRows(initialDetailRows))
-    );
+    return !areDetailRowsEqual(uiState.editedRows, initialDetailRows);
   }, [uiState.selectedCardId, uiState.editedRows, initialDetailRows]);
 
   const isUnsavedDialogOpen = pendingNavigationAction !== null;
@@ -108,6 +122,8 @@ export const useMainDashboardState = ({
 
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
+      // returnValue is deprecated but required for cross-browser unsaved-changes prompt
+      (event as BeforeUnloadEvent & { returnValue: string }).returnValue = "";
     };
 
     window.addEventListener("beforeunload", onBeforeUnload);
@@ -161,7 +177,7 @@ export const useMainDashboardState = ({
     const selectedBook = currentItems.find((item) => item.id === bookId);
     const cardDate = normalizeCardDate(selectedBook?.creationTime);
     const rowsToSave = cardDate
-      ? uiState.editedRows.map((row) => ({ ...row, date: cardDate }))
+      ? uiState.editedRows.map((row) => ({ ...row, date: row.date ?? cardDate }))
       : uiState.editedRows;
 
     const result = await booksData.saveDetailRows(bookId, rowsToSave);
@@ -272,6 +288,7 @@ export const useMainDashboardState = ({
       selectedDeleteCount,
       selectedCardTitle,
       activeItem,
+      activeCardDate,
       libraryCount: booksData.libraryCount,
       isUnsavedDialogOpen,
       hasUnsavedChanges,

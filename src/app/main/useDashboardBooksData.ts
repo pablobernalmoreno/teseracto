@@ -106,7 +106,7 @@ export const useDashboardBooksData = ({
 
     return rows.map((row) => ({
       ...row,
-      date: fixedDate,
+      date: row.date === undefined || row.date === null || row.date === "" ? fixedDate : row.date,
     }));
   };
 

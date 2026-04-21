@@ -25,7 +25,7 @@ const UnsavedChangesDialog = ({
   onSave,
   onDiscard,
 }: UnsavedChangesDialogProps) => {
-  const saveLabel = hasUnsavedChanges ? "Guardar y salir *" : "Guardar y salir";
+  const saveLabel = hasUnsavedChanges ? "Guardar y continuar *" : "Guardar y continuar";
 
   return (
     <Dialog
