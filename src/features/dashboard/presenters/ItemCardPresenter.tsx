@@ -9,7 +9,6 @@ import type { MainData } from "@/types/dashboard";
 interface ItemCardPresenterProps {
   cardId: string | number;
   name: string;
-  description: string;
   content?: MainData[];
   onOpenDetail?: (id: string | number) => void;
   onBeforeAddClick?: () => void;
@@ -21,7 +20,6 @@ interface ItemCardPresenterProps {
 const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
   cardId,
   name,
-  description,
   content,
   onOpenDetail,
   onBeforeAddClick,

@@ -53,7 +53,6 @@ export const DashboardCardsGrid: React.FC<DashboardCardsGridProps> = React.memo(
               <ItemCardPresenter
                 cardId={item.id}
                 name={item.title}
-                description=""
                 content={item.content}
                 onOpenDetail={onOpenDetail}
                 onBeforeAddClick={onBeforeAddClick}
