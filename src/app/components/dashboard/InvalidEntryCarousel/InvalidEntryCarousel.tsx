@@ -52,8 +52,8 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
   if (isDateMismatch) {
     messageNode = (
       <Typography color="error" sx={{ textAlign: "center" }}>
-        {dateMismatchCount} imagenes no correspondian con la fecha elegida:{" "}
-        {selectedDate || "No detectada"}, por lo que no seran agregadas.
+        {dateMismatchCount} imágenes no correspondían con la fecha elegida:{" "}
+        {selectedDate || "No detectada"}, por lo que no serán agregadas.
       </Typography>
     );
   } else if (entryMessage) {
@@ -95,7 +95,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
           {shouldRenderImage ? (
             <Image
               src={source}
-              alt={`Vista previa de la entrada invalida ${currentIndex + 1} de ${invalidEntries.length}`}
+              alt={`Vista previa de la entrada inválida ${currentIndex + 1} de ${invalidEntries.length}`}
               width={150}
               height={150}
             />

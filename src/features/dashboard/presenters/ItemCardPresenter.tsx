@@ -64,11 +64,10 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
       dialogState: state.dialogState,
       invalidEntries: state.invalidEntries,
       sources: state.sources,
-      carouselIndex: state.carouselIndex,
       carouselValues,
       selectedDate: state.selectedDate,
-      excludedEntryIds: Array.from(state.excludedEntryIds),
-      dateMismatchEntryIds: Array.from(state.dateMismatchEntryIds),
+      excludedEntryIds: state.excludedEntryIds,
+      dateMismatchEntryIds: state.dateMismatchEntryIds,
       entryMessages,
       onClose: handleInputDialogClose,
       onSave: async () => {
@@ -83,11 +82,6 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
         }
       },
       onFileChange: actions.onFileChange,
-      onPrev: () => actions.setCarouselIndex(Math.max(0, state.carouselIndex - 1)),
-      onNext: () =>
-        actions.setCarouselIndex(
-          Math.min(state.invalidEntries.length - 1, state.carouselIndex + 1)
-        ),
       onMoneyChange: actions.onMoneyChange,
       inputRef,
     };

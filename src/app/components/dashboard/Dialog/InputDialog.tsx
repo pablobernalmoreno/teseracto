@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { DialogState } from "@/features/dashboard/model/useItemCardModel";
@@ -24,17 +24,14 @@ export interface InputDialogProps {
   dialogState: DialogState;
   invalidEntries: MainData[];
   sources: string[];
-  carouselIndex: number;
   carouselValues: CarouselValues;
   selectedDate: string;
-  excludedEntryIds: number[];
-  dateMismatchEntryIds: number[];
+  excludedEntryIds: Set<number>;
+  dateMismatchEntryIds: Set<number>;
   entryMessages: Record<number, string>;
   onClose: () => void;
   onSave: () => Promise<void> | void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onPrev: () => void;
-  onNext: () => void;
   onMoneyChange: (entryId: number, value: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
 }
@@ -44,7 +41,6 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   dialogState,
   invalidEntries,
   sources,
-  carouselIndex,
   carouselValues,
   selectedDate,
   excludedEntryIds,
@@ -53,13 +49,12 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   onClose,
   onSave,
   onFileChange,
-  onPrev,
-  onNext,
   onMoneyChange,
   inputRef,
 }) => {
-  const excludedSet = useMemo(() => new Set(excludedEntryIds), [excludedEntryIds]);
-  const dateMismatchSet = useMemo(() => new Set(dateMismatchEntryIds), [dateMismatchEntryIds]);
+  const excludedSet = excludedEntryIds;
+  const dateMismatchSet = dateMismatchEntryIds;
+  const [groupedCarouselIndex, setGroupedCarouselIndex] = useState(0);
 
   const groupedInvalidEntries = useMemo(() => {
     const firstDateMismatchId = invalidEntries.find((entry) => dateMismatchSet.has(entry.id))?.id;
@@ -74,12 +69,11 @@ export const InputDialog: React.FC<InputDialogProps> = ({
     });
   }, [invalidEntries, dateMismatchSet]);
 
-  const dateMismatchCount = dateMismatchEntryIds.length;
-  const effectiveCarouselIndex = Math.min(
-    carouselIndex,
-    Math.max(groupedInvalidEntries.length - 1, 0)
-  );
-  const activeInvalidEntry = groupedInvalidEntries[effectiveCarouselIndex];
+  const maxGroupedIndex = Math.max(groupedInvalidEntries.length - 1, 0);
+  const currentGroupedIndex = Math.min(groupedCarouselIndex, maxGroupedIndex);
+
+  const dateMismatchCount = dateMismatchEntryIds.size;
+  const activeInvalidEntry = groupedInvalidEntries[currentGroupedIndex];
 
   const allInvalidEntriesFilled = invalidEntries.every((entry) => {
     if (excludedSet.has(entry.id)) return true;
@@ -103,15 +97,17 @@ export const InputDialog: React.FC<InputDialogProps> = ({
             <InvalidEntryCarousel
               invalidEntries={groupedInvalidEntries}
               sources={sources}
-              currentIndex={effectiveCarouselIndex}
+              currentIndex={currentGroupedIndex}
               carouselValues={carouselValues}
               selectedDate={selectedDate}
               isEntryExcluded={excludedSet.has(activeInvalidEntry?.id)}
               isDateMismatch={dateMismatchSet.has(activeInvalidEntry?.id)}
               dateMismatchCount={dateMismatchCount}
               entryMessage={entryMessages[activeInvalidEntry?.id]}
-              onPrev={onPrev}
-              onNext={onNext}
+              onPrev={() => setGroupedCarouselIndex(Math.max(0, currentGroupedIndex - 1))}
+              onNext={() =>
+                setGroupedCarouselIndex(Math.min(maxGroupedIndex, currentGroupedIndex + 1))
+              }
               onMoneyChange={onMoneyChange}
             />
           </Box>
