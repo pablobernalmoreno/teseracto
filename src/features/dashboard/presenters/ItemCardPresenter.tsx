@@ -68,6 +68,7 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
       carouselValues,
       selectedDate: state.selectedDate,
       excludedEntryIds: Array.from(state.excludedEntryIds),
+      dateMismatchEntryIds: Array.from(state.dateMismatchEntryIds),
       entryMessages,
       onClose: handleInputDialogClose,
       onSave: async () => {

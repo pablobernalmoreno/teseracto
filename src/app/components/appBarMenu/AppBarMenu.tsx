@@ -153,6 +153,7 @@ export const AppBarMenu = ({ variant = "public" }: AppBarMenuProps) => {
             className="appbar_buttons appbar_theme_toggle"
             onClick={handleToggleTheme}
             aria-label="Cambiar tema"
+            suppressHydrationWarning
           >
             {themeToggleIcon}
             {themeToggleLabel}

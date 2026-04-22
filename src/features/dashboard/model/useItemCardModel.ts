@@ -89,6 +89,7 @@ interface ParsedUploadState {
   invalidEntries: MainData[];
   editedValues: Map<number, { money: string }>;
   excludedIds: Set<number>;
+  dateMismatchIds: Set<number>;
   messages: Map<number, string>;
   selectedDate: string;
 }
@@ -103,6 +104,7 @@ function buildParsedUploadState(
   const invalidEntries: MainData[] = [];
   const editedValues = new Map<number, { money: string }>();
   const excludedIds = new Set<number>();
+  const dateMismatchIds = new Set<number>();
   const messages = new Map<number, string>();
 
   if (referenceDate) {
@@ -116,6 +118,7 @@ function buildParsedUploadState(
       if (isDifferentDate) {
         invalidEntries.push(normalizedEntry);
         excludedIds.add(i);
+        dateMismatchIds.add(i);
         messages.set(
           i,
           `Imagen con fecha ${detectedDate}. Solo se guardan datos del dia ${referenceDate}.`
@@ -135,6 +138,7 @@ function buildParsedUploadState(
       invalidEntries,
       editedValues,
       excludedIds,
+      dateMismatchIds,
       messages,
       selectedDate: referenceDate,
     };
@@ -153,6 +157,7 @@ function buildParsedUploadState(
     invalidEntries,
     editedValues,
     excludedIds,
+    dateMismatchIds,
     messages,
     selectedDate: "",
   };
@@ -175,6 +180,7 @@ interface ItemCardModelState {
   editedValues: Map<number, { money: string }>;
   selectedDate: string;
   excludedEntryIds: Set<number>;
+  dateMismatchEntryIds: Set<number>;
   entryMessages: Map<number, string>;
 }
 
@@ -198,6 +204,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   const [editedValues, setEditedValues] = useState<Map<number, { money: string }>>(new Map());
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [excludedEntryIds, setExcludedEntryIds] = useState<Set<number>>(new Set());
+  const [dateMismatchEntryIds, setDateMismatchEntryIds] = useState<Set<number>>(new Set());
   const [entryMessages, setEntryMessages] = useState<Map<number, string>>(new Map());
 
   const handleDialogClose = () => {
@@ -208,6 +215,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     setEditedValues(new Map());
     setSelectedDate("");
     setExcludedEntryIds(new Set());
+    setDateMismatchEntryIds(new Set());
     setEntryMessages(new Map());
   };
 
@@ -254,6 +262,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       setInvalidEntries(parsedUploadState.invalidEntries);
       setEditedValues(parsedUploadState.editedValues);
       setExcludedEntryIds(parsedUploadState.excludedIds);
+      setDateMismatchEntryIds(parsedUploadState.dateMismatchIds);
       setEntryMessages(parsedUploadState.messages);
       setSelectedDate(parsedUploadState.selectedDate);
       setDialogState(
@@ -417,6 +426,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     editedValues,
     selectedDate,
     excludedEntryIds,
+    dateMismatchEntryIds,
     entryMessages,
   };
 

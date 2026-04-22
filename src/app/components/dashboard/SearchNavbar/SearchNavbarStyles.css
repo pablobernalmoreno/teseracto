@@ -5,10 +5,16 @@
   flex-direction: column;
   gap: 0.6rem;
   padding: 0.9rem 1rem;
-  border: 1px solid rgba(var(--rgb-border), 0.16);
+  border: 1px solid rgba(var(--rgb-border), 0.2);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(var(--rgb-white), 0.92), rgba(var(--rgb-white), 0.72));
-  box-shadow: inset 0 1px 0 rgba(var(--rgb-white), 0.75);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-surface) 94%, transparent),
+    color-mix(in srgb, var(--color-surface-soft) 84%, transparent)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 72%, transparent),
+    0 10px 22px color-mix(in srgb, var(--background) 72%, transparent);
 }
 
 .search_navbar_controls {
@@ -27,16 +33,88 @@
   flex: 1;
 }
 
+.search_navbar_controls .MuiInputBase-input {
+  color: var(--color-text-primary);
+}
+
+.search_navbar_controls .MuiInputLabel-root {
+  color: var(--color-text-secondary);
+}
+
+.search_navbar_controls .MuiInputLabel-root.Mui-focused {
+  color: var(--color-accent);
+}
+
 .search_navbar_controls .MuiOutlinedInput-root {
   border-radius: 999px;
-  background: rgba(var(--rgb-white), 0.75);
+  background: color-mix(in srgb, var(--color-surface) 84%, transparent);
+}
+
+.search_navbar_controls .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(var(--rgb-border), 0.34);
+}
+
+.search_navbar_controls .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(var(--rgb-accent-strong), 0.64);
+}
+
+.search_navbar_controls .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-accent);
 }
 
 .search_navbar_controls .MuiIconButton-root {
   width: 48px;
   height: 48px;
-  border: 1px solid rgba(var(--rgb-border), 0.2);
-  background: rgba(var(--rgb-accent), 0.14);
+  border-radius: 14px;
+  border: 1px solid rgba(176, 50, 50, 0.38);
+  color: #6f1818;
+  background: linear-gradient(145deg, rgba(252, 228, 228, 0.9), rgba(245, 207, 207, 0.86));
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.search_navbar_controls .MuiIconButton-root:hover {
+  background: linear-gradient(145deg, rgba(255, 236, 236, 0.94), rgba(248, 216, 216, 0.9));
+  border-color: rgba(176, 50, 50, 0.56);
+  transform: translateY(-1px);
+}
+
+.search_navbar_controls .MuiIconButton-root.Mui-disabled {
+  border-color: rgba(var(--rgb-border), 0.26);
+  color: rgba(var(--rgb-border), 0.7);
+  background: color-mix(in srgb, var(--color-surface-muted) 90%, transparent);
+}
+
+.search_navbar_controls .MuiBadge-badge {
+  font-weight: 700;
+  border: 2px solid color-mix(in srgb, var(--color-surface) 90%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .search_navbar_controls .MuiIconButton-root {
+    border-color: rgba(245, 149, 149, 0.52);
+    color: #2a0f0f;
+    background: linear-gradient(145deg, #f2b6b6, #e88f8f);
+  }
+
+  :root:not([data-theme="light"]) .search_navbar_controls .MuiIconButton-root:hover {
+    background: linear-gradient(145deg, #f6c4c4, #eda1a1);
+    border-color: rgba(248, 172, 172, 0.78);
+  }
+}
+
+:root[data-theme="dark"] .search_navbar_controls .MuiIconButton-root {
+  border-color: rgba(245, 149, 149, 0.52);
+  color: #2a0f0f;
+  background: linear-gradient(145deg, #f2b6b6, #e88f8f);
+}
+
+:root[data-theme="dark"] .search_navbar_controls .MuiIconButton-root:hover {
+  background: linear-gradient(145deg, #f6c4c4, #eda1a1);
+  border-color: rgba(248, 172, 172, 0.78);
 }
 
 @media (max-width: 640px) {

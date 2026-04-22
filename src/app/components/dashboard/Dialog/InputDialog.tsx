@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { DialogState } from "@/features/dashboard/model/useItemCardModel";
@@ -27,6 +28,7 @@ export interface InputDialogProps {
   carouselValues: CarouselValues;
   selectedDate: string;
   excludedEntryIds: number[];
+  dateMismatchEntryIds: number[];
   entryMessages: Record<number, string>;
   onClose: () => void;
   onSave: () => Promise<void> | void;
@@ -46,6 +48,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   carouselValues,
   selectedDate,
   excludedEntryIds,
+  dateMismatchEntryIds,
   entryMessages,
   onClose,
   onSave,
@@ -55,7 +58,29 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   onMoneyChange,
   inputRef,
 }) => {
-  const excludedSet = new Set(excludedEntryIds);
+  const excludedSet = useMemo(() => new Set(excludedEntryIds), [excludedEntryIds]);
+  const dateMismatchSet = useMemo(() => new Set(dateMismatchEntryIds), [dateMismatchEntryIds]);
+
+  const groupedInvalidEntries = useMemo(() => {
+    const firstDateMismatchId = invalidEntries.find((entry) => dateMismatchSet.has(entry.id))?.id;
+
+    return invalidEntries.filter((entry) => {
+      const isDateMismatchEntry = dateMismatchSet.has(entry.id);
+      if (!isDateMismatchEntry) {
+        return true;
+      }
+
+      return entry.id === firstDateMismatchId;
+    });
+  }, [invalidEntries, dateMismatchSet]);
+
+  const dateMismatchCount = dateMismatchEntryIds.length;
+  const effectiveCarouselIndex = Math.min(
+    carouselIndex,
+    Math.max(groupedInvalidEntries.length - 1, 0)
+  );
+  const activeInvalidEntry = groupedInvalidEntries[effectiveCarouselIndex];
+
   const allInvalidEntriesFilled = invalidEntries.every((entry) => {
     if (excludedSet.has(entry.id)) return true;
     const v = carouselValues[entry.id] || { money: "" };
@@ -76,13 +101,15 @@ export const InputDialog: React.FC<InputDialogProps> = ({
         return (
           <Box className={styles.invalidEntriesContainer}>
             <InvalidEntryCarousel
-              invalidEntries={invalidEntries}
+              invalidEntries={groupedInvalidEntries}
               sources={sources}
-              currentIndex={carouselIndex}
+              currentIndex={effectiveCarouselIndex}
               carouselValues={carouselValues}
               selectedDate={selectedDate}
-              isEntryExcluded={excludedSet.has(invalidEntries[carouselIndex]?.id)}
-              entryMessage={entryMessages[invalidEntries[carouselIndex]?.id]}
+              isEntryExcluded={excludedSet.has(activeInvalidEntry?.id)}
+              isDateMismatch={dateMismatchSet.has(activeInvalidEntry?.id)}
+              dateMismatchCount={dateMismatchCount}
+              entryMessage={entryMessages[activeInvalidEntry?.id]}
               onPrev={onPrev}
               onNext={onNext}
               onMoneyChange={onMoneyChange}
@@ -107,6 +134,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
               Selecciona uno o varios archivos de imagen o PDF para continuar.
             </Typography>
             <Button
+              className={styles.uploadButton}
               component="label"
               variant="text"
               startIcon={<CloudUploadIcon />}
@@ -157,15 +185,15 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       >
         {renderContent()}
       </DialogContent>
-      <DialogActions>
+      <DialogActions className={styles.dialogActions}>
         <Button
-          className="dashboard-dialog-button dashboard-dialog-button--ghost"
+          className="dashboard-dialog-button dashboard-dialog-button--secondary"
           onClick={onClose}
         >
           Cancelar
         </Button>
         <Button
-          className="dashboard-dialog-button dashboard-dialog-button--solid"
+          className="dashboard-dialog-button dashboard-dialog-button--primary"
           onClick={onSave}
           autoFocus
           disabled={

@@ -38,6 +38,12 @@
 .dialogContent {
   overflow: visible;
   transition: background-color 0.2s;
+  border-radius: 14px;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 92%, transparent),
+    color-mix(in srgb, var(--color-surface-soft) 88%, transparent)
+  );
 }
 
 .dialogContentClickable {
@@ -45,5 +51,27 @@
 }
 
 .dialogContentClickable:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 96%, transparent),
+    color-mix(in srgb, var(--color-surface-soft) 92%, transparent)
+  );
+}
+
+.dialogActions {
+  border-top: 1px solid rgba(var(--rgb-border), 0.2);
+  padding: 0.85rem 1.25rem;
+}
+
+.uploadButton {
+  color: var(--color-accent-strong) !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(var(--rgb-border), 0.35) !important;
+  padding: 0.55rem 1rem !important;
+  background: color-mix(in srgb, var(--color-surface) 75%, transparent) !important;
+}
+
+.uploadButton:hover {
+  background: color-mix(in srgb, var(--color-surface-soft) 82%, transparent) !important;
+  border-color: rgba(var(--rgb-accent-strong), 0.55) !important;
 }
