@@ -52,6 +52,7 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
 
   const dashboardContent = selectedCardId ? (
     <DashboardDetailPanel
+      bookId={selectedCardId}
       title={activeItem?.title || "Detalle del libro"}
       fixedDate={activeCardDate}
       hasUnsavedChanges={hasUnsavedChanges}

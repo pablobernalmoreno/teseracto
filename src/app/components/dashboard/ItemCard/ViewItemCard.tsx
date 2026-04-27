@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardActionArea, CardContent, Typography, Box, Checkbox } from "@mui/material";
+import React from "react";
 import type { MainData } from "@/types/dashboard";
 import DataTable from "../../dataTable/DataTable";
 

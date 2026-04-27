@@ -1,7 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
-import { Box, Button, Paper, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import "./pricingStyles.css";
 
 export const metadata: Metadata = {
   title: "Precios",
@@ -11,99 +14,85 @@ export const metadata: Metadata = {
   },
 };
 
+const features = [
+  "Libros ilimitados",
+  "Movimientos y registros sin límite",
+  "Panel de estadísticas",
+  "Exportación de datos",
+  "Soporte por correo",
+];
+
 const page = () => {
   return (
     <>
       <AppBarMenu />
-      <Box
-        component="main"
-        id="main-content"
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Typography component="h1" variant="h3" sx={{ color: "#2E2E2E", mt: 4 }}>
-          Precios
-        </Typography>
-        <section
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Paper elevation={1} sx={{ margin: "2rem", padding: "2rem", width: "30%" }}>
-            <Typography
-              component="h2"
-              variant="h4"
-              sx={{
-                color: "#2E2E2E",
-              }}
-            >
-              Valor por año
+      <Box component="main" id="main-content" className="pricing_box">
+        <section className="pricing_hero">
+          <Typography className="pricing_eyebrow" component="p">
+            Sin sorpresas
+          </Typography>
+          <Typography className="pricing_title" component="h1">
+            Un precio simple,
+            <br />
+            <span className="pricing_title_accent">todo incluido.</span>
+          </Typography>
+          <Typography className="pricing_subtitle">
+            Accede a todas las funciones de Teseracto con cualquiera de los planes. Sin niveles, sin
+            restricciones ocultas.
+          </Typography>
+        </section>
+
+        <section className="pricing_cards" aria-label="Planes disponibles">
+          <Box className="pricing_card">
+            <Typography className="pricing_card_label" component="p">
+              Mensual
             </Typography>
-            <Typography
-              variant="h2"
-              sx={{
-                color: "#2E2E2E",
-              }}
-            >
-              $100.000
+            <Typography className="pricing_card_price" component="p">
+              $10.000 <span className="pricing_card_period">/ mes</span>
             </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                color: "#2E2E2E",
-              }}
-            >
-              Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat
-              commodo. Elit sunt amet fugiat veniam occaecat.
+            <Typography className="pricing_card_desc">
+              Ideal para probar Teseracto sin compromisos. Cancela cuando quieras.
             </Typography>
-            <Button
-              variant="contained"
-              sx={{ background: "#464033", textTransform: "none", fontSize: "24px" }}
-            >
-              Únete
-            </Button>
-          </Paper>
-          <Paper elevation={3} sx={{ margin: "2rem", padding: "2rem", width: "30%" }}>
-            <Typography
-              component="h2"
-              variant="h4"
-              sx={{
-                color: "#2E2E2E",
-              }}
-            >
-              Valor mensual
+            <ul className="pricing_features_list">
+              {features.map((f) => (
+                <li key={f} className="pricing_feature_item">
+                  <CheckIcon className="pricing_check_icon" />
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/register" style={{ width: "100%" }}>
+              <Button className="pricing_btn_secondary" fullWidth>
+                Únete
+              </Button>
+            </Link>
+          </Box>
+
+          <Box className="pricing_card pricing_card_featured">
+            <Box className="pricing_card_badge">Mejor valor</Box>
+            <Typography className="pricing_card_label" component="p">
+              Anual
             </Typography>
-            <Typography
-              variant="h2"
-              sx={{
-                color: "#2E2E2E",
-              }}
-            >
-              $10.000
+            <Typography className="pricing_card_price" component="p">
+              $100.000 <span className="pricing_card_period">/ año</span>
             </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                color: "#2E2E2E",
-              }}
-            >
-              Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat
-              commodo. Elit sunt amet fugiat veniam occaecat.
+            <Typography className="pricing_card_desc">
+              El plan más completo para quienes usan Teseracto de forma continua. Ahorra 2 meses.
             </Typography>
-            <Button
-              variant="contained"
-              sx={{ background: "#464033", textTransform: "none", fontSize: "24px" }}
-            >
-              Únete
-            </Button>
-          </Paper>
+            <ul className="pricing_features_list">
+              {features.map((f) => (
+                <li key={f} className="pricing_feature_item">
+                  <CheckIcon className="pricing_check_icon" />
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/register" style={{ width: "100%" }}>
+              <Button className="pricing_btn_primary" fullWidth>
+                Únete
+              </Button>
+            </Link>
+          </Box>
         </section>
       </Box>
     </>
