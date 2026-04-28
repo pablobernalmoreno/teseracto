@@ -8,7 +8,7 @@ It includes selective MVP-style pieces where they provide value, rather than enf
 ### Current Pattern
 
 - **Route layer** (`src/app/**`): pages, layouts, route handlers, server actions
-- **Feature logic** (`src/app/main/*.ts` hooks + `src/features/**`): domain logic and orchestration
+- **Feature logic** (`src/features/**`): domain logic, state orchestration, and presenters
 - **UI components** (`src/app/components/**`): reusable UI building blocks
 - **Shared types** (`src/types/**`): cross-feature type contracts
 
@@ -31,20 +31,46 @@ Do **not** create a presenter when all it does is:
 
 If a presenter ends up empty or pass-through, prefer removing it.
 
-### Project Structure
+### Project Tree (Current)
 
 ```
-src/
-├── app/                     # Next.js App Router
-│   ├── actions/             # Server Actions
-│   ├── api/                 # Route Handlers
-│   ├── components/          # UI components
-│   └── main/                # Page-specific hooks/controllers
-├── features/                # Domain features (model/presenter logic)
-│   └── dashboard/
-├── types/                   # Shared types
-├── config/                  # Configuration files
-└── utils/                   # Utility functions
+.
+├── migrations/
+├── public/
+├── src/
+│   ├── app/
+│   │   ├── account_confirmation/
+│   │   ├── actions/
+│   │   ├── api/
+│   │   ├── components/
+│   │   │   ├── appBarMenu/
+│   │   │   ├── dashboard/
+│   │   │   └── dataTable/
+│   │   ├── login/
+│   │   ├── main/
+│   │   │   ├── mainStyles.css
+│   │   │   └── page.tsx
+│   │   ├── pricing/
+│   │   ├── register/
+│   │   └── utils/
+│   ├── config/
+│   ├── features/
+│   │   ├── account_confirmation/
+│   │   ├── dashboard/
+│   │   │   ├── model/
+│   │   │   │   ├── dashboardService.ts
+│   │   │   │   ├── state/
+│   │   │   │   └── useItemCardModel.ts
+│   │   │   ├── presenters/
+│   │   │   └── view/
+│   │   └── login/
+│   ├── types/
+│   └── proxy.ts
+├── eslint.config.mjs
+├── next.config.ts
+├── package.json
+├── pnpm-lock.yaml
+└── tsconfig.json
 ```
 
 ### Decision Checklist

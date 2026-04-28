@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/app/utils/supabase/server";
 import { redirect } from "next/navigation";
-import MainPageClient from "./MainPageClient";
+import MainPageClient from "@/features/dashboard/view/MainPageClient";
 import { fetchBooksPage } from "@/app/actions/dashboard";
 import { Suspense } from "react";
 import { Box, CircularProgress } from "@mui/material";

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Suspense } from "react";
 import { AppBarMenu } from "./components/appBarMenu/AppBarMenu";
 import { Box, Typography } from "@mui/material";
 import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
@@ -34,17 +35,25 @@ function serializeJsonLd(data: unknown): string {
     .replaceAll("\u2029", String.raw`\u2029`);
 }
 
-export default async function Home() {
+async function OrganizationJsonLdScript() {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
+    <script
+      id="organization-json-ld"
+      type="application/ld+json"
+      nonce={nonce}
+      dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
+    />
+  );
+}
+
+export default function Home() {
+  return (
     <>
-      <script
-        id="organization-json-ld"
-        type="application/ld+json"
-        nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
-      />
+      <Suspense fallback={null}>
+        <OrganizationJsonLdScript />
+      </Suspense>
       <AppBarMenu />
       <Box component="main" id="main-content" className="main_box">
         <section className="hero_section">

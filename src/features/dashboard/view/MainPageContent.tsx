@@ -5,12 +5,12 @@ import { DashboardSummaryStats } from "./DashboardSummaryStats";
 import { DashboardDetailPanel } from "./DashboardDetailPanel";
 import { DashboardCardsGrid } from "./DashboardCardsGrid";
 import { Box, CircularProgress, Pagination, Paper, Typography } from "@mui/material";
-import { useMainDashboardState } from "./useMainDashboardState";
+import { useMainDashboardState } from "@/features/dashboard/model/state/useMainDashboardState";
 import "./mainStyles.css";
-import { SearchNavbar } from "../components/dashboard/SearchNavbar/SearchNavbar";
-import AlertMessage from "../components/dashboard/Dialog/AlertMessage";
-import DeleteDialog from "../components/dashboard/Dialog/DeleteDialog";
-import UnsavedChangesDialog from "../components/dashboard/Dialog/UnsavedChangesDialog";
+import { SearchNavbar } from "@/app/components/dashboard/SearchNavbar/SearchNavbar";
+import AlertMessage from "@/app/components/dashboard/Dialog/AlertMessage";
+import DeleteDialog from "@/app/components/dashboard/Dialog/DeleteDialog";
+import UnsavedChangesDialog from "@/app/components/dashboard/Dialog/UnsavedChangesDialog";
 import { type BookData } from "@/app/actions/dashboard";
 
 interface MainPageContentProps {

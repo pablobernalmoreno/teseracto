@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
-import DataTable from "../components/dataTable/DataTable";
+import DataTable from "@/app/components/dataTable/DataTable";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
