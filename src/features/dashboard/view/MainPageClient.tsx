@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
-import { DashboardModalProvider } from "./DashboardModalContext";
+import { AppBarMenu } from "@/app/components/appBarMenu/AppBarMenu";
+import { DashboardModalProvider } from "@/features/dashboard/model/state/DashboardModalContext";
 import { MainPageContent } from "./MainPageContent";
 import { type BookData } from "@/app/actions/dashboard";
 
