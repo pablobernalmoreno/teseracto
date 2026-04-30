@@ -12,6 +12,13 @@
   overflow: hidden;
 }
 
+@media (max-width: 640px) {
+  .dashboard-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .dashboard-table thead .MuiTableCell-root {
   border-bottom: 1px solid rgba(var(--rgb-border), 0.3);
   color: var(--color-text-primary);

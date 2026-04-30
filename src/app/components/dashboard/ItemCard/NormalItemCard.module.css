@@ -1,6 +1,6 @@
 .cardRoot {
   max-width: 100%;
-  min-height: 370px;
+  min-height: clamp(300px, 55vw, 370px);
   border-radius: 12px;
   position: relative;
 }
