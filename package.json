@@ -31,7 +31,7 @@
     "@mui/material": "^9.0.0",
     "@reduxjs/toolkit": "^2.11.2",
     "@supabase/ssr": "^0.10.2",
-    "@supabase/supabase-js": "^2.105.0",
+    "@supabase/supabase-js": "^2.105.1",
     "date-fns": "^4.1.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
