@@ -146,15 +146,17 @@ export const AppBarMenu = ({ variant = "public" }: AppBarMenuProps) => {
             <span className="appbar_brand_mark" aria-hidden="true" />
             <span className="appbar_brand_name">Teseracto</span>
           </Box>
-          <Button
-            className="appbar_buttons appbar_theme_toggle"
-            onClick={handleToggleTheme}
-            aria-label="Cambiar tema"
-            suppressHydrationWarning
-          >
-            {themeToggleIcon}
-            {themeToggleLabel}
-          </Button>
+          {process.env.NODE_ENV === "development" && (
+            <Button
+              className="appbar_buttons appbar_theme_toggle"
+              onClick={handleToggleTheme}
+              aria-label="Cambiar tema"
+              suppressHydrationWarning
+            >
+              {themeToggleIcon}
+              {themeToggleLabel}
+            </Button>
+          )}
           {isAuthenticated ? loggedInButtons(handleLogout) : notLoggedInButtons()}
         </Toolbar>
       </AppBar>
