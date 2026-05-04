@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { dashboardService } from "./dashboardService";
 import type { BookData } from "@/app/actions/dashboard";
 import { extractCurrencyValues, parseDates } from "@/app/utils/data";
@@ -14,7 +14,7 @@ export const formatDateDisplay = (dateStr: string): string => {
   }
 
   const parsed = new Date(dateStr);
-  if (!isNaN(parsed.getTime())) {
+  if (!Number.isNaN(parsed.getTime())) {
     const d = String(parsed.getDate()).padStart(2, "0");
     const m = String(parsed.getMonth() + 1).padStart(2, "0");
     const y = parsed.getFullYear();
@@ -34,7 +34,7 @@ export const formatCurrency = (raw: string | number): string => {
     const str = String(s || "").trim();
     if (!str) return { intPart: "", fracPart: undefined };
 
-    const cleaned = str.replace(/[^0-9.,-]/g, "");
+    const cleaned = str.replaceAll(/[^0-9.,-]/g, "");
     if (!cleaned) return { intPart: "", fracPart: undefined };
 
     const lastComma = cleaned.lastIndexOf(",");
@@ -47,10 +47,10 @@ export const formatCurrency = (raw: string | number): string => {
     if (lastComma > -1 && lastDot === -1) {
       const decimalsLen = cleaned.length - lastComma - 1;
       if (decimalsLen === 3) {
-        return { intPart: cleaned.replace(/,/g, ""), fracPart: undefined };
+        return { intPart: cleaned.replaceAll(",", ""), fracPart: undefined };
       }
       return {
-        intPart: cleaned.slice(0, lastComma).replace(/\./g, ""),
+        intPart: cleaned.slice(0, lastComma).replaceAll(".", ""),
         fracPart: cleaned.slice(lastComma + 1),
       };
     }
@@ -58,29 +58,29 @@ export const formatCurrency = (raw: string | number): string => {
     if (lastDot > -1 && lastComma === -1) {
       const decimalsLen = cleaned.length - lastDot - 1;
       if (decimalsLen === 3) {
-        return { intPart: cleaned.replace(/\./g, ""), fracPart: undefined };
+        return { intPart: cleaned.replaceAll(".", ""), fracPart: undefined };
       }
       return {
-        intPart: cleaned.slice(0, lastDot).replace(/,/g, ""),
+        intPart: cleaned.slice(0, lastDot).replaceAll(",", ""),
         fracPart: cleaned.slice(lastDot + 1),
       };
     }
 
     if (lastComma > lastDot) {
       return {
-        intPart: cleaned.slice(0, lastComma).replace(/\./g, ""),
+        intPart: cleaned.slice(0, lastComma).replaceAll(".", ""),
         fracPart: cleaned.slice(lastComma + 1),
       };
     }
 
     return {
-      intPart: cleaned.slice(0, lastDot).replace(/,/g, ""),
+      intPart: cleaned.slice(0, lastDot).replaceAll(",", ""),
       fracPart: cleaned.slice(lastDot + 1),
     };
   };
 
   const parts = parseNumberParts(raw);
-  const intFormatted = parts.intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const intFormatted = parts.intPart.replaceAll(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.fracPart ? `${intFormatted}.${parts.fracPart}` : intFormatted;
 };
 
@@ -225,11 +225,12 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     if (selectedFiles.length) {
       setFiles(selectedFiles);
       target.value = "";
+      void getImageText(selectedFiles);
     }
   };
 
-  const getImageText = useCallback(async () => {
-    if (!files?.length) return;
+  const getImageText = async (selectedFiles: File[]) => {
+    if (!selectedFiles.length) return;
 
     let worker: Awaited<ReturnType<(typeof import("tesseract.js"))["createWorker"]>> | null = null;
 
@@ -241,15 +242,13 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       const paths: string[] = [];
       const newSources: string[] = [];
 
-      for (let i = 0; i < files.length; ++i) {
-        const file = files[i];
+      for (const file of selectedFiles) {
         const ret = await worker.recognize(file);
         const ocrText = ret.data.text;
         newSources.push(URL.createObjectURL(file));
         paths.push(ocrText);
       }
 
-      setSources(newSources);
       const expectedDatesArray = parseDates(paths);
       const expectedCurrencyArray = extractCurrencyValues(paths);
       const parsedUploadState = buildParsedUploadState(
@@ -258,6 +257,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
         paths.length
       );
 
+      setSources(newSources);
       setPathData(parsedUploadState.pathData);
       setInvalidEntries(parsedUploadState.invalidEntries);
       setEditedValues(parsedUploadState.editedValues);
@@ -276,7 +276,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
         await worker.terminate();
       }
     }
-  }, [files]);
+  };
 
   const formatUpdatedPathData = (
     originalPathData: MainData[],
@@ -287,7 +287,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       if (typeof s === "number") return s;
       const str = String(s || "").trim();
       if (!str) return 0;
-      const cleaned = str.replace(/[^0-9.,-]/g, "");
+      const cleaned = str.replaceAll(/[^0-9.,-]/g, "");
       if (!cleaned) return 0;
 
       const lastComma = cleaned.lastIndexOf(",");
@@ -298,24 +298,24 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       if (lastComma > -1 && lastDot === -1) {
         const decimalsLen = cleaned.length - lastComma - 1;
         if (decimalsLen === 3) {
-          return Number(cleaned.replace(/,/g, "")) || 0;
+          return Number(cleaned.replaceAll(",", "")) || 0;
         }
-        return Number(cleaned.replace(/,/g, ".")) || 0;
+        return Number(cleaned.replaceAll(",", ".")) || 0;
       }
 
       if (lastDot > -1 && lastComma === -1) {
         const decimalsLen = cleaned.length - lastDot - 1;
         if (decimalsLen === 3) {
-          return Number(cleaned.replace(/\./g, "")) || 0;
+          return Number(cleaned.replaceAll(".", "")) || 0;
         }
         return Number(cleaned) || 0;
       }
 
       if (lastComma > lastDot) {
-        const normalized = cleaned.replace(/\./g, "").replace(/,/g, ".");
+        const normalized = cleaned.replaceAll(".", "").replaceAll(",", ".");
         return Number(normalized) || 0;
       } else {
-        const normalized = cleaned.replace(/,/g, "");
+        const normalized = cleaned.replaceAll(",", "");
         return Number(normalized) || 0;
       }
     };
@@ -409,12 +409,6 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     });
     setEditedValues(newEdited);
   };
-
-  useEffect(() => {
-    if (files?.length && files.length !== 0) {
-      getImageText();
-    }
-  }, [files, getImageText]);
 
   const state: ItemCardModelState = {
     files,
