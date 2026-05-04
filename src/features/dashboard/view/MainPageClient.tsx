@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { AppBarMenu } from "@/app/components/appBarMenu/AppBarMenu";
 import { DashboardModalProvider } from "@/features/dashboard/model/state/DashboardModalContext";
 import { MainPageContent } from "./MainPageContent";
@@ -12,10 +12,17 @@ interface MainPageClientProps {
 }
 
 const MainPageClient = ({ initialBooks, initialBooksCount }: MainPageClientProps) => {
+  const [showHistory, setShowHistory] = useState(false);
+
   return (
     <DashboardModalProvider>
-      <AppBarMenu variant="authenticated" />
-      <MainPageContent initialBooks={initialBooks} initialBooksCount={initialBooksCount} />
+      <AppBarMenu variant="authenticated" onShowHistory={() => setShowHistory(true)} />
+      <MainPageContent
+        initialBooks={initialBooks}
+        initialBooksCount={initialBooksCount}
+        showHistory={showHistory}
+        onHideHistory={() => setShowHistory(false)}
+      />
     </DashboardModalProvider>
   );
 };

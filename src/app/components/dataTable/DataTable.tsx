@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback } from "react";
 import {
   Button,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -11,6 +12,7 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { formatCurrency, formatDateDisplay } from "@/features/dashboard/model/useItemCardModel";
 import type { MainData } from "@/types/dashboard";
 import "./DataTableStyles.css";
@@ -119,14 +121,43 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
     const handleAddRow = useCallback(() => {
       if (!onRowsChange) return;
       const newRowId = Date.now();
+      const preferredDate = rows.find((row) => Boolean(row.date?.trim()))?.date || fixedDate || "";
       const newRow: MainData = {
         id: newRowId,
-        date: fixedDate || rows[0]?.date || "",
+        date: preferredDate,
         money: "",
       };
       setNewRowIds((prev) => new Set(prev).add(newRowId));
       onRowsChange([...rows, newRow]);
     }, [fixedDate, rows, onRowsChange]);
+
+    const handleRemoveRow = useCallback(
+      (index: number) => {
+        if (!onRowsChange) return;
+
+        const rowToRemove = rows[index];
+        if (!rowToRemove) return;
+
+        const nextRows = rows.filter((_, rowIndex) => rowIndex !== index);
+        const rowId = rowToRemove.id;
+
+        if (typeof rowId === "number") {
+          setNewRowIds((prev) => {
+            const next = new Set(prev);
+            next.delete(rowId);
+            return next;
+          });
+          setEditedRowIds((prev) => {
+            const next = new Set(prev);
+            next.delete(rowId);
+            return next;
+          });
+        }
+
+        onRowsChange(nextRows);
+      },
+      [rows, onRowsChange]
+    );
 
     const handleFocusMoneyIndex = useCallback((idx: number) => {
       setFocusedMoneyIndex(idx);
@@ -188,6 +219,18 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
         <TableRow key={row.id ?? idx} className={rowClassName}>
           <TableCell>{renderDateCell(row)}</TableCell>
           <TableCell align="right">{renderMoneyCell(row, idx)}</TableCell>
+          {editable && (
+            <TableCell align="center" className="data-table-action-cell">
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => handleRemoveRow(idx)}
+                aria-label={`Eliminar fila ${idx + 1}`}
+              >
+                <DeleteOutlineRoundedIcon fontSize="small" />
+              </IconButton>
+            </TableCell>
+          )}
         </TableRow>
       );
     };
@@ -210,6 +253,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
             <TableRow>
               <TableCell>Fecha</TableCell>
               <TableCell align="right">Ganancias</TableCell>
+              {editable && <TableCell align="center">Acciones</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -217,7 +261,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
               rows.map((row, idx) => renderTableRow(row, idx))
             ) : (
               <TableRow>
-                <TableCell colSpan={2} align="center">
+                <TableCell colSpan={editable ? 3 : 2} align="center">
                   Sin datos
                 </TableCell>
               </TableRow>
@@ -237,6 +281,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
                 <TableCell align="right" className="data-table-total-cell">
                   Total: {formatCurrency(totalGanancias)}
                 </TableCell>
+                <TableCell className="data-table-action-cell" />
               </TableRow>
             )}
           </TableBody>

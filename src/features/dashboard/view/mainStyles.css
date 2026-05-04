@@ -243,6 +243,16 @@
   line-height: 1.65;
 }
 
+.dashboard_detail_date_input {
+  margin-top: 1rem !important;
+  max-width: 240px;
+}
+
+.dashboard_detail_title_input {
+  margin-top: 1rem !important;
+  max-width: 420px;
+}
+
 .dashboard_detail_actions {
   display: flex;
   flex-wrap: wrap;
@@ -376,6 +386,66 @@
   color: #f6fff7 !important;
 }
 
+/* ── History view ─────────────────────────────────────── */
+.dashboard_history_view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.dashboard_history_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard_history_heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dashboard_history_title {
+  font-weight: 600;
+}
+
+.dashboard_history_filters {
+  background: rgba(var(--rgb-white), 0.78);
+  border: 1px solid var(--dashboard-line);
+  border-radius: 999px;
+}
+
+.dashboard_history_filters .MuiToggleButton-root {
+  border: none;
+  color: var(--dashboard-ink);
+  text-transform: none;
+  padding-inline: 0.9rem;
+}
+
+.dashboard_history_filters .Mui-selected {
+  background: rgba(var(--rgb-accent), 0.18) !important;
+  color: var(--dashboard-accent) !important;
+  font-weight: 600;
+}
+
+.dashboard_history_chart_paper {
+  padding: 2rem 1rem;
+  border-radius: 16px !important;
+  border: 1px solid var(--dashboard-line);
+  background: rgba(var(--rgb-white), 0.94) !important;
+}
+
+.dashboard_history_empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+/* ──────────────────────────────────────────────────────── */
+
 .dashboard-card-root,
 .dashboard-create-card-root {
   height: 100%;
@@ -439,6 +509,20 @@
   .dashboard_detail_actions {
     width: 100%;
     justify-content: start;
+  }
+
+  .dashboard_history_heading {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .dashboard_history_filters {
+    width: 100%;
+  }
+
+  .dashboard_history_filters .MuiToggleButtonGroup-grouped {
+    flex: 1;
   }
 }
 

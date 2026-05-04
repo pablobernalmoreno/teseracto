@@ -184,6 +184,34 @@ async function fetchBookContentCached(bookId: string, ownerId: string) {
   return { data, error: null };
 }
 
+async function fetchAllBooksHistoryCached(ownerBookId: string) {
+  "use cache: private";
+
+  cacheLife("minutes");
+  cacheTag("dashboard-books", booksTag(ownerBookId));
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("user_books")
+    .select("id, title, content, owner_id, creationTime")
+    .eq("owner_id", ownerBookId)
+    .order("creationTime", { ascending: true })
+    .order("id", { ascending: true });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return {
+    data: ((data ?? []) as BookData[]).map((book) => ({
+      ...book,
+      content: Array.isArray(book.content) ? book.content : [],
+    })),
+    error: null,
+  };
+}
+
 export async function fetchBooksPage(page: number, searchQuery: string, itemsPerPage: number = 5) {
   const context = await getDashboardActionContext();
   if (context.error || !context.ownerBookId) {
@@ -210,6 +238,15 @@ export async function fetchBookContent(bookId: string) {
   }
 
   return fetchBookContentCached(trimmedBookId, context.ownerBookId);
+}
+
+export async function fetchAllBooksHistory() {
+  const context = await getDashboardActionContext();
+  if (context.error || !context.ownerBookId) {
+    return { data: null, error: context.error ?? "Unauthorized" };
+  }
+
+  return fetchAllBooksHistoryCached(context.ownerBookId);
 }
 
 export async function deleteBooks(bookIds: (string | number)[]) {
@@ -248,7 +285,12 @@ export async function deleteBooks(bookIds: (string | number)[]) {
   return { data: data ?? [], error: null };
 }
 
-export async function createBook(title: string, content: MainData[], bookId?: string) {
+export async function createBook(
+  title: string,
+  content: MainData[],
+  bookId?: string,
+  creationTime?: string
+) {
   const mutationRateLimit = await isMutationRateLimited("dashboard:create-book");
   if (!mutationRateLimit.allowed) {
     return { data: null, error: "Demasiadas solicitudes. Intenta nuevamente más tarde." };
@@ -261,9 +303,14 @@ export async function createBook(title: string, content: MainData[], bookId?: st
 
   const normalizedTitle = title.trim();
   const normalizedContent = normalizeMainDataArray(content);
+  const normalizedCreationTime = creationTime?.trim();
   const trimmedBookId = bookId?.trim();
   if (bookId !== undefined && !trimmedBookId) {
     return { data: null, error: "Invalid book id" };
+  }
+
+  if (normalizedCreationTime && !/^\d{4}-\d{2}-\d{2}$/.test(normalizedCreationTime)) {
+    return { data: null, error: "Invalid creation date" };
   }
 
   if (normalizedTitle.length > 180) {
@@ -275,16 +322,31 @@ export async function createBook(title: string, content: MainData[], bookId?: st
   }
 
   const operation = trimmedBookId
-    ? context.supabase
-        .from("user_books")
-        .update({
-          title: normalizedTitle,
+    ? (() => {
+        const updatePayload: {
+          title?: string;
+          content: MainData[];
+          creationTime?: string;
+        } = {
           content: normalizedContent,
-        })
-        .eq("id", trimmedBookId)
-        .eq("owner_id", context.ownerBookId)
-        .select()
-        .single()
+        };
+
+        if (normalizedTitle) {
+          updatePayload.title = normalizedTitle;
+        }
+
+        if (normalizedCreationTime) {
+          updatePayload.creationTime = normalizedCreationTime;
+        }
+
+        return context.supabase
+          .from("user_books")
+          .update(updatePayload)
+          .eq("id", trimmedBookId)
+          .eq("owner_id", context.ownerBookId)
+          .select()
+          .single();
+      })()
     : context.supabase
         .from("user_books")
         .insert({
@@ -292,6 +354,7 @@ export async function createBook(title: string, content: MainData[], bookId?: st
             parseTrimmedString(normalizedTitle || "Libro sin título", 180) || "Libro sin título",
           content: normalizedContent,
           owner_id: context.ownerBookId,
+          creationTime: normalizedCreationTime ?? new Date().toISOString().slice(0, 10),
         })
         .select()
         .single();

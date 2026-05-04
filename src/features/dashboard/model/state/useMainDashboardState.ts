@@ -31,6 +31,7 @@ interface DashboardState {
   selectedCardTitle: string;
   activeItem: BookData | null;
   activeCardDate: string;
+  activeCardTitle: string;
   libraryCount: number;
   isUnsavedDialogOpen: boolean;
   hasUnsavedChanges: boolean;
@@ -43,6 +44,8 @@ interface DashboardActions {
   handleBackFromDetail: () => void;
   handleSaveDetail: () => void;
   handleSaveAndExitDetail: () => void;
+  handleDetailDateChange: (date: string) => void;
+  handleDetailTitleChange: (title: string) => void;
   openDeleteModal: () => void;
   closeDeleteModal: () => void;
   deleteSelectedCards: () => void;
@@ -77,6 +80,19 @@ function normalizeCardDate(creationTime?: string): string {
   return `${year}-${month}-${day}`;
 }
 
+function computeTitleFromDate(date: string): string {
+  if (!date) {
+    return "Dia sin fecha";
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [year, month, day] = date.split("-");
+    return `Dia ${day}/${month}/${year}`;
+  }
+
+  return `Dia ${date}`;
+}
+
 export const useMainDashboardState = ({
   initialBooks,
   initialBooksCount,
@@ -85,6 +101,10 @@ export const useMainDashboardState = ({
   const uiState = useDashboardUiState();
   const modals = useDashboardModals();
   const [initialDetailRows, setInitialDetailRows] = useState<MainData[]>([]);
+  const [detailCardDate, setDetailCardDate] = useState("");
+  const [initialDetailDate, setInitialDetailDate] = useState("");
+  const [detailCardTitle, setDetailCardTitle] = useState("");
+  const [initialDetailTitle, setInitialDetailTitle] = useState("");
   const [pendingNavigationAction, setPendingNavigationAction] = useState<(() => void) | null>(null);
 
   const currentItems = booksData.books;
@@ -97,7 +117,8 @@ export const useMainDashboardState = ({
     ? (currentItems.find((item) => item.id === uiState.selectedCardId) ?? null)
     : null;
 
-  const activeCardDate = normalizeCardDate(activeItem?.creationTime);
+  const activeCardDate = detailCardDate;
+  const activeCardTitle = detailCardTitle;
 
   const areDetailRowsEqual = (left: MainData[], right: MainData[]) => {
     if (left.length !== right.length) {
@@ -125,8 +146,20 @@ export const useMainDashboardState = ({
       return false;
     }
 
-    return !areDetailRowsEqual(uiState.editedRows, initialDetailRows);
-  }, [uiState.selectedCardId, uiState.editedRows, initialDetailRows]);
+    return (
+      !areDetailRowsEqual(uiState.editedRows, initialDetailRows) ||
+      detailCardDate !== initialDetailDate ||
+      detailCardTitle.trim() !== initialDetailTitle.trim()
+    );
+  }, [
+    uiState.selectedCardId,
+    uiState.editedRows,
+    initialDetailRows,
+    detailCardDate,
+    initialDetailDate,
+    detailCardTitle,
+    initialDetailTitle,
+  ]);
 
   const isUnsavedDialogOpen = pendingNavigationAction !== null;
 
@@ -155,7 +188,21 @@ export const useMainDashboardState = ({
     // Set both states together (they're independent)
     uiState.setActiveCard(bookId);
     uiState.setEditedRows(rows);
+    setDetailCardDate(cardDate);
+    setInitialDetailDate(cardDate);
+    setDetailCardTitle(selectedBook?.title ?? "");
+    setInitialDetailTitle(selectedBook?.title ?? "");
     setInitialDetailRows(rows);
+  };
+
+  const handleDetailDateChange = (date: string) => {
+    setDetailCardDate(date);
+    setDetailCardTitle(computeTitleFromDate(date));
+    uiState.setEditedRows((prevRows) => prevRows.map((row) => ({ ...row, date })));
+  };
+
+  const handleDetailTitleChange = (title: string) => {
+    setDetailCardTitle(title);
   };
 
   const openDetail = async (bookId: string | number) => {
@@ -174,27 +221,39 @@ export const useMainDashboardState = ({
   const saveDetailInternal = async (exitAfterSave: boolean): Promise<boolean> => {
     if (!uiState.selectedCardId) return false;
     const bookId = uiState.selectedCardId;
-    const selectedBook = currentItems.find((item) => item.id === bookId);
-    const cardDate = normalizeCardDate(selectedBook?.creationTime);
+    const cardDate = detailCardDate;
     const rowsToSave = cardDate
-      ? uiState.editedRows.map((row) => ({ ...row, date: row.date ?? cardDate }))
+      ? uiState.editedRows.map((row) => ({ ...row, date: cardDate }))
       : uiState.editedRows;
 
-    const result = await booksData.saveDetailRows(bookId, rowsToSave);
+    const result = await booksData.saveDetailRows(
+      bookId,
+      rowsToSave,
+      cardDate || undefined,
+      detailCardTitle
+    );
     if (result.error) {
       modals.showToast("Error al guardar", "error");
       return false;
     }
 
+    void booksData.refreshCurrentPage();
+
     modals.showToast("Guardado correctamente", "success");
 
     if (exitAfterSave) {
       uiState.clearDetail();
+      setDetailCardDate("");
+      setInitialDetailDate("");
+      setDetailCardTitle("");
+      setInitialDetailTitle("");
       setInitialDetailRows([]);
       return true;
     }
 
     uiState.setEditedRows(rowsToSave);
+    setInitialDetailDate(cardDate);
+    setInitialDetailTitle(detailCardTitle);
     setInitialDetailRows(rowsToSave);
     return true;
   };
@@ -212,6 +271,10 @@ export const useMainDashboardState = ({
       setPendingNavigationAction(() => {
         return () => {
           uiState.clearDetail();
+          setDetailCardDate("");
+          setInitialDetailDate("");
+          setDetailCardTitle("");
+          setInitialDetailTitle("");
           setInitialDetailRows([]);
         };
       });
@@ -219,6 +282,10 @@ export const useMainDashboardState = ({
     }
 
     uiState.clearDetail();
+    setDetailCardDate("");
+    setInitialDetailDate("");
+    setDetailCardTitle("");
+    setInitialDetailTitle("");
     setInitialDetailRows([]);
   };
 
@@ -230,6 +297,10 @@ export const useMainDashboardState = ({
     const pendingAction = pendingNavigationAction;
     setPendingNavigationAction(null);
     uiState.clearDetail();
+    setDetailCardDate("");
+    setInitialDetailDate("");
+    setDetailCardTitle("");
+    setInitialDetailTitle("");
     setInitialDetailRows([]);
     pendingAction?.();
   };
@@ -289,6 +360,7 @@ export const useMainDashboardState = ({
       selectedCardTitle,
       activeItem,
       activeCardDate,
+      activeCardTitle,
       libraryCount: booksData.libraryCount,
       isUnsavedDialogOpen,
       hasUnsavedChanges,
@@ -300,6 +372,8 @@ export const useMainDashboardState = ({
       handleBackFromDetail,
       handleSaveDetail,
       handleSaveAndExitDetail,
+      handleDetailDateChange,
+      handleDetailTitleChange,
       openDeleteModal: modals.openDeleteModal,
       closeDeleteModal: modals.closeDeleteModal,
       deleteSelectedCards,

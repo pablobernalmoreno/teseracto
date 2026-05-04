@@ -7,6 +7,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
+import InsightsIcon from "@mui/icons-material/Insights";
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,21 +30,17 @@ function applyThemeMode(mode: ThemeMode) {
   }
 }
 
-function getInitialThemeMode(): ThemeMode {
-  if (globalThis.window === undefined) {
-    return "system";
-  }
-
-  const storedTheme = globalThis.localStorage.getItem(THEME_STORAGE_KEY);
+function getStoredThemeMode(): ThemeMode {
+  const storedTheme = globalThis.localStorage?.getItem(THEME_STORAGE_KEY);
   if (storedTheme === "light" || storedTheme === "dark" || storedTheme === "system") {
     return storedTheme;
   }
-
   return "system";
 }
 
 interface AppBarMenuProps {
   variant?: AppBarMenuVariant;
+  onShowHistory?: () => void;
 }
 
 const notLoggedInButtons = () => {
@@ -69,10 +66,19 @@ const notLoggedInButtons = () => {
   );
 };
 
-const loggedInButtons = (onLogout: () => Promise<void>) => {
+const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => void) => {
   return (
     <>
       <Box>
+        <Box
+          className="appbar_brand"
+          component={Link}
+          href="/"
+          aria-label="Ir al inicio de Teseracto"
+        >
+          <span className="appbar_brand_mark" aria-hidden="true" />
+          <span className="appbar_brand_name">Teseracto</span>
+        </Box>
         <Button className="appbar_buttons" onClick={onLogout}>
           Salir
         </Button>
@@ -80,6 +86,13 @@ const loggedInButtons = (onLogout: () => Promise<void>) => {
       <Box>
         <Button className="appbar_buttons" href="/login" aria-label="Notificaciones">
           <NotificationsIcon aria-hidden="true" />
+        </Button>
+        <Button
+          className="appbar_buttons"
+          onClick={onShowHistory}
+          aria-label="Historial y análisis"
+        >
+          <InsightsIcon aria-hidden="true" />
         </Button>
         <Button className="appbar_buttons" href="/login" aria-label="Perfil de usuario">
           <AccountCircleIcon aria-hidden="true" />
@@ -89,16 +102,13 @@ const loggedInButtons = (onLogout: () => Promise<void>) => {
   );
 };
 
-export const AppBarMenu = ({ variant = "public" }: AppBarMenuProps) => {
+export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProps) => {
   const router = useRouter();
-  const [themeMode, setThemeMode] = useState<ThemeMode>(getInitialThemeMode);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => getStoredThemeMode());
 
   useEffect(() => {
     applyThemeMode(themeMode);
-
-    if (globalThis.window !== undefined) {
-      globalThis.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
-    }
+    globalThis.localStorage?.setItem(THEME_STORAGE_KEY, themeMode);
   }, [themeMode]);
 
   const handleLogout = async () => {
@@ -137,15 +147,6 @@ export const AppBarMenu = ({ variant = "public" }: AppBarMenuProps) => {
     <Box component="header" className="appbar_container">
       <AppBar className="appbar" position="static">
         <Toolbar component="nav" aria-label="Navegación principal" className="toolbar">
-          <Box
-            className="appbar_brand"
-            component={Link}
-            href="/"
-            aria-label="Ir al inicio de Teseracto"
-          >
-            <span className="appbar_brand_mark" aria-hidden="true" />
-            <span className="appbar_brand_name">Teseracto</span>
-          </Box>
           {process.env.NODE_ENV === "development" && (
             <Button
               className="appbar_buttons appbar_theme_toggle"
@@ -157,7 +158,7 @@ export const AppBarMenu = ({ variant = "public" }: AppBarMenuProps) => {
               {themeToggleLabel}
             </Button>
           )}
-          {isAuthenticated ? loggedInButtons(handleLogout) : notLoggedInButtons()}
+          {isAuthenticated ? loggedInButtons(handleLogout, onShowHistory) : notLoggedInButtons()}
         </Toolbar>
       </AppBar>
     </Box>

@@ -114,3 +114,17 @@
   font-weight: 600;
   color: var(--color-text-primary);
 }
+
+.data-table-action-cell {
+  width: 90px;
+}
+
+.data-table-action-cell .MuiIconButton-root {
+  border: 1px solid rgba(var(--rgb-border), 0.35);
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+}
+
+.data-table-action-cell .MuiIconButton-root:hover {
+  border-color: rgba(190, 35, 35, 0.55);
+  background: color-mix(in srgb, #fce7e7 55%, var(--color-surface));
+}

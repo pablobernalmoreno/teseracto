@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Badge, Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import "./SearchNavbarStyles.css";
 
 interface SearchNavbarProps {
