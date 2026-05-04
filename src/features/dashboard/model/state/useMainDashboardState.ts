@@ -197,7 +197,13 @@ export const useMainDashboardState = ({
 
   const handleDetailDateChange = (date: string) => {
     setDetailCardDate(date);
-    setDetailCardTitle(computeTitleFromDate(date));
+    setDetailCardTitle((prevTitle) => {
+      const autoTitle = computeTitleFromDate(detailCardDate);
+      if (prevTitle === autoTitle || prevTitle === "") {
+        return computeTitleFromDate(date);
+      }
+      return prevTitle;
+    });
     uiState.setEditedRows((prevRows) => prevRows.map((row) => ({ ...row, date })));
   };
 

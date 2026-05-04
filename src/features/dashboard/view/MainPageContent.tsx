@@ -71,20 +71,29 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
       setIsHistoryLoading(true);
       setHistoryError(null);
 
-      const result = await fetchAllBooksHistory();
-      if (isCancelled) {
-        return;
-      }
+      try {
+        const result = await fetchAllBooksHistory();
+        if (isCancelled) {
+          return;
+        }
 
-      if (result.error || !result.data) {
-        setHistoryBooks([]);
-        setHistoryError(result.error ?? "No se pudo cargar el historial.");
-      } else {
-        setHistoryBooks(result.data);
-        setHistoryError(null);
+        if (result.error || !result.data) {
+          setHistoryBooks([]);
+          setHistoryError(result.error ?? "No se pudo cargar el historial.");
+        } else {
+          setHistoryBooks(result.data);
+          setHistoryError(null);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setHistoryBooks([]);
+          setHistoryError(err instanceof Error ? err.message : "No se pudo cargar el historial.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsHistoryLoading(false);
+        }
       }
-
-      setIsHistoryLoading(false);
     };
 
     void loadHistoryBooks();

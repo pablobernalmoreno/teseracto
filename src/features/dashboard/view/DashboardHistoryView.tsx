@@ -57,13 +57,37 @@ function parseEntryDate(rawDate?: string): Date | null {
   return null;
 }
 
+function parseMoneyToNumber(value: string | undefined): number {
+  const str = String(value ?? "").trim();
+  if (!str) return 0;
+  const cleaned = str.replaceAll(/[^0-9.,-]/g, "");
+  if (!cleaned) return 0;
+  const lastComma = cleaned.lastIndexOf(",");
+  const lastDot = cleaned.lastIndexOf(".");
+  if (lastComma === -1 && lastDot === -1) return Number(cleaned) || 0;
+  if (lastComma > -1 && lastDot === -1) {
+    const decimalsLen = cleaned.length - lastComma - 1;
+    if (decimalsLen === 3) return Number(cleaned.replaceAll(",", "")) || 0;
+    return Number(cleaned.replaceAll(",", ".")) || 0;
+  }
+  if (lastDot > -1 && lastComma === -1) {
+    const decimalsLen = cleaned.length - lastDot - 1;
+    if (decimalsLen === 3) return Number(cleaned.replaceAll(".", "")) || 0;
+    return Number(cleaned) || 0;
+  }
+  if (lastComma > lastDot) {
+    return Number(cleaned.replaceAll(".", "").replace(",", ".")) || 0;
+  }
+  return Number(cleaned.replaceAll(",", "")) || 0;
+}
+
 function processBookEntry(dateMap: Map<string, number>, entry: { date?: string; money?: string }) {
   if (!entry.date) return;
   const parsed = parseEntryDate(entry.date);
-  if (!isValid(parsed)) return;
+  if (!parsed || !isValid(parsed)) return;
   const key = format(parsed, "yyyy-MM-dd");
-  const val = Number.parseFloat(entry.money ?? "0");
-  dateMap.set(key, (dateMap.get(key) ?? 0) + (Number.isNaN(val) ? 0 : val));
+  const val = parseMoneyToNumber(entry.money);
+  dateMap.set(key, (dateMap.get(key) ?? 0) + val);
 }
 
 function buildDateMap(books: BookData[]): Map<string, number> {
