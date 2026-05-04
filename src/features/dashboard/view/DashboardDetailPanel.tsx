@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Paper, TextField, Typography } from "@mui/material";
 import DataTable from "@/app/components/dataTable/DataTable";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
@@ -12,13 +12,14 @@ import { exportBookToPdf } from "@/app/utils/exportPdf";
 interface DashboardDetailPanelProps {
   bookId: string | number;
   title: string;
-  fixedDate?: string;
+  bookDate?: string;
   hasUnsavedChanges: boolean;
   editedRows: MainData[];
   isPending: boolean;
   onBack: () => void;
   onSave: () => void;
   onSaveAndExit: () => void;
+  onBookDateChange: (date: string) => void;
   onRowsChange: (rows: MainData[]) => void;
 }
 
@@ -26,13 +27,14 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
   ({
     bookId,
     title,
-    fixedDate,
+    bookDate,
     hasUnsavedChanges,
     editedRows,
     isPending,
     onBack,
     onSave,
     onSaveAndExit,
+    onBookDateChange,
     onRowsChange,
   }) => {
     const saveLabel = hasUnsavedChanges ? "Guardar *" : "Guardar";
@@ -64,6 +66,15 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
             <Typography className="dashboard_detail_description" variant="body1">
               {"Ajusta fechas y ganancias con una vista limpia pensada para revisión rápida."}
             </Typography>
+            <TextField
+              className="dashboard_detail_date_input"
+              label="Fecha del libro"
+              type="date"
+              size="small"
+              value={bookDate || ""}
+              onChange={(event) => onBookDateChange(event.target.value)}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
           </Box>
           <Box className="dashboard_detail_actions">
             <Button className="dashboard_button dashboard_button--ghost" onClick={onBack}>
@@ -106,7 +117,7 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
           <DataTable
             rows={editedRows}
             mode="edit"
-            fixedDate={fixedDate}
+            fixedDate={bookDate}
             onRowsChange={onRowsChange}
           />
         </Box>

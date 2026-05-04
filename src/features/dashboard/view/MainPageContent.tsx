@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DashboardSummaryStats } from "./DashboardSummaryStats";
 import { DashboardDetailPanel } from "./DashboardDetailPanel";
 import { DashboardCardsGrid } from "./DashboardCardsGrid";
+import { DashboardHistoryView } from "./DashboardHistoryView";
 import { Box, CircularProgress, Pagination, Paper, Typography } from "@mui/material";
 import { useMainDashboardState } from "@/features/dashboard/model/state/useMainDashboardState";
 import "./mainStyles.css";
@@ -11,17 +12,25 @@ import { SearchNavbar } from "@/app/components/dashboard/SearchNavbar/SearchNavb
 import AlertMessage from "@/app/components/dashboard/Dialog/AlertMessage";
 import DeleteDialog from "@/app/components/dashboard/Dialog/DeleteDialog";
 import UnsavedChangesDialog from "@/app/components/dashboard/Dialog/UnsavedChangesDialog";
-import { type BookData } from "@/app/actions/dashboard";
+import { fetchAllBooksHistory, type BookData } from "@/app/actions/dashboard";
 
 interface MainPageContentProps {
   initialBooks: BookData[];
   initialBooksCount: number;
+  showHistory?: boolean;
+  onHideHistory?: () => void;
 }
 
 export const MainPageContent: React.FC<MainPageContentProps> = ({
   initialBooks,
   initialBooksCount,
+  showHistory = false,
+  onHideHistory,
 }) => {
+  const [historyBooks, setHistoryBooks] = useState<BookData[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
   const { state, actions } = useMainDashboardState({
     initialBooks,
     initialBooksCount,
@@ -45,22 +54,67 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
     selectedCardTitle,
     activeItem,
     activeCardDate,
+    activeCardTitle,
     libraryCount,
     isUnsavedDialogOpen,
     hasUnsavedChanges,
   } = state;
 
+  useEffect(() => {
+    if (!showHistory) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadHistoryBooks = async () => {
+      setIsHistoryLoading(true);
+      setHistoryError(null);
+
+      try {
+        const result = await fetchAllBooksHistory();
+        if (isCancelled) {
+          return;
+        }
+
+        if (result.error || !result.data) {
+          setHistoryBooks([]);
+          setHistoryError(result.error ?? "No se pudo cargar el historial.");
+        } else {
+          setHistoryBooks(result.data);
+          setHistoryError(null);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setHistoryBooks([]);
+          setHistoryError(err instanceof Error ? err.message : "No se pudo cargar el historial.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsHistoryLoading(false);
+        }
+      }
+    };
+
+    void loadHistoryBooks();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [showHistory]);
+
   const dashboardContent = selectedCardId ? (
     <DashboardDetailPanel
       bookId={selectedCardId}
-      title={activeItem?.title || "Detalle del libro"}
-      fixedDate={activeCardDate}
+      title={activeCardTitle || activeItem?.title || "Detalle del libro"}
+      bookDate={activeCardDate}
       hasUnsavedChanges={hasUnsavedChanges}
       editedRows={editedRows}
       isPending={isPending}
       onBack={actions.handleBackFromDetail}
       onSave={actions.handleSaveDetail}
       onSaveAndExit={actions.handleSaveAndExitDetail}
+      onBookDateChange={actions.handleDetailDateChange}
       onRowsChange={actions.setEditedRows}
     />
   ) : (
@@ -103,42 +157,53 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
         </Box>
 
         <Box className="dashboard_stage">
-          {!selectedCardId && (
-            <Box className="dashboard_top">
-              <SearchNavbar
-                value={searchQuery}
-                onChange={actions.handleSearchChange}
-                matchCount={filteredCount}
-                selectedCount={selectedCardIds.length}
-                onDeleteClick={actions.openDeleteModal}
-              />
-            </Box>
-          )}
+          {showHistory ? (
+            <DashboardHistoryView
+              books={historyBooks}
+              isLoading={isHistoryLoading}
+              loadError={historyError}
+              onBack={onHideHistory ?? (() => {})}
+            />
+          ) : (
+            <>
+              {!selectedCardId && (
+                <Box className="dashboard_top">
+                  <SearchNavbar
+                    value={searchQuery}
+                    onChange={actions.handleSearchChange}
+                    matchCount={filteredCount}
+                    selectedCount={selectedCardIds.length}
+                    onDeleteClick={actions.openDeleteModal}
+                  />
+                </Box>
+              )}
 
-          <Box className="dashboard_middle">
-            {isPending ? (
-              <Paper elevation={0} className="dashboard_loading_panel">
-                <CircularProgress size={88} />
-                <Typography className="dashboard_loading_text" variant="body1">
-                  Preparando el archivo y ordenando tus registros.
-                </Typography>
-              </Paper>
-            ) : (
-              dashboardContent
-            )}
-          </Box>
+              <Box className="dashboard_middle">
+                {isPending ? (
+                  <Paper elevation={0} className="dashboard_loading_panel">
+                    <CircularProgress size={88} />
+                    <Typography className="dashboard_loading_text" variant="body1">
+                      Preparando el archivo y ordenando tus registros.
+                    </Typography>
+                  </Paper>
+                ) : (
+                  dashboardContent
+                )}
+              </Box>
 
-          {!selectedCardId && (
-            <Box className="dashboard_pagination">
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={actions.handlePageChange}
-                color="primary"
-                size="large"
-                disabled={isPending}
-              />
-            </Box>
+              {!selectedCardId && (
+                <Box className="dashboard_pagination">
+                  <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={actions.handlePageChange}
+                    color="primary"
+                    size="large"
+                    disabled={isPending}
+                  />
+                </Box>
+              )}
+            </>
           )}
         </Box>
       </main>

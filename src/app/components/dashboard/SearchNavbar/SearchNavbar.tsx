@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Badge, Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import "./SearchNavbarStyles.css";
 
 interface SearchNavbarProps {
@@ -43,7 +43,7 @@ export const SearchNavbar: React.FC<SearchNavbarProps> = ({
               disabled={isDeleteDisabled}
             >
               <Badge badgeContent={selectedCount} color="error">
-                <DeleteOutlineIcon />
+                <DeleteOutlinedIcon />
               </Badge>
             </IconButton>
           </span>

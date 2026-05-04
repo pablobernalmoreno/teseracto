@@ -32,7 +32,12 @@ interface UseDashboardBooksDataResult {
   refreshFirstPage: () => Promise<void>;
   addNewBook: (book: BookData) => void;
   fetchDetailRows: (bookId: string | number, fixedDate?: string) => Promise<MainData[]>;
-  saveDetailRows: (bookId: string | number, rows: MainData[]) => Promise<{ error: string | null }>;
+  saveDetailRows: (
+    bookId: string | number,
+    rows: MainData[],
+    bookDate?: string,
+    bookTitle?: string
+  ) => Promise<{ error: string | null }>;
 }
 
 export const useDashboardBooksData = ({
@@ -112,9 +117,11 @@ export const useDashboardBooksData = ({
 
   const saveDetailRows = async (
     bookId: string | number,
-    rows: MainData[]
+    rows: MainData[],
+    bookDate?: string,
+    bookTitle?: string
   ): Promise<{ error: string | null }> => {
-    const result = await createBookFn("", rows, String(bookId));
+    const result = await createBookFn(bookTitle ?? "", rows, String(bookId), bookDate);
     return { error: result.error ?? null };
   };
 

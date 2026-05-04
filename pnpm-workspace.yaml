@@ -1,0 +1,8 @@
+packages:
+  - "."
+
+allowBuilds:
+  core-js: false
+  sharp: true
+  tesseract.js: false
+  unrs-resolver: false
