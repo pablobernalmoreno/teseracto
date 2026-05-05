@@ -70,6 +70,14 @@ export const InputDialog: React.FC<InputDialogProps> = ({
     }
   };
 
+  const handleDialogClose = (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
+    if (isSaving && (reason === "backdropClick" || reason === "escapeKeyDown")) {
+      return;
+    }
+
+    onClose();
+  };
+
   const groupedInvalidEntries = useMemo(() => {
     const firstDateMismatchId = invalidEntries.find((entry) => dateMismatchSet.has(entry.id))?.id;
 
@@ -168,7 +176,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleDialogClose}
       maxWidth="sm"
       fullWidth
       aria-labelledby="alert-dialog-title"

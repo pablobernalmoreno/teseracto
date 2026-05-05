@@ -94,7 +94,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
 
   if (!invalidEntries.length || !entry) return null;
 
-  const zoomStyle = { "--zoom-level": zoomLevel } as CSSProperties;
+  const zoomStyle = { "--zoom-width": `${zoomLevel * 100}%` } as CSSProperties;
 
   let messageNode: React.ReactNode = null;
   if (isDateMismatch) {

@@ -52,7 +52,7 @@ interface DashboardActions {
   selectCard: (cardId: string | number) => void;
   deselectCard: (cardId: string | number) => void;
   clearCardSelection: () => void;
-  handleBookCreated: (newBook?: BookData | null) => void;
+  handleBookCreated: (newBook?: BookData | null) => Promise<void>;
   closeToast: () => void;
   setEditedRows: React.Dispatch<React.SetStateAction<MainData[]>>;
   saveAndContinueWithUnsavedChanges: () => void;
@@ -338,12 +338,12 @@ export const useMainDashboardState = ({
     })();
   };
 
-  const handleBookCreated = (newBook?: BookData | null) => {
+  const handleBookCreated = async (newBook?: BookData | null): Promise<void> => {
     if (newBook) {
       // Optimistically add the new book to the list
       booksData.addNewBook(newBook);
     }
-    void booksData.refreshFirstPage();
+    await booksData.refreshFirstPage();
   };
 
   return {
