@@ -55,6 +55,20 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   const excludedSet = excludedEntryIds;
   const dateMismatchSet = dateMismatchEntryIds;
   const [groupedCarouselIndex, setGroupedCarouselIndex] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveClick = async () => {
+    if (isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await onSave();
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const groupedInvalidEntries = useMemo(() => {
     const firstDateMismatchId = invalidEntries.find((entry) => dateMismatchSet.has(entry.id))?.id;
@@ -185,19 +199,21 @@ export const InputDialog: React.FC<InputDialogProps> = ({
         <Button
           className="dashboard-dialog-button dashboard-dialog-button--secondary"
           onClick={onClose}
+          disabled={isSaving}
         >
           Cancelar
         </Button>
         <Button
           className="dashboard-dialog-button dashboard-dialog-button--primary"
-          onClick={onSave}
+          onClick={handleSaveClick}
           autoFocus
           disabled={
+            isSaving ||
             (dialogState.type !== "invalid_entries" && dialogState.type !== "success") ||
             !allInvalidEntriesFilled
           }
         >
-          Guardar
+          {isSaving ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
     </Dialog>
