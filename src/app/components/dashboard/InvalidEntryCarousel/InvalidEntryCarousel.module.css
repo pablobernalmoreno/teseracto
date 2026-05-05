@@ -1,0 +1,127 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.selectedDate {
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  align-items: center;
+}
+
+.messageText {
+  text-align: center;
+}
+
+.previewButton {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+  border-radius: 8px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.moneyRow {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.moneyField {
+  flex: 1;
+}
+
+.moneyField :global(.MuiInputBase-root) {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-muted);
+}
+
+.moneyField :global(.MuiInputLabel-root) {
+  color: var(--color-text-secondary);
+}
+
+.moneyField :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--color-accent);
+}
+
+.moneyField :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(var(--rgb-border), 0.42);
+}
+
+.moneyField :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(var(--rgb-accent-strong), 0.7);
+}
+
+.moneyField :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--color-accent);
+}
+
+.navigation {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.zoomDialogContent {
+  background-color: var(--color-surface-muted);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.zoomHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.zoomPercent {
+  min-width: 50px;
+  text-align: center;
+}
+
+.zoomViewport {
+  width: 100%;
+  min-height: 280px;
+  max-height: 70vh;
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--rgb-border), 0.42);
+  background-color: var(--color-surface);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.zoomImage {
+  width: var(--zoom-width, 100%);
+  max-width: none;
+  height: auto;
+  display: block;
+  transition: width 0.15s ease-out;
+}
+
+@media (min-width: 600px) {
+  .zoomViewport {
+    min-height: 420px;
+  }
+}

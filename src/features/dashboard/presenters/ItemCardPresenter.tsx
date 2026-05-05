@@ -73,7 +73,10 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
       onSave: async () => {
         try {
           const newBook = await actions.handleSave();
-          // Call onBookCreated with the newly created book for optimistic update
+          // Close promptly to avoid a visible gap while list refresh completes.
+          setOpen(false);
+
+          // Keep save flow pending until the parent post-save workflow finishes.
           if (onBookCreated) {
             await onBookCreated(newBook);
           }
