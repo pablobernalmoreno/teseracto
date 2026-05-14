@@ -38,7 +38,7 @@
     "jspdf-autotable": "^5.0.7",
     "next": "16.2.5",
     "react": "^19.2.6",
-    "react-dom": "^19.2.5",
+    "react-dom": "^19.2.6",
     "recharts": "^3.8.1",
     "tesseract.js": "^7.0.0"
   },
@@ -49,7 +49,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "baseline-browser-mapping": "^2.10.27",
-    "eslint": "^9.39.4",
+    "eslint": "^10.3.0",
     "eslint-config-next": "16.2.6",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.4",
