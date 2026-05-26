@@ -85,6 +85,7 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
         }
       },
       onFileChange: actions.onFileChange,
+      onDateChange: actions.onSelectedDateChange,
       onMoneyChange: actions.onMoneyChange,
       inputRef,
     };

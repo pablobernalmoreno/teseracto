@@ -10,7 +10,7 @@ import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightne
 import InsightsIcon from "@mui/icons-material/Insights";
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import "./AppBarMenuStyles.css";
 import { loginService } from "@/features/login/model/loginService";
 
@@ -43,13 +43,17 @@ interface AppBarMenuProps {
   onShowHistory?: () => void;
 }
 
-const notLoggedInButtons = () => {
+const notLoggedInButtons = (pathname: string) => {
+  const showHomeButton = pathname !== "/";
+
   return (
     <>
       <Box className="appbar_nav_links" aria-label="Secciones informativas">
-        <Button className="appbar_buttons" component={Link} href="/">
-          Inicio
-        </Button>
+        {showHomeButton && (
+          <Button className="appbar_buttons" component={Link} href="/">
+            Inicio
+          </Button>
+        )}
         <Button className="appbar_buttons" component={Link} href="/pricing">
           Precios
         </Button>
@@ -103,6 +107,7 @@ const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => vo
 };
 
 export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProps) => {
+  const pathname = usePathname();
   const router = useRouter();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => getStoredThemeMode());
 
@@ -158,7 +163,9 @@ export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProp
               {themeToggleLabel}
             </Button>
           )}
-          {isAuthenticated ? loggedInButtons(handleLogout, onShowHistory) : notLoggedInButtons()}
+          {isAuthenticated
+            ? loggedInButtons(handleLogout, onShowHistory)
+            : notLoggedInButtons(pathname)}
         </Toolbar>
       </AppBar>
     </Box>

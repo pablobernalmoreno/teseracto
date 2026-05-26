@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { dashboardService } from "./dashboardService";
 import type { BookData } from "@/app/actions/dashboard";
 import { extractCurrencyValues, parseDates } from "@/app/utils/data";
@@ -94,12 +94,38 @@ interface ParsedUploadState {
   selectedDate: string;
 }
 
+function buildUnreadableUploadState(totalEntries: number, message: string): ParsedUploadState {
+  const pathData: MainData[] = [];
+  const invalidEntries: MainData[] = [];
+  const editedValues = new Map<number, { money: string }>();
+  const excludedIds = new Set<number>();
+  const dateMismatchIds = new Set<number>();
+  const messages = new Map<number, string>();
+
+  for (let i = 0; i < totalEntries; i += 1) {
+    pathData.push({ id: i, date: "", money: "N/A" });
+    invalidEntries.push({ id: i, date: "", money: "N/A" });
+    editedValues.set(i, { money: "" });
+    messages.set(i, message);
+  }
+
+  return {
+    pathData,
+    invalidEntries,
+    editedValues,
+    excludedIds,
+    dateMismatchIds,
+    messages,
+    selectedDate: "",
+  };
+}
+
 function buildParsedUploadState(
   expectedDatesArray: (string | null)[],
   expectedCurrencyArray: string[],
   totalEntries: number
 ): ParsedUploadState {
-  const referenceDate = expectedDatesArray[0] ?? null;
+  const referenceDate = expectedDatesArray.find(Boolean) ?? null;
   const pathData: MainData[] = [];
   const invalidEntries: MainData[] = [];
   const editedValues = new Map<number, { money: string }>();
@@ -129,7 +155,10 @@ function buildParsedUploadState(
       if (!money || money === "N/A") {
         invalidEntries.push(normalizedEntry);
         editedValues.set(i, { money: "" });
-        messages.set(i, "Ingresa el valor de dinero para guardar esta imagen.");
+        messages.set(
+          i,
+          "No pudimos leer bien el valor en esta imagen. Suele pasar cuando la foto esta borrosa, oscura o cortada. Revisa la imagen e ingresa el valor manualmente."
+        );
       }
     }
 
@@ -146,10 +175,13 @@ function buildParsedUploadState(
 
   for (let i = 0; i < totalEntries; i += 1) {
     const money = expectedCurrencyArray[i] || "N/A";
-    pathData.push({ id: i, date: "N/A", money });
-    invalidEntries.push({ id: i, date: "N/A", money });
-    excludedIds.add(i);
-    messages.set(i, "No se detecto fecha en la primera imagen. Esta imagen no se guardara.");
+    pathData.push({ id: i, date: "", money });
+    invalidEntries.push({ id: i, date: "", money });
+    editedValues.set(i, { money: money === "N/A" ? "" : money });
+    messages.set(
+      i,
+      "No pudimos leer bien esta imagen. Suele pasar cuando la foto esta borrosa, oscura o cortada. Revisa la imagen y completa la fecha y el valor manualmente."
+    );
   }
 
   return {
@@ -192,6 +224,7 @@ interface ItemCardModelActions {
   handleSave: () => Promise<BookData | null>;
   setCarouselIndex: (index: number) => void;
   onMoneyChange: (entryId: number, value: string) => void;
+  onSelectedDateChange: (value: string) => void;
 }
 
 export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] => {
@@ -207,9 +240,18 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   const [dateMismatchEntryIds, setDateMismatchEntryIds] = useState<Set<number>>(new Set());
   const [entryMessages, setEntryMessages] = useState<Map<number, string>>(new Map());
 
+  useEffect(() => {
+    return () => {
+      for (const source of sources) {
+        URL.revokeObjectURL(source);
+      }
+    };
+  }, [sources]);
+
   const handleDialogClose = () => {
     setDialogState({ type: "idle" });
     setFiles(undefined);
+    setSources([]);
     setInvalidEntries([]);
     setCarouselIndex(0);
     setEditedValues(new Map());
@@ -220,7 +262,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
+    const target = e.target;
     const selectedFiles = Array.from(target.files ?? []);
     if (selectedFiles.length) {
       setFiles(selectedFiles);
@@ -270,7 +312,19 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
       );
     } catch (error) {
       console.error("OCR worker failed:", error);
-      setDialogState({ type: "idle" });
+      const unreadableUploadState = buildUnreadableUploadState(
+        selectedFiles.length,
+        "No pudimos leer bien esta imagen. Suele pasar cuando la foto esta borrosa, oscura o cortada. Revisa la imagen y completa la fecha y el valor manualmente."
+      );
+      setSources(selectedFiles.map((file) => URL.createObjectURL(file)));
+      setPathData(unreadableUploadState.pathData);
+      setInvalidEntries(unreadableUploadState.invalidEntries);
+      setEditedValues(unreadableUploadState.editedValues);
+      setExcludedEntryIds(unreadableUploadState.excludedIds);
+      setDateMismatchEntryIds(unreadableUploadState.dateMismatchIds);
+      setEntryMessages(unreadableUploadState.messages);
+      setSelectedDate(unreadableUploadState.selectedDate);
+      setDialogState({ type: "invalid_entries" });
     } finally {
       if (worker) {
         await worker.terminate();
@@ -371,8 +425,13 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
 
   const handleSave = async () => {
     try {
+      const normalizedSelectedDate = selectedDate.trim();
       const updatedPathData = formatUpdatedPathData(pathData, editedValues);
       setPathData(updatedPathData);
+
+      if (!normalizedSelectedDate) {
+        return null;
+      }
 
       if (!validateRequiredMoney(updatedPathData)) {
         return null;
@@ -410,6 +469,20 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     setEditedValues(newEdited);
   };
 
+  const onSelectedDateChange = (value: string) => {
+    setSelectedDate(value);
+    setPathData((previous) =>
+      previous.map((entry) =>
+        dateMismatchEntryIds.has(entry.id)
+          ? entry
+          : {
+              ...entry,
+              date: value,
+            }
+      )
+    );
+  };
+
   const state: ItemCardModelState = {
     files,
     dialogState,
@@ -432,6 +505,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     handleSave,
     setCarouselIndex,
     onMoneyChange,
+    onSelectedDateChange,
   };
 
   return [state, actions];

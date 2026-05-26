@@ -28,9 +28,60 @@ interface InvalidEntryCarouselProps {
   isDateMismatch: boolean;
   dateMismatchCount: number;
   entryMessage?: string;
+  onDateChange: (value: string) => void;
   onPrev: () => void;
   onNext: () => void;
   onMoneyChange: (entryId: number, value: string) => void;
+}
+
+function getEntryMessageNode(
+  isDateMismatch: boolean,
+  dateMismatchCount: number,
+  selectedDate: string,
+  entryMessage: string | undefined,
+  isEntryExcluded: boolean
+): React.ReactNode {
+  if (isDateMismatch) {
+    return (
+      <Typography color="error" className={styles.messageText}>
+        {dateMismatchCount} imágenes no correspondían con la fecha elegida: {selectedDate || "No detectada"}, por lo que no serán agregadas.
+      </Typography>
+    );
+  }
+
+  if (!entryMessage) {
+    return null;
+  }
+
+  return (
+    <Typography
+      color={isEntryExcluded ? "error" : undefined}
+      sx={isEntryExcluded ? undefined : { color: "warning.main" }}
+      className={styles.messageText}
+    >
+      {entryMessage}
+    </Typography>
+  );
+}
+
+function getMoneyFieldValue(currentMoney: string, entryMoney: string): string {
+  if (currentMoney) {
+    return currentMoney;
+  }
+
+  return entryMoney === "N/A" ? "" : entryMoney;
+}
+
+function getFirstImageDatePromptNode(shouldPromptFirstImageDate: boolean): React.ReactNode {
+  if (!shouldPromptFirstImageDate) {
+    return null;
+  }
+
+  return (
+    <Typography sx={{ color: "warning.main" }} className={styles.messageText}>
+      Define la fecha en la primera imagen para aplicarla a todas las imágenes de este lote.
+    </Typography>
+  );
 }
 
 export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
@@ -43,6 +94,7 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
   isDateMismatch,
   dateMismatchCount,
   entryMessage,
+  onDateChange,
   onPrev,
   onNext,
   onMoneyChange,
@@ -91,26 +143,21 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
   const currentValues = entry ? carouselValues[entry.id] || { money: "" } : { money: "" };
   const shouldRenderImage = Boolean(source) && !isDateMismatch;
   const shouldShowNavigation = invalidEntries.length > 1;
+  const needsManualDate = !selectedDate.trim() && !isDateMismatch && currentIndex === 0;
+  const shouldPromptFirstImageDate = !selectedDate.trim() && !isDateMismatch && currentIndex > 0;
 
   if (!invalidEntries.length || !entry) return null;
 
   const zoomStyle = { "--zoom-width": `${zoomLevel * 100}%` } as CSSProperties;
-
-  let messageNode: React.ReactNode = null;
-  if (isDateMismatch) {
-    messageNode = (
-      <Typography color="error" className={styles.messageText}>
-        {dateMismatchCount} imágenes no correspondían con la fecha elegida:{" "}
-        {selectedDate || "No detectada"}, por lo que no serán agregadas.
-      </Typography>
-    );
-  } else if (entryMessage) {
-    messageNode = (
-      <Typography color={isEntryExcluded ? "error" : "warning.main"} className={styles.messageText}>
-        {entryMessage}
-      </Typography>
-    );
-  }
+  const messageNode = getEntryMessageNode(
+    isDateMismatch,
+    dateMismatchCount,
+    selectedDate,
+    entryMessage,
+    isEntryExcluded
+  );
+  const moneyFieldValue = getMoneyFieldValue(currentValues.money, entry.money);
+  const firstImageDatePromptNode = getFirstImageDatePromptNode(shouldPromptFirstImageDate);
 
   return (
     <div className={styles.root}>
@@ -142,19 +189,32 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
           {messageNode}
           {isDateMismatch ? null : (
             <div className={styles.moneyRow}>
+              {needsManualDate ? (
+                <TextField
+                  label="Fecha"
+                  type="date"
+                  variant="outlined"
+                  size="small"
+                  value={selectedDate}
+                  onChange={(e) => onDateChange(e.target.value)}
+                  className={styles.moneyField}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              ) : null}
               <TextField
                 key={`money-${currentIndex}`}
                 label="Dinero"
                 type="text"
                 variant="outlined"
                 size="small"
-                value={currentValues.money}
+                value={moneyFieldValue}
                 onChange={(e) => onMoneyChange(entry.id, e.target.value)}
                 disabled={isEntryExcluded}
                 className={styles.moneyField}
               />
             </div>
           )}
+          {firstImageDatePromptNode}
         </div>
       </Fade>
       {shouldShowNavigation ? (
