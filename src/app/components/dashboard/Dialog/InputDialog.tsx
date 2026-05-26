@@ -147,41 +147,12 @@ export const InputDialog: React.FC<InputDialogProps> = ({
           </Box>
         );
 
-      case "read_error":
-        return (
-          <Box className={styles.idleContainer}>
-            <Typography id="upload-dialog-description" sx={{ textAlign: "center" }}>
-              {dialogState.message}
-            </Typography>
-            <Typography sx={{ textAlign: "center", color: "text.secondary", mt: 1.5 }}>
-              Intenta de nuevo con una imagen mas nitida y con mejor luz.
-            </Typography>
-            <Button
-              className={styles.uploadButton}
-              component="label"
-              variant="text"
-              startIcon={<CloudUploadIcon />}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span>Probar con otra imagen</span>
-              <input
-                ref={inputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                className="file_upload_hidden_input"
-                onChange={onFileChange}
-              />
-            </Button>
-          </Box>
-        );
-
       case "idle":
       default:
         return (
           <Box className={styles.idleContainer}>
             <Typography id="upload-dialog-description" sx={{ textAlign: "center" }}>
-              Selecciona una o varias imagenes para continuar.
+              Selecciona una o varias imágenes para continuar.
             </Typography>
             <Button
               className={styles.uploadButton}
@@ -218,15 +189,10 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
       <DialogContent
         className={`file_upload_container ${styles.dialogContent} ${
-          dialogState.type === "idle" || dialogState.type === "read_error"
-            ? styles.dialogContentClickable
-            : ""
+          dialogState.type === "idle" ? styles.dialogContentClickable : ""
         }`}
-        onClick={() =>
-          (dialogState.type === "idle" || dialogState.type === "read_error") &&
-          inputRef.current?.click()
-        }
-        {...((dialogState.type === "idle" || dialogState.type === "read_error") && {
+        onClick={() => dialogState.type === "idle" && inputRef.current?.click()}
+        {...(dialogState.type === "idle" && {
           role: "button",
           tabIndex: 0,
           "aria-label": "Seleccionar archivos para subir",
