@@ -54,7 +54,11 @@ function getEntryMessageNode(
   }
 
   return (
-    <Typography color={isEntryExcluded ? "error" : "warning.main"} className={styles.messageText}>
+    <Typography
+      color={isEntryExcluded ? "error" : undefined}
+      sx={isEntryExcluded ? undefined : { color: "warning.main" }}
+      className={styles.messageText}
+    >
       {entryMessage}
     </Typography>
   );
@@ -74,8 +78,8 @@ function getFirstImageDatePromptNode(shouldPromptFirstImageDate: boolean): React
   }
 
   return (
-    <Typography color="warning.main" className={styles.messageText}>
-      Define la fecha en la primera imagen para aplicarla a todas las imagenes de este lote.
+    <Typography sx={{ color: "warning.main" }} className={styles.messageText}>
+      Define la fecha en la primera imagen para aplicarla a todas las imágenes de este lote.
     </Typography>
   );
 }
