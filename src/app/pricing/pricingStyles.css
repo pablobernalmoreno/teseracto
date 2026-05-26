@@ -214,20 +214,24 @@
 }
 
 .pricing_matrix_table {
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid rgba(89, 120, 98, 0.14);
 }
 
 .pricing_matrix_row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(120px, 1fr) minmax(120px, 1fr);
   background: rgba(var(--rgb-white), 0.72);
 }
 
 .pricing_matrix_row + .pricing_matrix_row {
+  border-top: 1px solid rgba(89, 120, 98, 0.1);
+}
+
+.pricing_matrix_table tbody .pricing_matrix_row + .pricing_matrix_row .pricing_matrix_cell {
   border-top: 1px solid rgba(89, 120, 98, 0.1);
 }
 
@@ -237,6 +241,8 @@
 
 .pricing_matrix_cell {
   padding: 0.95rem 1rem;
+  text-align: left;
+  vertical-align: top;
   color: var(--color-text-secondary) !important;
   font-size: 0.95rem !important;
   line-height: 1.4 !important;
@@ -269,8 +275,14 @@
     padding: 1.25rem;
   }
 
-  .pricing_matrix_row {
-    grid-template-columns: 1fr;
+  .pricing_matrix_table,
+  .pricing_matrix_table thead,
+  .pricing_matrix_table tbody,
+  .pricing_matrix_table tr,
+  .pricing_matrix_table th,
+  .pricing_matrix_table td {
+    display: block;
+    width: 100%;
   }
 
   .pricing_matrix_cell {
