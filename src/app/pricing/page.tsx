@@ -14,12 +14,88 @@ export const metadata: Metadata = {
   },
 };
 
-const features = [
-  "Libros ilimitados",
-  "Movimientos y registros sin límite",
-  "Panel de estadísticas",
-  "Exportación de datos",
-  "Soporte por correo",
+const plans = [
+  {
+    name: "Gratis",
+    price: "$0",
+    period: "/ mes",
+    description:
+      "Para personas y equipos pequeños que quieren probar Teseracto con datos reales sin pagar al inicio.",
+    ctaLabel: "Comenzar gratis",
+    ctaClassName: "pricing_btn_secondary",
+    href: "/register",
+    features: [
+      "Hasta 10 libros",
+      "Hasta 100 movimientos por libro",
+      "Panel básico de estadísticas",
+      "Lectura automática de imágenes con cupo mensual limitado",
+      "Carga de imágenes",
+    ],
+  },
+  {
+    name: "Pro mensual",
+    price: "$19.900",
+    period: "/ mes",
+    description:
+      "Para organizaciones que ya operan cada semana y necesitan más capacidad, control y exportación.",
+    ctaLabel: "Elegir mensual",
+    ctaClassName: "pricing_btn_secondary",
+    href: "/register",
+    features: [
+      "Libros ilimitados",
+      "Hasta 500 movimientos por libro",
+      "Lectura automática ampliada para uso frecuente",
+      "Historial y análisis completos",
+      "Exportación a PDF y soporte por correo",
+    ],
+  },
+  {
+    name: "Pro anual",
+    price: "$199.000",
+    period: "/ año",
+    description:
+      "La mejor opción si Teseracto ya hace parte de tu operación. Equivale a 10 meses y usas 12.",
+    ctaLabel: "Elegir anual",
+    ctaClassName: "pricing_btn_primary",
+    href: "/register",
+    badge: "Mejor valor",
+    featured: true,
+    features: [
+      "Todo lo del plan Pro",
+      "Ahorro frente al pago mensual",
+      "Prioridad para mejoras y soporte",
+      "Más margen para crecer sin cambiar de plan",
+      "Ideal para uso continuo durante todo el año",
+    ],
+  },
+];
+
+const comparisonRows = [
+  {
+    label: "Libros",
+    free: "10",
+    pro: "Ilimitados",
+  },
+  {
+    label: "Movimientos por libro",
+    free: "100",
+    pro: "500",
+  },
+  {
+    label: "Lectura automática de comprobantes",
+    free: "Incluido con cupo mensual",
+    pro: "Cupo ampliado",
+  },
+  {
+    label: "Panel y métricas",
+    free: "Básico",
+    pro: "Completo",
+  },
+  {
+    label: "Exportación PDF",
+    free: "No incluida",
+    pro: "Incluida",
+  },
 ];
 
 const page = () => {
@@ -32,67 +108,82 @@ const page = () => {
             Sin sorpresas
           </Typography>
           <Typography className="pricing_title" component="h1">
-            Un precio simple,
+            Empieza gratis,
             <br />
-            <span className="pricing_title_accent">todo incluido.</span>
+            <span className="pricing_title_accent">escala cuando lo necesites.</span>
           </Typography>
           <Typography className="pricing_subtitle">
-            Accede a todas las funciones de Teseracto con cualquiera de los planes. Sin niveles, sin
-            restricciones ocultas.
+            El plan gratis te deja trabajar con hasta 10 libros y leer imágenes con un cupo
+            mensual. Los planes Pro desbloquean más capacidad, exportación y análisis avanzados.
           </Typography>
         </section>
 
         <section className="pricing_cards" aria-label="Planes disponibles">
-          <Box className="pricing_card">
-            <Typography className="pricing_card_label" component="p">
-              Mensual
-            </Typography>
-            <Typography className="pricing_card_price" component="p">
-              $10.000 <span className="pricing_card_period">/ mes</span>
-            </Typography>
-            <Typography className="pricing_card_desc">
-              Ideal para probar Teseracto sin compromisos. Cancela cuando quieras.
-            </Typography>
-            <ul className="pricing_features_list">
-              {features.map((f) => (
-                <li key={f} className="pricing_feature_item">
-                  <CheckIcon className="pricing_check_icon" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/register" style={{ width: "100%" }}>
-              <Button className="pricing_btn_secondary" fullWidth>
-                Únete
-              </Button>
-            </Link>
-          </Box>
+          {plans.map((plan) => (
+            <Box
+              key={plan.name}
+              className={plan.featured ? "pricing_card pricing_card_featured" : "pricing_card"}
+            >
+              {plan.badge ? <Box className="pricing_card_badge">{plan.badge}</Box> : null}
+              <Typography className="pricing_card_label" component="p">
+                {plan.name}
+              </Typography>
+              <Typography className="pricing_card_price" component="p">
+                {plan.price} <span className="pricing_card_period">{plan.period}</span>
+              </Typography>
+              <Typography className="pricing_card_desc">{plan.description}</Typography>
+              <ul className="pricing_features_list">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="pricing_feature_item">
+                    <CheckIcon className="pricing_check_icon" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href={plan.href} style={{ width: "100%" }}>
+                <Button className={plan.ctaClassName} fullWidth>
+                  {plan.ctaLabel}
+                </Button>
+              </Link>
+            </Box>
+          ))}
+        </section>
 
-          <Box className="pricing_card pricing_card_featured">
-            <Box className="pricing_card_badge">Mejor valor</Box>
-            <Typography className="pricing_card_label" component="p">
-              Anual
-            </Typography>
-            <Typography className="pricing_card_price" component="p">
-              $100.000 <span className="pricing_card_period">/ año</span>
-            </Typography>
-            <Typography className="pricing_card_desc">
-              El plan más completo para quienes usan Teseracto de forma continua. Ahorra 2 meses.
-            </Typography>
-            <ul className="pricing_features_list">
-              {features.map((f) => (
-                <li key={f} className="pricing_feature_item">
-                  <CheckIcon className="pricing_check_icon" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/register" style={{ width: "100%" }}>
-              <Button className="pricing_btn_primary" fullWidth>
-                Únete
-              </Button>
-            </Link>
+        <section className="pricing_matrix" aria-label="Comparación de funciones">
+          <Typography className="pricing_section_title" component="h2" variant="h5">
+            Comparación rápida
+          </Typography>
+          <Box className="pricing_matrix_table" role="table" aria-label="Tabla de comparación">
+            <Box className="pricing_matrix_row pricing_matrix_row_header" role="row">
+              <Typography component="span" className="pricing_matrix_cell pricing_matrix_feature">
+                Función
+              </Typography>
+              <Typography component="span" className="pricing_matrix_cell">
+                Gratis
+              </Typography>
+              <Typography component="span" className="pricing_matrix_cell">
+                Pro
+              </Typography>
+            </Box>
+            {comparisonRows.map((row) => (
+              <Box key={row.label} className="pricing_matrix_row" role="row">
+                <Typography component="span" className="pricing_matrix_cell pricing_matrix_feature">
+                  {row.label}
+                </Typography>
+                <Typography component="span" className="pricing_matrix_cell">
+                  {row.free}
+                </Typography>
+                <Typography component="span" className="pricing_matrix_cell">
+                  {row.pro}
+                </Typography>
+              </Box>
+            ))}
           </Box>
+          <Typography className="pricing_matrix_note">
+            Recomendación inicial: mantén el plan gratis mientras validas adopción, y pasa a Pro en
+            cuanto tengas clientes activos que dependan del sistema o necesites respaldo y mayor
+            estabilidad operativa.
+          </Typography>
         </section>
       </Box>
     </>

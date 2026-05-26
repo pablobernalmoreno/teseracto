@@ -32,6 +32,7 @@ export interface InputDialogProps {
   onClose: () => void;
   onSave: () => Promise<void> | void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onDateChange: (value: string) => void;
   onMoneyChange: (entryId: number, value: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
 }
@@ -49,6 +50,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   onClose,
   onSave,
   onFileChange,
+  onDateChange,
   onMoneyChange,
   inputRef,
 }) => {
@@ -126,6 +128,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
               isDateMismatch={dateMismatchSet.has(activeInvalidEntry?.id)}
               dateMismatchCount={dateMismatchCount}
               entryMessage={entryMessages[activeInvalidEntry?.id]}
+              onDateChange={onDateChange}
               onPrev={() => setGroupedCarouselIndex(Math.max(0, currentGroupedIndex - 1))}
               onNext={() =>
                 setGroupedCarouselIndex(Math.min(maxGroupedIndex, currentGroupedIndex + 1))
@@ -144,12 +147,41 @@ export const InputDialog: React.FC<InputDialogProps> = ({
           </Box>
         );
 
+      case "read_error":
+        return (
+          <Box className={styles.idleContainer}>
+            <Typography id="upload-dialog-description" sx={{ textAlign: "center" }}>
+              {dialogState.message}
+            </Typography>
+            <Typography sx={{ textAlign: "center", color: "text.secondary", mt: 1.5 }}>
+              Intenta de nuevo con una imagen mas nitida y con mejor luz.
+            </Typography>
+            <Button
+              className={styles.uploadButton}
+              component="label"
+              variant="text"
+              startIcon={<CloudUploadIcon />}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span>Probar con otra imagen</span>
+              <input
+                ref={inputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                className="file_upload_hidden_input"
+                onChange={onFileChange}
+              />
+            </Button>
+          </Box>
+        );
+
       case "idle":
       default:
         return (
           <Box className={styles.idleContainer}>
             <Typography id="upload-dialog-description" sx={{ textAlign: "center" }}>
-              Selecciona uno o varios archivos de imagen o PDF para continuar.
+              Selecciona una o varias imagenes para continuar.
             </Typography>
             <Button
               className={styles.uploadButton}
@@ -163,7 +195,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
                 ref={inputRef}
                 type="file"
                 multiple
-                accept="image/*,application/pdf"
+                accept="image/*"
                 className="file_upload_hidden_input"
                 onChange={onFileChange}
               />
@@ -186,10 +218,15 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
       <DialogContent
         className={`file_upload_container ${styles.dialogContent} ${
-          dialogState.type === "idle" ? styles.dialogContentClickable : ""
+          dialogState.type === "idle" || dialogState.type === "read_error"
+            ? styles.dialogContentClickable
+            : ""
         }`}
-        onClick={() => dialogState.type === "idle" && inputRef.current?.click()}
-        {...(dialogState.type === "idle" && {
+        onClick={() =>
+          (dialogState.type === "idle" || dialogState.type === "read_error") &&
+          inputRef.current?.click()
+        }
+        {...((dialogState.type === "idle" || dialogState.type === "read_error") && {
           role: "button",
           tabIndex: 0,
           "aria-label": "Seleccionar archivos para subir",
@@ -218,6 +255,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
           disabled={
             isSaving ||
             (dialogState.type !== "invalid_entries" && dialogState.type !== "success") ||
+            (dialogState.type === "invalid_entries" && !selectedDate.trim()) ||
             !allInvalidEntriesFilled
           }
         >
