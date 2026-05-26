@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { dashboardService } from "./dashboardService";
 import type { BookData } from "@/app/actions/dashboard";
 import { extractCurrencyValues, parseDates } from "@/app/utils/data";
@@ -200,8 +200,7 @@ export type DialogState =
   | { type: "idle" }
   | { type: "loading" }
   | { type: "invalid_entries" }
-  | { type: "success" }
-  | { type: "read_error"; message: string };
+  | { type: "success" };
 
 interface ItemCardModelState {
   files: File[] | undefined;
@@ -241,9 +240,18 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   const [dateMismatchEntryIds, setDateMismatchEntryIds] = useState<Set<number>>(new Set());
   const [entryMessages, setEntryMessages] = useState<Map<number, string>>(new Map());
 
+  useEffect(() => {
+    return () => {
+      for (const source of sources) {
+        URL.revokeObjectURL(source);
+      }
+    };
+  }, [sources]);
+
   const handleDialogClose = () => {
     setDialogState({ type: "idle" });
     setFiles(undefined);
+    setSources([]);
     setInvalidEntries([]);
     setCarouselIndex(0);
     setEditedValues(new Map());
