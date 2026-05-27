@@ -1,6 +1,6 @@
 import type { MainData } from "@/types/dashboard";
 
-export const GENERIC_REQUEST_ERROR = "Request could not be completed.";
+export const GENERIC_REQUEST_ERROR = "No se pudo completar la solicitud.";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
