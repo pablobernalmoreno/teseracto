@@ -6,6 +6,7 @@ import { cacheLife, cacheTag, updateTag } from "next/cache";
 import type { MainData } from "@/types/dashboard";
 import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
 import {
+  GENERIC_REQUEST_ERROR,
   normalizeBookIds,
   normalizeMainDataArray,
   parseTrimmedString,
@@ -151,8 +152,7 @@ async function fetchBooksPageCached(
   const { data, error, count } = await query;
 
   if (error) {
-    const fallbackError = rpcError?.message || error.message;
-    return { data: null, count: 0, error: fallbackError };
+    return { data: null, count: 0, error: GENERIC_REQUEST_ERROR };
   }
 
   return {
@@ -178,7 +178,7 @@ async function fetchBookContentCached(bookId: string, ownerId: string) {
     .single<BookData>();
 
   if (error) {
-    return { data: null, error: error.message };
+    return { data: null, error: GENERIC_REQUEST_ERROR };
   }
 
   return { data, error: null };
@@ -200,7 +200,7 @@ async function fetchAllBooksHistoryCached(ownerBookId: string) {
     .order("id", { ascending: true });
 
   if (error) {
-    return { data: null, error: error.message };
+    return { data: null, error: GENERIC_REQUEST_ERROR };
   }
 
   return {
@@ -273,7 +273,7 @@ export async function deleteBooks(bookIds: (string | number)[]) {
     .select();
 
   if (error) {
-    return { data: null, error: error.message };
+    return { data: null, error: GENERIC_REQUEST_ERROR };
   }
 
   updateTag("dashboard-books");
@@ -362,7 +362,7 @@ export async function createBook(
   const { data, error } = await operation;
 
   if (error) {
-    return { data: null, error: error.message };
+    return { data: null, error: GENERIC_REQUEST_ERROR };
   }
 
   updateTag("dashboard-books");

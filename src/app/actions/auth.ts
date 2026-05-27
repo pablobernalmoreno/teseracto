@@ -79,7 +79,10 @@ export async function signUpAction(email: string, password: string, confirmPassw
   });
 
   if (error) {
-    return { success: false, error: error.message };
+    return {
+      success: false,
+      error: "No se pudo completar el registro. Verifica tus datos e intenta nuevamente.",
+    };
   }
 
   redirect("/account_confirmation");
