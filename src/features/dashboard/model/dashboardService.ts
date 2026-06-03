@@ -3,7 +3,19 @@ import type { MainData } from "@/types/dashboard";
 
 export interface UserData {
   id: string;
-  book_id: string;
+  book_id: string | null;
+  membership?: UserMembershipData;
+}
+
+export interface UserMembershipData {
+  tier: "free" | "member" | "admin";
+  status: "active" | "trialing" | "past_due" | "canceled" | "expired" | "suspended";
+  starts_at: string;
+  ends_at: string | null;
+  provider: string | null;
+  provider_subscription_id: string | null;
+  auto_renew: boolean;
+  canceled_at: string | null;
 }
 
 export interface BookData {

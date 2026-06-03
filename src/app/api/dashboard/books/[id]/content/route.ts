@@ -144,9 +144,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   // Revalidate the cache for the updated book
-  revalidateTag("dashboard-books");
-  revalidateTag(`dashboard-books:${ownerId}`);
-  revalidateTag(`dashboard-book:${id}`);
+  revalidateTag("dashboard-books", "max");
+  revalidateTag(`dashboard-books:${ownerId}`, "max");
+  revalidateTag(`dashboard-book:${id}`, "max");
 
   return NextResponse.json({ data });
 }
