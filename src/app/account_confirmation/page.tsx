@@ -56,20 +56,20 @@ const Page = () => {
         </Typography>
       </Box>
       <Box sx={{ textAlign: "center" }}>
-        <Typography variant="body2" color="textSecondary" mb={2}>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
           ¿No te llegó el correo?
         </Typography>
         {successMessage && (
-          <Typography color="success" mb={2}>
+          <Typography color="success" sx={{ mb: 2 }}>
             {successMessage}
           </Typography>
         )}
         {errorMessage && (
-          <Typography color="error" mb={2}>
+          <Typography color="error" sx={{ mb: 2 }}>
             {errorMessage}
           </Typography>
         )}
-        <Box mb={2}>
+        <Box sx={{ mb: 2 }}>
           <TextField
             size="small"
             type="email"

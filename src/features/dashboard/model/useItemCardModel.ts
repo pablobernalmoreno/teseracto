@@ -220,7 +220,7 @@ interface ItemCardModelActions {
   setFiles: (files: File[]) => void;
   handleDialogClose: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  getImageText: () => Promise<void>;
+  getImageText: (selectedFiles: File[]) => Promise<void>;
   handleSave: () => Promise<BookData | null>;
   setCarouselIndex: (index: number) => void;
   onMoneyChange: (entryId: number, value: string) => void;

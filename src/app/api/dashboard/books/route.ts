@@ -88,7 +88,6 @@ export async function GET(request: NextRequest) {
   const safeTo = Number.isFinite(to) && to >= safeFrom ? to : safeFrom;
 
   const { data: rpcData, error: rpcError } = await supabase.rpc("get_user_books_page_preview", {
-    p_owner_id: ownerId,
     p_from: safeFrom,
     p_to: safeTo,
     p_search_query: searchQuery || null,
@@ -178,10 +177,10 @@ export async function DELETE(request: NextRequest) {
   }
 
   // Revalidate the dashboard books cache after deletion
-  revalidateTag("dashboard-books");
-  revalidateTag(`dashboard-books:${ownerId}`);
+  revalidateTag("dashboard-books", "max");
+  revalidateTag(`dashboard-books:${ownerId}`, "max");
   for (const deleted of data) {
-    revalidateTag(`dashboard-book:${deleted.id}`);
+    revalidateTag(`dashboard-book:${deleted.id}`, "max");
   }
 
   return NextResponse.json({ data: data ?? [] });
@@ -252,8 +251,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Revalidate the dashboard books cache so the new book appears immediately
-  revalidateTag("dashboard-books");
-  revalidateTag(`dashboard-books:${ownerId}`);
+  revalidateTag("dashboard-books", "max");
+  revalidateTag(`dashboard-books:${ownerId}`, "max");
 
   return NextResponse.json({ data });
 }

@@ -113,7 +113,6 @@ async function fetchBooksPageCached(
   const to = from + itemsPerPage - 1;
 
   const { data: rpcData, error: rpcError } = await supabase.rpc("get_user_books_page_preview", {
-    p_owner_id: ownerBookId,
     p_from: from,
     p_to: to,
     p_search_query: searchQuery.trim() || null,
