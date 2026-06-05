@@ -57,7 +57,10 @@
   letter-spacing: -0.02em;
 }
 
-.appbar_nav_links,
+.appbar_nav_links {
+  display: flex;
+}
+
 .appbar_actions {
   display: inline-flex;
   align-items: center;
