@@ -73,7 +73,7 @@ const notLoggedInButtons = (pathname: string) => {
 const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => void) => {
   return (
     <>
-      <Box>
+      <Box className="appbar_nav_links" aria-label="Navegación principal">
         <Box
           className="appbar_brand"
           component={Link}
