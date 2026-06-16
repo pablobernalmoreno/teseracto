@@ -134,7 +134,7 @@ When adding new write actions:
 
 ## Getting Started
 
-## Environment Variables
+### Environment Variables
 
 Create a local env file before running or deploying:
 
