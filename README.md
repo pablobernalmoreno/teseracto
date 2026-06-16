@@ -134,6 +134,26 @@ When adding new write actions:
 
 ## Getting Started
 
+### Environment Variables
+
+Create a local env file before running or deploying:
+
+1. Copy `.env.example` to `.env.local` for local development.
+2. Set the required Supabase values from your Supabase project.
+3. In production (for example Vercel), add the same values in Project Settings -> Environment Variables.
+
+Required variables:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- `NEXT_PUBLIC_SITE_URL`
+
+Security notes:
+
+- Only use Supabase publishable/anon keys in `NEXT_PUBLIC_*` variables.
+- Never expose the Supabase service role key to the browser.
+- Keep `.env`, `.env.local`, and other local env files untracked (already covered by `.gitignore`).
+
 First, run the development server:
 
 ```bash

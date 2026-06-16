@@ -2,17 +2,27 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 function getSupabaseServerConfig(): { supabaseUrl: string; supabaseKey: string } {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.TS_SUPA_SUPABASE_URL;
   const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.TS_SUPA_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     const missing: string[] = [];
     if (!supabaseUrl) {
-      missing.push("NEXT_PUBLIC_SUPABASE_URL");
+      missing.push(
+        "NEXT_PUBLIC_SUPABASE_URL or TS_SUPA_NEXT_PUBLIC_SUPABASE_URL or TS_SUPA_SUPABASE_URL"
+      );
     }
     if (!supabaseKey) {
-      missing.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY");
+      missing.push(
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY or TS_SUPA_NEXT_PUBLIC_SUPABASE_ANON_KEY or TS_SUPA_SUPABASE_ANON_KEY"
+      );
     }
 
     throw new Error(`Missing Supabase environment variables: ${missing.join(", ")}`);
