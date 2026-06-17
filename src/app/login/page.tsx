@@ -4,6 +4,7 @@ import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material
 import React, { useState, useTransition } from "react";
 import "./loginStyles.css";
 import { signInAction } from "@/app/actions/auth";
+import { loginService } from "@/features/login/model/loginService";
 
 export interface User {
   email: string;
@@ -15,10 +16,15 @@ const initialUserState: User = {
   password: "",
 };
 
+function getOAuthRedirectUrl() {
+  return new URL("/auth/callback", globalThis.location.origin).toString();
+}
+
 const Page = () => {
   const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState<User>(initialUserState);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isGooglePending, setIsGooglePending] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,10 +34,23 @@ const Page = () => {
   const handleSubmit = async () => {
     startTransition(async () => {
       const result = await signInAction(user.email, user.password);
-      if (!result.success) {
+      if (result?.success === false) {
         setErrorMessage(result.error);
       }
     });
+  };
+
+  const signInWithGoogle = async () => {
+    setErrorMessage("");
+    setIsGooglePending(true);
+
+    const redirectTo = getOAuthRedirectUrl();
+    const { error } = await loginService.signInWithGoogle(redirectTo);
+
+    if (error) {
+      setErrorMessage("No se pudo iniciar sesión con Google. Intenta nuevamente.");
+      setIsGooglePending(false);
+    }
   };
 
   return (
@@ -92,10 +111,23 @@ const Page = () => {
             variant="contained"
             fullWidth
             className="get_started"
-            disabled={isPending}
+            disabled={isPending || isGooglePending}
           >
             {isPending ? "Iniciando..." : "Iniciar Sesión"}
           </Button>
+          <Box className="google_signin_spacing">
+            <Button
+              type="button"
+              variant="outlined"
+              fullWidth
+              onClick={() => {
+                void signInWithGoogle();
+              }}
+              disabled={isPending || isGooglePending}
+            >
+              {isGooglePending ? "Redirigiendo..." : "Iniciar con Google"}
+            </Button>
+          </Box>
         </form>
         <Box className="auth_divider_spacing">
           <Divider>

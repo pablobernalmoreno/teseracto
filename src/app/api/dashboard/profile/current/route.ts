@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 import { createClient } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { GENERIC_REQUEST_ERROR, getBearerToken } from "@/app/utils/security/validation";
@@ -20,6 +22,35 @@ interface UserMembership {
 
 interface DashboardProfileResponse extends UserProfile {
   membership: UserMembership;
+}
+
+async function ensureBookId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  existingProfile: UserProfile | null
+): Promise<UserProfile | null> {
+  if (existingProfile?.book_id) {
+    return existingProfile;
+  }
+
+  const nextBookId = crypto.randomUUID();
+  const { data, error } = await supabase
+    .from("user_profile")
+    .upsert(
+      {
+        id: userId,
+        book_id: nextBookId,
+      },
+      { onConflict: "id" }
+    )
+    .select("id,book_id")
+    .single<UserProfile>();
+
+  if (error) {
+    return existingProfile;
+  }
+
+  return data ?? existingProfile;
 }
 
 export async function GET(request: NextRequest) {
@@ -54,9 +85,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
 
-  const responseData: DashboardProfileResponse | null = profile
+  const resolvedProfile = await ensureBookId(supabase, user.id, profile ?? null);
+
+  const responseData: DashboardProfileResponse | null = resolvedProfile
     ? {
-        ...profile,
+        ...resolvedProfile,
         membership: membership ?? {
           tier: "free",
           status: "active",

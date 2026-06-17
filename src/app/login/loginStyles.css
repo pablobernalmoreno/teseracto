@@ -77,6 +77,10 @@
   box-shadow: 0 14px 24px rgba(28, 84, 42, 0.24) !important;
 }
 
+.google_signin_spacing {
+  margin-top: 1rem;
+}
+
 .auth_secondary_action {
   background: linear-gradient(120deg, #4ea35c, var(--color-focus)) !important;
   text-transform: none !important;
