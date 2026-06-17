@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 let supabaseInstance: SupabaseClient | null = null;
@@ -26,8 +26,17 @@ export function getSupabaseClient(): SupabaseClient {
       throw new Error(`Missing Supabase environment variables: ${missing.join(", ")}`);
     }
 
-    supabaseInstance = createClient(supabaseURL, supabaseAnonKey);
+    supabaseInstance = createBrowserClient(supabaseURL, supabaseAnonKey, {
+      auth: {
+        flowType: "pkce",
+      },
+    });
   }
+
+  if (!supabaseInstance) {
+    throw new Error("Failed to initialize Supabase client");
+  }
+
   return supabaseInstance;
 }
 

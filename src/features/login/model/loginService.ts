@@ -17,6 +17,15 @@ export const loginService = {
     });
   },
 
+  async signInWithGoogle(redirectTo: string) {
+    return await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+  },
+
   validatePassword(password: string, confirmPassword: string): boolean {
     return password === confirmPassword && password.length > 0;
   },

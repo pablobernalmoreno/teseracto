@@ -38,8 +38,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
 
-  if (existingProfile) {
+  if (existingProfile?.book_id) {
     return NextResponse.json({ data: existingProfile, created: false });
+  }
+
+  if (existingProfile) {
+    const { data, error } = await supabase
+      .from("user_profile")
+      .update({ book_id: crypto.randomUUID() })
+      .eq("id", user.id)
+      .select("id,book_id")
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
+    }
+
+    return NextResponse.json({ data, created: false });
   }
 
   const { data, error } = await supabase
