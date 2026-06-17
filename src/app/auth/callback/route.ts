@@ -44,7 +44,16 @@ export async function GET(request: NextRequest) {
   }
 
   const redirectResponse = NextResponse.redirect(new URL(destination, requestUrl.origin));
-  const { supabaseUrl, supabaseKey } = getSupabaseServerConfig();
+
+  let supabaseUrl: string;
+  let supabaseKey: string;
+  try {
+    ({ supabaseUrl, supabaseKey } = getSupabaseServerConfig());
+  } catch {
+    return NextResponse.redirect(
+      new URL("/auth/callback/error?reason=oauth_callback", requestUrl.origin)
+    );
+  }
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {

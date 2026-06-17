@@ -71,7 +71,15 @@ export async function proxy(request: NextRequest) {
     process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_ANON_KEY ??
     "";
 
-  if (supabaseUrl && supabaseKey) {
+  if (!supabaseUrl || !supabaseKey) {
+    if (!isPublicPath(request.nextUrl.pathname)) {
+      return new NextResponse("Service Unavailable: auth misconfigured", { status: 503 });
+    }
+    response.headers.set("Content-Security-Policy", csp);
+    return response;
+  }
+
+  {
     const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
         getAll() {

@@ -28,9 +28,9 @@ async function ensureBookId(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   existingProfile: UserProfile | null
-): Promise<UserProfile | null> {
+): Promise<{ profile: UserProfile | null; dbError: boolean }> {
   if (existingProfile?.book_id) {
-    return existingProfile;
+    return { profile: existingProfile, dbError: false };
   }
 
   const nextBookId = crypto.randomUUID();
@@ -47,10 +47,10 @@ async function ensureBookId(
     .single<UserProfile>();
 
   if (error) {
-    return existingProfile;
+    return { profile: null, dbError: true };
   }
 
-  return data ?? existingProfile;
+  return { profile: data ?? existingProfile, dbError: false };
 }
 
 export async function GET(request: NextRequest) {
@@ -85,7 +85,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
   }
 
-  const resolvedProfile = await ensureBookId(supabase, user.id, profile ?? null);
+  const { profile: resolvedProfile, dbError } = await ensureBookId(
+    supabase,
+    user.id,
+    profile ?? null
+  );
+
+  if (dbError) {
+    return NextResponse.json({ error: GENERIC_REQUEST_ERROR }, { status: 500 });
+  }
 
   const responseData: DashboardProfileResponse | null = resolvedProfile
     ? {

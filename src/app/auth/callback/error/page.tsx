@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Box, Button, Typography } from "@mui/material";
+import "../../../login/loginStyles.css";
 
 const callbackErrorMessages: Record<string, string> = {
   missing_code: "No recibimos el código de autenticación de Google.",
@@ -10,12 +11,9 @@ type OAuthCallbackErrorPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-async function OAuthCallbackErrorMessage({ searchParams }: OAuthCallbackErrorPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const reason =
-    typeof resolvedSearchParams.reason === "string"
-      ? resolvedSearchParams.reason
-      : "oauth_callback";
+async function OAuthCallbackErrorMessage({ searchParams }: Readonly<OAuthCallbackErrorPageProps>) {
+  const params = await searchParams;
+  const reason = typeof params.reason === "string" ? params.reason : "oauth_callback";
   const message =
     callbackErrorMessages[reason] ?? "Ocurrió un error inesperado durante la autenticación.";
 
@@ -26,7 +24,9 @@ async function OAuthCallbackErrorMessage({ searchParams }: OAuthCallbackErrorPag
   );
 }
 
-export default function OAuthCallbackErrorPage({ searchParams }: OAuthCallbackErrorPageProps) {
+export default function OAuthCallbackErrorPage({
+  searchParams,
+}: Readonly<OAuthCallbackErrorPageProps>) {
   return (
     <main id="main-content" className="login_container">
       <Typography className="login_title" component="h1" variant="h4">
