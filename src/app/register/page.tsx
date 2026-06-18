@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import "../login/loginStyles.css";
 import { User } from "../login/page";
 import { signUpAction } from "@/app/actions/auth";
+import { loginService } from "@/features/login/model/loginService";
 
 interface NewUser extends User {
   confirm_password: string;
@@ -15,10 +16,15 @@ const initialNewUserState: NewUser = {
   confirm_password: "",
 };
 
+function getOAuthRedirectUrl() {
+  return new URL("/auth/callback", globalThis.location.origin).toString();
+}
+
 const Page = () => {
   const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState<NewUser>(initialNewUserState);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isGooglePending, setIsGooglePending] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,6 +40,19 @@ const Page = () => {
     });
   };
 
+  const signInWithGoogle = async () => {
+    setErrorMessage("");
+    setIsGooglePending(true);
+
+    const redirectTo = getOAuthRedirectUrl();
+    const { error } = await loginService.signInWithGoogle(redirectTo);
+
+    if (error) {
+      setErrorMessage("No se pudo iniciar sesión con Google. Intenta nuevamente.");
+      setIsGooglePending(false);
+    }
+  };
+
   return (
     <main id="main-content" className="login_container">
       <Typography className="login_title" component="h1" variant="h4">
@@ -42,6 +61,7 @@ const Page = () => {
       <Box className="register_form_container">
         <form
           className="login_form"
+          method="post"
           onSubmit={(event) => {
             event.preventDefault();
             void handleSubmit();
@@ -106,10 +126,23 @@ const Page = () => {
             variant="contained"
             fullWidth
             className="create_account"
-            disabled={isPending}
+            disabled={isPending || isGooglePending}
           >
             {isPending ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
+          <Box className="google_signin_spacing">
+            <Button
+              type="button"
+              variant="outlined"
+              fullWidth
+              onClick={() => {
+                void signInWithGoogle();
+              }}
+              disabled={isPending || isGooglePending}
+            >
+              {isGooglePending ? "Redirigiendo..." : "Iniciar con Google"}
+            </Button>
+          </Box>
         </form>
         <Box className="auth_footer_spacing_lg auth_text_center">
           <Typography variant="body2" color="textSecondary">

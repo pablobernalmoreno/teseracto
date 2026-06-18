@@ -61,6 +61,7 @@ const Page = () => {
       <Box className="login_form_container">
         <form
           className="login_form"
+          method="post"
           onSubmit={(event) => {
             event.preventDefault();
             void handleSubmit();

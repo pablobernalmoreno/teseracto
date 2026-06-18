@@ -148,6 +148,15 @@ Required variables:
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - `NEXT_PUBLIC_SITE_URL`
 
+Auth URL checklist (Supabase Dashboard -> Authentication -> URL Configuration):
+
+- Site URL should be your deployed domain (example: `https://teseracto.vercel.app`) in production.
+- Add all required redirect URLs, including local and production callback paths:
+  - `http://localhost:3000/auth/callback`
+  - `https://teseracto.vercel.app/auth/callback`
+
+If Site URL is left as localhost in production, OAuth providers can redirect back to localhost.
+
 Security notes:
 
 - Only use Supabase publishable/anon keys in `NEXT_PUBLIC_*` variables.
