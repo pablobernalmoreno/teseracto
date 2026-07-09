@@ -2,7 +2,6 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
-import { createClient } from "@/app/utils/supabase/server";
 import { Box, Button, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import { comparisonRows, plans } from "./pricingData";
@@ -16,17 +15,10 @@ export const metadata: Metadata = {
   },
 };
 
-const page = async () => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const appBarVariant = user?.id ? "authenticated" : "public";
-
+const page = () => {
   return (
     <>
-      <AppBarMenu variant={appBarVariant} activeSection="pricing" />
+      <AppBarMenu />
       <Box component="main" id="main-content" className="pricing_box">
         <section className="pricing_hero">
           <Typography className="pricing_eyebrow" component="p">
