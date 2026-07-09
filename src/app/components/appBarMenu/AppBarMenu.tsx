@@ -153,16 +153,18 @@ const loggedInButtons = (
           )}
         </Tooltip>
 
-        <Tooltip title="Abrir historial y análisis" arrow>
-          <Button
-            className={`appbar_buttons ${activeSection === "history" ? "appbar_buttons_active" : ""}`}
-            onClick={onShowHistory}
-            aria-label="Historial y análisis"
-            aria-pressed={activeSection === "history"}
-          >
-            <InsightsIcon aria-hidden="true" />
-          </Button>
-        </Tooltip>
+        {onShowHistory ? (
+          <Tooltip title="Abrir historial y análisis" arrow>
+            <Button
+              className={`appbar_buttons ${activeSection === "history" ? "appbar_buttons_active" : ""}`}
+              onClick={onShowHistory}
+              aria-label="Historial y análisis"
+              aria-pressed={activeSection === "history"}
+            >
+              <InsightsIcon aria-hidden="true" />
+            </Button>
+          </Tooltip>
+        ) : null}
       </Box>
     </>
   );
