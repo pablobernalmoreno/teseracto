@@ -121,6 +121,7 @@ const loggedInButtons = (
           ) : (
             <Button
               className={`appbar_buttons ${activeSection === "books" ? "appbar_buttons_active" : ""}`}
+              component={Link}
               href="/main"
               aria-label="Libros"
               aria-pressed={activeSection === "books"}
