@@ -55,11 +55,9 @@ export const DashboardPricingView: React.FC<DashboardPricingViewProps> = ({ onBa
                 </li>
               ))}
             </ul>
-            <Link href={plan.href} style={{ width: "100%" }}>
-              <Button className={plan.ctaClassName} fullWidth>
-                {plan.ctaLabel}
-              </Button>
-            </Link>
+            <Button component={Link} href={plan.href} className={plan.ctaClassName} fullWidth>
+              {plan.ctaLabel}
+            </Button>
           </Box>
         ))}
       </section>
