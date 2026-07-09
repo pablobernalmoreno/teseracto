@@ -4,6 +4,7 @@ import { AppBar, Box, Button, Toolbar, Tooltip } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import StoreIcon from "@mui/icons-material/Store";
+import BookIcon from "@mui/icons-material/Book";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -14,6 +15,7 @@ import "./AppBarMenuStyles.css";
 import { loginService } from "@/features/login/model/loginService";
 
 type AppBarMenuVariant = "authenticated" | "public";
+type AppBarActiveSection = "books" | "pricing" | "history";
 type ThemeMode = "system" | "light" | "dark";
 
 const THEME_STORAGE_KEY = "teseracto-theme-mode";
@@ -40,6 +42,9 @@ function getStoredThemeMode(): ThemeMode {
 interface AppBarMenuProps {
   variant?: AppBarMenuVariant;
   onShowHistory?: () => void;
+  onShowPricing?: () => void;
+  onShowBooks?: () => void;
+  activeSection?: AppBarActiveSection;
 }
 
 const notLoggedInButtons = (pathname: string) => {
@@ -77,7 +82,13 @@ const notLoggedInButtons = (pathname: string) => {
   );
 };
 
-const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => void) => {
+const loggedInButtons = (
+  onLogout: () => Promise<void>,
+  onShowHistory?: () => void,
+  onShowPricing?: () => void,
+  onShowBooks?: () => void,
+  activeSection: AppBarActiveSection = "books"
+) => {
   return (
     <>
       <Box className="appbar_nav_links" aria-label="Navegación principal">
@@ -97,16 +108,56 @@ const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => vo
         </Tooltip>
       </Box>
       <Box className="appbar_actions">
-        <Tooltip title="Ver planes" arrow>
-          <Button className="appbar_buttons" href="/pricing" aria-label="Planes">
-            <StoreIcon aria-hidden="true" />
-          </Button>
+        <Tooltip title="Ver libros" arrow>
+          {onShowBooks ? (
+            <Button
+              className={`appbar_buttons ${activeSection === "books" ? "appbar_buttons_active" : ""}`}
+              onClick={onShowBooks}
+              aria-label="Libros"
+              aria-pressed={activeSection === "books"}
+            >
+              <BookIcon aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              className={`appbar_buttons ${activeSection === "books" ? "appbar_buttons_active" : ""}`}
+              href="/main"
+              aria-label="Libros"
+              aria-pressed={activeSection === "books"}
+            >
+              <BookIcon aria-hidden="true" />
+            </Button>
+          )}
         </Tooltip>
+
+        <Tooltip title="Ver planes" arrow>
+          {onShowPricing ? (
+            <Button
+              className={`appbar_buttons ${activeSection === "pricing" ? "appbar_buttons_active" : ""}`}
+              onClick={onShowPricing}
+              aria-label="Planes"
+              aria-pressed={activeSection === "pricing"}
+            >
+              <StoreIcon aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              className={`appbar_buttons ${activeSection === "pricing" ? "appbar_buttons_active" : ""}`}
+              href="/pricing"
+              aria-label="Planes"
+              aria-pressed={activeSection === "pricing"}
+            >
+              <StoreIcon aria-hidden="true" />
+            </Button>
+          )}
+        </Tooltip>
+
         <Tooltip title="Abrir historial y análisis" arrow>
           <Button
-            className="appbar_buttons"
+            className={`appbar_buttons ${activeSection === "history" ? "appbar_buttons_active" : ""}`}
             onClick={onShowHistory}
             aria-label="Historial y análisis"
+            aria-pressed={activeSection === "history"}
           >
             <InsightsIcon aria-hidden="true" />
           </Button>
@@ -116,7 +167,13 @@ const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => vo
   );
 };
 
-export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProps) => {
+export const AppBarMenu = ({
+  variant = "public",
+  onShowHistory,
+  onShowPricing,
+  onShowBooks,
+  activeSection = "books",
+}: AppBarMenuProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => getStoredThemeMode());
@@ -176,7 +233,13 @@ export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProp
             </Tooltip>
           )}
           {isAuthenticated
-            ? loggedInButtons(handleLogout, onShowHistory)
+            ? loggedInButtons(
+                handleLogout,
+                onShowHistory,
+                onShowPricing,
+                onShowBooks,
+                activeSection
+              )
             : notLoggedInButtons(pathname)}
         </Toolbar>
       </AppBar>

@@ -5,6 +5,7 @@ import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { createClient } from "@/app/utils/supabase/server";
 import { Box, Button, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
+import { comparisonRows, plans } from "./pricingData";
 import "./pricingStyles.css";
 
 export const metadata: Metadata = {
@@ -14,90 +15,6 @@ export const metadata: Metadata = {
     canonical: "/pricing",
   },
 };
-
-const plans = [
-  {
-    name: "Gratis",
-    price: "$0",
-    period: "/ mes",
-    description:
-      "Para personas y equipos pequeños que quieren probar Teseracto con datos reales sin pagar al inicio.",
-    ctaLabel: "Comenzar gratis",
-    ctaClassName: "pricing_btn_secondary",
-    href: "/register",
-    features: [
-      "Hasta 10 libros",
-      "Hasta 100 movimientos por libro",
-      "Panel básico de estadísticas",
-      "Lectura automática de imágenes con cupo mensual limitado",
-      "Carga de imágenes",
-    ],
-  },
-  {
-    name: "Pro mensual",
-    price: "$19.900",
-    period: "/ mes",
-    description:
-      "Para organizaciones que ya operan cada semana y necesitan más capacidad, control y exportación.",
-    ctaLabel: "Elegir mensual",
-    ctaClassName: "pricing_btn_secondary",
-    href: "/register",
-    features: [
-      "Libros ilimitados",
-      "Hasta 500 movimientos por libro",
-      "Lectura automática ampliada para uso frecuente",
-      "Historial y análisis completos",
-      "Exportación a PDF y soporte por correo",
-    ],
-  },
-  {
-    name: "Pro anual",
-    price: "$199.000",
-    period: "/ año",
-    description:
-      "La mejor opción si Teseracto ya hace parte de tu operación. Equivale a 10 meses y usas 12.",
-    ctaLabel: "Elegir anual",
-    ctaClassName: "pricing_btn_primary",
-    href: "/register",
-    badge: "Mejor valor",
-    featured: true,
-    features: [
-      "Todo lo del plan Pro",
-      "Ahorro frente al pago mensual",
-      "Prioridad para mejoras y soporte",
-      "Más margen para crecer sin cambiar de plan",
-      "Ideal para uso continuo durante todo el año",
-    ],
-  },
-];
-
-const comparisonRows = [
-  {
-    label: "Libros",
-    free: "10",
-    pro: "Ilimitados",
-  },
-  {
-    label: "Movimientos por libro",
-    free: "100",
-    pro: "500",
-  },
-  {
-    label: "Lectura automática de comprobantes",
-    free: "Incluido con cupo mensual",
-    pro: "Cupo ampliado",
-  },
-  {
-    label: "Panel y métricas",
-    free: "Básico",
-    pro: "Completo",
-  },
-  {
-    label: "Exportación PDF",
-    free: "No incluida",
-    pro: "Incluida",
-  },
-];
 
 const page = async () => {
   const supabase = await createClient();

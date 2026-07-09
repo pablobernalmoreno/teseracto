@@ -5,6 +5,7 @@ import { DashboardSummaryStats } from "./DashboardSummaryStats";
 import { DashboardDetailPanel } from "./DashboardDetailPanel";
 import { DashboardCardsGrid } from "./DashboardCardsGrid";
 import { DashboardHistoryView } from "./DashboardHistoryView";
+import { DashboardPricingView } from "./DashboardPricingView";
 import { Box, CircularProgress, Pagination, Paper, Typography } from "@mui/material";
 import { useMainDashboardState } from "@/features/dashboard/model/state/useMainDashboardState";
 import "./mainStyles.css";
@@ -18,14 +19,18 @@ interface MainPageContentProps {
   initialBooks: BookData[];
   initialBooksCount: number;
   showHistory?: boolean;
+  showPricing?: boolean;
   onHideHistory?: () => void;
+  onHidePricing?: () => void;
 }
 
 export const MainPageContent: React.FC<MainPageContentProps> = ({
   initialBooks,
   initialBooksCount,
   showHistory = false,
+  showPricing = false,
   onHideHistory,
+  onHidePricing,
 }) => {
   const [historyBooks, setHistoryBooks] = useState<BookData[]>([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -129,6 +134,62 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
     />
   );
 
+  let stageContent: React.ReactNode;
+  if (showPricing) {
+    stageContent = <DashboardPricingView onBack={onHidePricing ?? (() => {})} />;
+  } else if (showHistory) {
+    stageContent = (
+      <DashboardHistoryView
+        books={historyBooks}
+        isLoading={isHistoryLoading}
+        loadError={historyError}
+        onBack={onHideHistory ?? (() => {})}
+      />
+    );
+  } else {
+    stageContent = (
+      <>
+        {!selectedCardId && (
+          <Box className="dashboard_top">
+            <SearchNavbar
+              value={searchQuery}
+              onChange={actions.handleSearchChange}
+              matchCount={filteredCount}
+              selectedCount={selectedCardIds.length}
+              onDeleteClick={actions.openDeleteModal}
+            />
+          </Box>
+        )}
+
+        <Box className="dashboard_middle">
+          {isPending ? (
+            <Paper elevation={0} className="dashboard_loading_panel">
+              <CircularProgress size={88} />
+              <Typography className="dashboard_loading_text" variant="body1">
+                Preparando el archivo y ordenando tus registros.
+              </Typography>
+            </Paper>
+          ) : (
+            dashboardContent
+          )}
+        </Box>
+
+        {!selectedCardId && (
+          <Box className="dashboard_pagination">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={actions.handlePageChange}
+              color="primary"
+              size="large"
+              disabled={isPending}
+            />
+          </Box>
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       <main id="main-content" className="dashboard_shell">
@@ -156,56 +217,7 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
           />
         </Box>
 
-        <Box className="dashboard_stage">
-          {showHistory ? (
-            <DashboardHistoryView
-              books={historyBooks}
-              isLoading={isHistoryLoading}
-              loadError={historyError}
-              onBack={onHideHistory ?? (() => {})}
-            />
-          ) : (
-            <>
-              {!selectedCardId && (
-                <Box className="dashboard_top">
-                  <SearchNavbar
-                    value={searchQuery}
-                    onChange={actions.handleSearchChange}
-                    matchCount={filteredCount}
-                    selectedCount={selectedCardIds.length}
-                    onDeleteClick={actions.openDeleteModal}
-                  />
-                </Box>
-              )}
-
-              <Box className="dashboard_middle">
-                {isPending ? (
-                  <Paper elevation={0} className="dashboard_loading_panel">
-                    <CircularProgress size={88} />
-                    <Typography className="dashboard_loading_text" variant="body1">
-                      Preparando el archivo y ordenando tus registros.
-                    </Typography>
-                  </Paper>
-                ) : (
-                  dashboardContent
-                )}
-              </Box>
-
-              {!selectedCardId && (
-                <Box className="dashboard_pagination">
-                  <Pagination
-                    count={totalPages}
-                    page={currentPage}
-                    onChange={actions.handlePageChange}
-                    color="primary"
-                    size="large"
-                    disabled={isPending}
-                  />
-                </Box>
-              )}
-            </>
-          )}
-        </Box>
+        <Box className="dashboard_stage">{stageContent}</Box>
       </main>
 
       <DeleteDialog

@@ -89,6 +89,16 @@
   background: rgba(var(--rgb-accent), 0.1) !important;
 }
 
+.appbar_buttons_active {
+  background: rgba(var(--rgb-accent), 0.16) !important;
+  border: 1px solid rgba(var(--rgb-accent), 0.38) !important;
+  box-shadow: 0 8px 16px rgba(var(--rgb-accent), 0.14) !important;
+}
+
+.appbar_buttons_active:hover {
+  background: rgba(var(--rgb-accent), 0.2) !important;
+}
+
 .appbar_login {
   border: 1px solid rgba(var(--rgb-accent), 0.3) !important;
 }
