@@ -28,6 +28,44 @@ jobs:
       - name: Run Semgrep
         run: semgrep scan --config p/owasp-top-ten --config p/javascript --error --sarif --output semgrep.sarif .
 
+      - name: Print Semgrep findings
+        if: always()
+        run: |
+          if [ ! -f semgrep.sarif ]; then
+            echo "semgrep.sarif not found."
+            exit 0
+          fi
+
+          python - <<'PY'
+          import json
+
+          with open("semgrep.sarif", "r", encoding="utf-8") as f:
+              sarif = json.load(f)
+
+          results = []
+          for run in sarif.get("runs", []):
+              for result in run.get("results", []):
+                  location = (result.get("locations") or [{}])[0]
+                  physical = location.get("physicalLocation") or {}
+                  artifact = physical.get("artifactLocation") or {}
+                  region = physical.get("region") or {}
+
+                  rule_id = result.get("ruleId", "unknown-rule")
+                  path = artifact.get("uri", "unknown-file")
+                  line = region.get("startLine", "?")
+                  message = (result.get("message") or {}).get("text", "").replace("\n", " ").strip()
+                  results.append((rule_id, path, line, message))
+
+          if not results:
+              print("Semgrep findings: 0")
+          else:
+              print(f"Semgrep findings: {len(results)}")
+              print("rule_id | file | line | message")
+              print("-" * 120)
+              for rule_id, path, line, message in results:
+                  print(f"{rule_id} | {path} | {line} | {message}")
+          PY
+
       - name: Upload SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@641a925cfafe92d0fdf8b239ba4053e3f8d99d6d # v3
