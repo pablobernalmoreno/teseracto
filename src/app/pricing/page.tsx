@@ -2,12 +2,13 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
+import { createClient } from "@/app/utils/supabase/server";
 import { Box, Button, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import "./pricingStyles.css";
 
 export const metadata: Metadata = {
-  title: "Precios",
+  title: "  Planes",
   description: "Conoce los planes de Teseracto para gestionar tu biblioteca financiera.",
   alternates: {
     canonical: "/pricing",
@@ -98,10 +99,17 @@ const comparisonRows = [
   },
 ];
 
-const page = () => {
+const page = async () => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const appBarVariant = user?.id ? "authenticated" : "public";
+
   return (
     <>
-      <AppBarMenu />
+      <AppBarMenu variant={appBarVariant} />
       <Box component="main" id="main-content" className="pricing_box">
         <section className="pricing_hero">
           <Typography className="pricing_eyebrow" component="p">
@@ -113,8 +121,8 @@ const page = () => {
             <span className="pricing_title_accent">escala cuando lo necesites.</span>
           </Typography>
           <Typography className="pricing_subtitle">
-            El plan gratis te deja trabajar con hasta 10 libros y leer imágenes con un cupo
-            mensual. Los planes Pro desbloquean más capacidad, exportación y análisis avanzados.
+            El plan gratis te deja trabajar con hasta 10 libros y leer imágenes con un cupo mensual.
+            Los planes Pro desbloquean más capacidad, exportación y análisis avanzados.
           </Typography>
         </section>
 

@@ -1,10 +1,9 @@
 "use client";
 
-import { AppBar, Box, Button, Toolbar } from "@mui/material";
+import { AppBar, Box, Button, Toolbar, Tooltip } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import StoreIcon from "@mui/icons-material/Store";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -50,21 +49,29 @@ const notLoggedInButtons = (pathname: string) => {
     <>
       <Box className="appbar_nav_links" aria-label="Secciones informativas">
         {showHomeButton && (
-          <Button className="appbar_buttons" component={Link} href="/">
-            Inicio
-          </Button>
+          <Tooltip title="Ir al inicio" arrow>
+            <Button className="appbar_buttons" component={Link} href="/">
+              Inicio
+            </Button>
+          </Tooltip>
         )}
-        <Button className="appbar_buttons" component={Link} href="/pricing">
-          Precios
-        </Button>
+        <Tooltip title="Ver planes" arrow>
+          <Button className="appbar_buttons" component={Link} href="/pricing">
+            Planes
+          </Button>
+        </Tooltip>
       </Box>
       <Box className="appbar_actions">
-        <Button className="appbar_buttons appbar_login" component={Link} href="/login">
-          Ingresar
-        </Button>
-        <Button className="appbar_buttons appbar_cta" component={Link} href="/register">
-          Crear cuenta <ArrowForwardIcon />
-        </Button>
+        <Tooltip title="Iniciar sesión" arrow>
+          <Button className="appbar_buttons appbar_login" component={Link} href="/login">
+            Ingresar
+          </Button>
+        </Tooltip>
+        <Tooltip title="Crear una cuenta" arrow>
+          <Button className="appbar_buttons appbar_cta" component={Link} href="/register">
+            Crear cuenta <ArrowForwardIcon />
+          </Button>
+        </Tooltip>
       </Box>
     </>
   );
@@ -83,24 +90,27 @@ const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => vo
           <span className="appbar_brand_mark" aria-hidden="true" />
           <span className="appbar_brand_name">Teseracto</span>
         </Box>
-        <Button className="appbar_buttons" onClick={onLogout}>
-          Salir
-        </Button>
+        <Tooltip title="Cerrar sesión" arrow>
+          <Button className="appbar_buttons" onClick={onLogout}>
+            Salir
+          </Button>
+        </Tooltip>
       </Box>
-      <Box>
-        <Button className="appbar_buttons" href="/login" aria-label="Notificaciones">
-          <NotificationsIcon aria-hidden="true" />
-        </Button>
-        <Button
-          className="appbar_buttons"
-          onClick={onShowHistory}
-          aria-label="Historial y análisis"
-        >
-          <InsightsIcon aria-hidden="true" />
-        </Button>
-        <Button className="appbar_buttons" href="/login" aria-label="Perfil de usuario">
-          <AccountCircleIcon aria-hidden="true" />
-        </Button>
+      <Box className="appbar_actions">
+        <Tooltip title="Ver planes" arrow>
+          <Button className="appbar_buttons" href="/pricing" aria-label="Planes">
+            <StoreIcon aria-hidden="true" />
+          </Button>
+        </Tooltip>
+        <Tooltip title="Abrir historial y análisis" arrow>
+          <Button
+            className="appbar_buttons"
+            onClick={onShowHistory}
+            aria-label="Historial y análisis"
+          >
+            <InsightsIcon aria-hidden="true" />
+          </Button>
+        </Tooltip>
       </Box>
     </>
   );
@@ -153,15 +163,17 @@ export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProp
       <AppBar className="appbar" position="static">
         <Toolbar component="nav" aria-label="Navegación principal" className="toolbar">
           {process.env.NODE_ENV === "development" && (
-            <Button
-              className="appbar_buttons appbar_theme_toggle"
-              onClick={handleToggleTheme}
-              aria-label="Cambiar tema"
-              suppressHydrationWarning
-            >
-              {themeToggleIcon}
-              {themeToggleLabel}
-            </Button>
+            <Tooltip title="Cambiar tema" arrow>
+              <Button
+                className="appbar_buttons appbar_theme_toggle"
+                onClick={handleToggleTheme}
+                aria-label="Cambiar tema"
+                suppressHydrationWarning
+              >
+                {themeToggleIcon}
+                {themeToggleLabel}
+              </Button>
+            </Tooltip>
           )}
           {isAuthenticated
             ? loggedInButtons(handleLogout, onShowHistory)

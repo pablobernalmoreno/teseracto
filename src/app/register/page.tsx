@@ -135,11 +135,15 @@ const Page = () => {
               type="button"
               variant="outlined"
               fullWidth
+              className="google_signin"
               onClick={() => {
                 void signInWithGoogle();
               }}
               disabled={isPending || isGooglePending}
             >
+              <span className="google_mark" aria-hidden="true">
+                G
+              </span>
               {isGooglePending ? "Redirigiendo..." : "Iniciar con Google"}
             </Button>
           </Box>
