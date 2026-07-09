@@ -55,9 +55,9 @@ export const plans: PricingPlan[] = [
   {
     name: "Pro anual",
     price: "$199.000",
-    period: "/ ano",
+    period: "/ año",
     description:
-      "La mejor opcion si Teseracto ya hace parte de tu operacion. Equivale a 10 meses y usas 12.",
+      "La mejor opción si Teseracto ya hace parte de tu operación. Equivale a 10 meses y usas 12.",
     ctaLabel: "Elegir anual",
     ctaClassName: "pricing_btn_primary",
     href: "/register",
@@ -67,8 +67,8 @@ export const plans: PricingPlan[] = [
       "Todo lo del plan Pro",
       "Ahorro frente al pago mensual",
       "Prioridad para mejoras y soporte",
-      "Mas margen para crecer sin cambiar de plan",
-      "Ideal para uso continuo durante todo el ano",
+      "Más margen para crecer sin cambiar de plan",
+      "Ideal para uso continuo durante todo el año",
     ],
   },
 ];
