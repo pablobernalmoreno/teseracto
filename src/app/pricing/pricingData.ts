@@ -85,17 +85,17 @@ export const comparisonRows: PricingComparisonRow[] = [
     pro: "500",
   },
   {
-    label: "Lectura automatica de comprobantes",
+    label: "Lectura automática de comprobantes",
     free: "Incluido con cupo mensual",
     pro: "Cupo ampliado",
   },
   {
-    label: "Panel y metricas",
-    free: "Basico",
+    label: "Panel y métricas",
+    free: "Básico",
     pro: "Completo",
   },
   {
-    label: "Exportacion PDF",
+    label: "Exportación PDF",
     free: "No incluida",
     pro: "Incluida",
   },
