@@ -26,7 +26,7 @@ const page = async () => {
 
   return (
     <>
-      <AppBarMenu variant={appBarVariant} />
+      <AppBarMenu variant={appBarVariant} activeSection="pricing" />
       <Box component="main" id="main-content" className="pricing_box">
         <section className="pricing_hero">
           <Typography className="pricing_eyebrow" component="p">
