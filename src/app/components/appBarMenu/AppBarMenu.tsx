@@ -53,18 +53,19 @@ const notLoggedInButtons = (pathname: string) => {
   return (
     <>
       <Box className="appbar_nav_links" aria-label="Secciones informativas">
-        {showHomeButton && (
+        {showHomeButton ? (
           <Tooltip title="Ir al inicio" arrow>
             <Button className="appbar_buttons" component={Link} href="/">
               Inicio
             </Button>
           </Tooltip>
+        ) : (
+          <Tooltip title="Ver planes" arrow>
+            <Button className="appbar_buttons" component={Link} href="/pricing">
+              Planes
+            </Button>
+          </Tooltip>
         )}
-        <Tooltip title="Ver planes" arrow>
-          <Button className="appbar_buttons" component={Link} href="/pricing">
-            Planes
-          </Button>
-        </Tooltip>
       </Box>
       <Box className="appbar_actions">
         <Tooltip title="Iniciar sesión" arrow>
