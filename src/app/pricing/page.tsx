@@ -9,7 +9,7 @@ import { comparisonRows, plans } from "./pricingData";
 import "./pricingStyles.css";
 
 export const metadata: Metadata = {
-  title: "  Planes",
+  title: "Planes",
   description: "Conoce los planes de Teseracto para gestionar tu biblioteca financiera.",
   alternates: {
     canonical: "/pricing",
