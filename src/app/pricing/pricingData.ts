@@ -40,16 +40,16 @@ export const plans: PricingPlan[] = [
     price: "$19.900",
     period: "/ mes",
     description:
-      "Para organizaciones que ya operan cada semana y necesitan mas capacidad, control y exportacion.",
+      "Para organizaciones que ya operan cada semana y necesitan más capacidad, control y exportación.",
     ctaLabel: "Elegir mensual",
     ctaClassName: "pricing_btn_secondary",
     href: "/register",
     features: [
       "Libros ilimitados",
       "Hasta 500 movimientos por libro",
-      "Lectura automatica ampliada para uso frecuente",
-      "Historial y analisis completos",
-      "Exportacion a PDF y soporte por correo",
+      "Lectura automática ampliada para uso frecuente",
+      "Historial y análisis completos",
+      "Exportación a PDF y soporte por correo",
     ],
   },
   {
