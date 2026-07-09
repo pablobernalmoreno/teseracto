@@ -23,16 +23,16 @@ export const plans: PricingPlan[] = [
     price: "$0",
     period: "/ mes",
     description:
-      "Para personas y equipos pequenos que quieren probar Teseracto con datos reales sin pagar al inicio.",
+      "Para personas y equipos pequeños que quieren probar Teseracto con datos reales sin pagar al inicio.",
     ctaLabel: "Comenzar gratis",
     ctaClassName: "pricing_btn_secondary",
     href: "/register",
     features: [
       "Hasta 10 libros",
       "Hasta 100 movimientos por libro",
-      "Panel basico de estadisticas",
-      "Lectura automatica de imagenes con cupo mensual limitado",
-      "Carga de imagenes",
+      "Panel básico de estadísticas",
+      "Lectura automática de imágenes con cupo mensual limitado",
+      "Carga de imágenes",
     ],
   },
   {
