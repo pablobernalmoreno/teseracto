@@ -64,13 +64,13 @@ export const DashboardPricingView: React.FC<DashboardPricingViewProps> = ({ onBa
 
       <section className="pricing_matrix">
         <Typography className="pricing_section_title" component="h3" variant="h6">
-          Comparacion rapida
+          Comparación rápida
         </Typography>
-        <table className="pricing_matrix_table" aria-label="Tabla de comparacion">
+        <table className="pricing_matrix_table" aria-label="Tabla de comparación">
           <thead>
             <tr className="pricing_matrix_row pricing_matrix_row_header">
               <th className="pricing_matrix_cell pricing_matrix_feature" scope="col">
-                Funcion
+                Función
               </th>
               <th className="pricing_matrix_cell" scope="col">
                 Gratis
