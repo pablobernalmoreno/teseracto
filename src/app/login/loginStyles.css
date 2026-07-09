@@ -88,6 +88,54 @@
   font-weight: 700 !important;
 }
 
+.google_signin {
+  border: 1px solid rgba(var(--rgb-accent), 0.35) !important;
+  background: rgba(var(--rgb-white), 0.9) !important;
+  color: var(--color-text-primary) !important;
+  text-transform: none !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  min-height: 44px;
+  gap: 0.5rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.google_signin:hover {
+  border-color: rgba(var(--rgb-accent-strong), 0.55) !important;
+  background: rgba(var(--rgb-accent), 0.08) !important;
+  box-shadow: 0 10px 18px rgba(var(--rgb-accent-strong), 0.14) !important;
+}
+
+.google_signin.Mui-disabled {
+  border-color: rgba(var(--rgb-border), 0.32) !important;
+  color: rgba(var(--rgb-ink), 0.48) !important;
+  background: rgba(var(--rgb-white), 0.72) !important;
+}
+
+.google_mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  background: conic-gradient(
+    from 200deg,
+    #ea4335 0deg 90deg,
+    #fbbc05 90deg 170deg,
+    #34a853 170deg 270deg,
+    #4285f4 270deg 360deg
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .login_form .MuiOutlinedInput-root {
   border-radius: 10px;
   background: rgba(var(--rgb-white), 0.94);

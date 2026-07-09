@@ -1,10 +1,10 @@
 "use client";
 
-import { AppBar, Box, Button, Toolbar } from "@mui/material";
+import { AppBar, Box, Button, Toolbar, Tooltip } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import StoreIcon from "@mui/icons-material/Store";
+import BookIcon from "@mui/icons-material/Book";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -15,6 +15,7 @@ import "./AppBarMenuStyles.css";
 import { loginService } from "@/features/login/model/loginService";
 
 type AppBarMenuVariant = "authenticated" | "public";
+type AppBarActiveSection = "books" | "pricing" | "history";
 type ThemeMode = "system" | "light" | "dark";
 
 const THEME_STORAGE_KEY = "teseracto-theme-mode";
@@ -41,6 +42,9 @@ function getStoredThemeMode(): ThemeMode {
 interface AppBarMenuProps {
   variant?: AppBarMenuVariant;
   onShowHistory?: () => void;
+  onShowPricing?: () => void;
+  onShowBooks?: () => void;
+  activeSection?: AppBarActiveSection;
 }
 
 const notLoggedInButtons = (pathname: string) => {
@@ -49,28 +53,43 @@ const notLoggedInButtons = (pathname: string) => {
   return (
     <>
       <Box className="appbar_nav_links" aria-label="Secciones informativas">
-        {showHomeButton && (
-          <Button className="appbar_buttons" component={Link} href="/">
-            Inicio
-          </Button>
+        {showHomeButton ? (
+          <Tooltip title="Ir al inicio" arrow>
+            <Button className="appbar_buttons" component={Link} href="/">
+              Inicio
+            </Button>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Ver planes" arrow>
+            <Button className="appbar_buttons" component={Link} href="/pricing">
+              Planes
+            </Button>
+          </Tooltip>
         )}
-        <Button className="appbar_buttons" component={Link} href="/pricing">
-          Precios
-        </Button>
       </Box>
       <Box className="appbar_actions">
-        <Button className="appbar_buttons appbar_login" component={Link} href="/login">
-          Ingresar
-        </Button>
-        <Button className="appbar_buttons appbar_cta" component={Link} href="/register">
-          Crear cuenta <ArrowForwardIcon />
-        </Button>
+        <Tooltip title="Iniciar sesión" arrow>
+          <Button className="appbar_buttons appbar_login" component={Link} href="/login">
+            Ingresar
+          </Button>
+        </Tooltip>
+        <Tooltip title="Crear una cuenta" arrow>
+          <Button className="appbar_buttons appbar_cta" component={Link} href="/register">
+            Crear cuenta <ArrowForwardIcon />
+          </Button>
+        </Tooltip>
       </Box>
     </>
   );
 };
 
-const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => void) => {
+const loggedInButtons = (
+  onLogout: () => Promise<void>,
+  onShowHistory?: () => void,
+  onShowPricing?: () => void,
+  onShowBooks?: () => void,
+  activeSection: AppBarActiveSection = "books"
+) => {
   return (
     <>
       <Box className="appbar_nav_links" aria-label="Navegación principal">
@@ -83,30 +102,83 @@ const loggedInButtons = (onLogout: () => Promise<void>, onShowHistory?: () => vo
           <span className="appbar_brand_mark" aria-hidden="true" />
           <span className="appbar_brand_name">Teseracto</span>
         </Box>
-        <Button className="appbar_buttons" onClick={onLogout}>
-          Salir
-        </Button>
+        <Tooltip title="Cerrar sesión" arrow>
+          <Button className="appbar_buttons" onClick={onLogout}>
+            Salir
+          </Button>
+        </Tooltip>
       </Box>
-      <Box>
-        <Button className="appbar_buttons" href="/login" aria-label="Notificaciones">
-          <NotificationsIcon aria-hidden="true" />
-        </Button>
-        <Button
-          className="appbar_buttons"
-          onClick={onShowHistory}
-          aria-label="Historial y análisis"
-        >
-          <InsightsIcon aria-hidden="true" />
-        </Button>
-        <Button className="appbar_buttons" href="/login" aria-label="Perfil de usuario">
-          <AccountCircleIcon aria-hidden="true" />
-        </Button>
+      <Box className="appbar_actions">
+        <Tooltip title="Ver libros" arrow>
+          {onShowBooks ? (
+            <Button
+              className={`appbar_buttons ${activeSection === "books" ? "appbar_buttons_active" : ""}`}
+              onClick={onShowBooks}
+              aria-label="Libros"
+              aria-pressed={activeSection === "books"}
+            >
+              <BookIcon aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              className={`appbar_buttons ${activeSection === "books" ? "appbar_buttons_active" : ""}`}
+              component={Link}
+              href="/main"
+              aria-label="Libros"
+              aria-pressed={activeSection === "books"}
+            >
+              <BookIcon aria-hidden="true" />
+            </Button>
+          )}
+        </Tooltip>
+
+        <Tooltip title="Ver planes" arrow>
+          {onShowPricing ? (
+            <Button
+              className={`appbar_buttons ${activeSection === "pricing" ? "appbar_buttons_active" : ""}`}
+              onClick={onShowPricing}
+              aria-label="Planes"
+              aria-pressed={activeSection === "pricing"}
+            >
+              <StoreIcon aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              className={`appbar_buttons ${activeSection === "pricing" ? "appbar_buttons_active" : ""}`}
+              component={Link}
+              href="/pricing"
+              aria-label="Planes"
+              aria-pressed={activeSection === "pricing"}
+            >
+              <StoreIcon aria-hidden="true" />
+            </Button>
+          )}
+        </Tooltip>
+
+        {onShowHistory ? (
+          <Tooltip title="Abrir historial y análisis" arrow>
+            <Button
+              className={`appbar_buttons ${activeSection === "history" ? "appbar_buttons_active" : ""}`}
+              onClick={onShowHistory}
+              aria-label="Historial y análisis"
+              aria-pressed={activeSection === "history"}
+            >
+              <InsightsIcon aria-hidden="true" />
+            </Button>
+          </Tooltip>
+        ) : null}
       </Box>
     </>
   );
 };
 
-export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProps) => {
+export const AppBarMenu = ({
+  variant = "public",
+  onShowHistory,
+  onShowPricing,
+  onShowBooks,
+  activeSection = "books",
+}: AppBarMenuProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => getStoredThemeMode());
@@ -153,18 +225,26 @@ export const AppBarMenu = ({ variant = "public", onShowHistory }: AppBarMenuProp
       <AppBar className="appbar" position="static">
         <Toolbar component="nav" aria-label="Navegación principal" className="toolbar">
           {process.env.NODE_ENV === "development" && (
-            <Button
-              className="appbar_buttons appbar_theme_toggle"
-              onClick={handleToggleTheme}
-              aria-label="Cambiar tema"
-              suppressHydrationWarning
-            >
-              {themeToggleIcon}
-              {themeToggleLabel}
-            </Button>
+            <Tooltip title="Cambiar tema" arrow>
+              <Button
+                className="appbar_buttons appbar_theme_toggle"
+                onClick={handleToggleTheme}
+                aria-label="Cambiar tema"
+                suppressHydrationWarning
+              >
+                {themeToggleIcon}
+                {themeToggleLabel}
+              </Button>
+            </Tooltip>
           )}
           {isAuthenticated
-            ? loggedInButtons(handleLogout, onShowHistory)
+            ? loggedInButtons(
+                handleLogout,
+                onShowHistory,
+                onShowPricing,
+                onShowBooks,
+                activeSection
+              )
             : notLoggedInButtons(pathname)}
         </Toolbar>
       </AppBar>

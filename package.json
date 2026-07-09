@@ -2,7 +2,7 @@
   "name": "teseracto",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@11.0.4",
+  "packageManager": "pnpm@11.10.0",
   "engines": {
     "node": ">=20.17.0"
   },
