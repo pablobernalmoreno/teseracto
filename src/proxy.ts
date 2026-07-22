@@ -23,6 +23,7 @@ function buildCsp(nonce: string, allowUnsafeEval: boolean): string {
     "'wasm-unsafe-eval'",
     "blob:",
     "https://cdn.jsdelivr.net",
+    "https://checkout.wompi.co",
   ];
 
   if (allowUnsafeEval) {
@@ -36,9 +37,10 @@ function buildCsp(nonce: string, allowUnsafeEval: boolean): string {
     "object-src 'none'",
     "form-action 'self'",
     `script-src ${scriptSrc.join(" ")}`,
-    `script-src-elem 'self' 'nonce-${nonce}' blob: https://cdn.jsdelivr.net`,
+    `script-src-elem 'self' 'nonce-${nonce}' blob: https://cdn.jsdelivr.net https://checkout.wompi.co`,
     "worker-src 'self' blob:",
-    "child-src 'self' blob:",
+    "child-src 'self' blob: https://checkout.wompi.co https://*.wompi.co",
+    "frame-src 'self' https://checkout.wompi.co https://*.wompi.co",
     // Keep styles compatible with MUI while scripts are strictly nonce-based.
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
