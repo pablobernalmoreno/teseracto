@@ -327,8 +327,6 @@ const markWebhookEventProcessed = async (
   return { ok: true, data: {} };
 };
 
-export const runtime = "nodejs";
-
 export const POST = async (request: NextRequest) => {
   const eventSecret = getEventSecret();
   if (!eventSecret) {
