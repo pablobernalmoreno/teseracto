@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, Button, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
-import { comparisonRows, plans } from "./pricingData";
+import { comparisonRows, plans, type PaidPricingPlanId, type PricingPlan } from "./pricingData";
 import "./pricingStyles.css";
 
 export const metadata: Metadata = {
@@ -16,6 +16,18 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
+  const isPaidPlan = (plan: PricingPlan): plan is PricingPlan & { id: PaidPricingPlanId } =>
+    plan.id !== "free";
+
+  const getCtaHref = (plan: PricingPlan) => {
+    if (!isPaidPlan(plan)) {
+      return plan.href;
+    }
+
+    const nextPath = `/pricing?plan=${plan.id}`;
+    return `/login?next=${encodeURIComponent(nextPath)}`;
+  };
+
   return (
     <>
       <AppBarMenu />
@@ -57,7 +69,7 @@ const page = () => {
                   </li>
                 ))}
               </ul>
-              <Link href={plan.href} style={{ width: "100%" }}>
+              <Link href={getCtaHref(plan)} style={{ width: "100%" }}>
                 <Button className={plan.ctaClassName} fullWidth>
                   {plan.ctaLabel}
                 </Button>

@@ -1,4 +1,5 @@
 export interface PricingPlan {
+  id: PricingPlanId;
   name: string;
   price: string;
   period: string;
@@ -11,6 +12,17 @@ export interface PricingPlan {
   featured?: boolean;
 }
 
+export type PricingPlanId = "free" | "pro_monthly" | "pro_annual";
+
+export type PaidPricingPlanId = Exclude<PricingPlanId, "free">;
+
+export interface BillingPlanDefinition {
+  id: PaidPricingPlanId;
+  amountInCents: number;
+  currency: "COP";
+  wompiDescription: string;
+}
+
 export interface PricingComparisonRow {
   label: string;
   free: string;
@@ -19,6 +31,7 @@ export interface PricingComparisonRow {
 
 export const plans: PricingPlan[] = [
   {
+    id: "free",
     name: "Gratis",
     price: "$0",
     period: "/ mes",
@@ -36,6 +49,7 @@ export const plans: PricingPlan[] = [
     ],
   },
   {
+    id: "pro_monthly",
     name: "Pro mensual",
     price: "$19.900",
     period: "/ mes",
@@ -53,6 +67,7 @@ export const plans: PricingPlan[] = [
     ],
   },
   {
+    id: "pro_annual",
     name: "Pro anual",
     price: "$199.000",
     period: "/ año",
@@ -72,6 +87,21 @@ export const plans: PricingPlan[] = [
     ],
   },
 ];
+
+export const BILLING_PLANS: Record<PaidPricingPlanId, BillingPlanDefinition> = {
+  pro_monthly: {
+    id: "pro_monthly",
+    amountInCents: 1990000,
+    currency: "COP",
+    wompiDescription: "Teseracto Pro mensual",
+  },
+  pro_annual: {
+    id: "pro_annual",
+    amountInCents: 19900000,
+    currency: "COP",
+    wompiDescription: "Teseracto Pro anual",
+  },
+};
 
 export const comparisonRows: PricingComparisonRow[] = [
   {
