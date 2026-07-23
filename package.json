@@ -45,7 +45,7 @@
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/eslintrc": "^3.3.6",
     "@tailwindcss/postcss": "^4.2.4",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.1.1",
