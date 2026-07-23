@@ -36,7 +36,6 @@ const isPaidPlanId = (value: string): value is PaidPricingPlanId => value in BIL
 const getWompiEnv = () => {
   const publicKey = process.env.NEXT_PUBLIC_WOMPI;
   const integritySecret = process.env.NEXT_INTEGRITY_WOMPI_URL;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   if (!publicKey || !integritySecret) {
     return {
@@ -49,7 +48,6 @@ const getWompiEnv = () => {
     ok: true as const,
     publicKey,
     integritySecret,
-    siteUrl,
   };
 };
 
@@ -123,9 +121,7 @@ export const POST = async (request: NextRequest) => {
     publicKey: env.publicKey,
     reference,
     signature,
-    redirectUrl: env.siteUrl
-      ? `${env.siteUrl.replace(/\/$/, "")}/dashboard?billing=processing`
-      : undefined,
+    redirectUrl: `${request.nextUrl.origin}/dashboard?billing=processing`,
   };
 
   return NextResponse.json({ data: responseBody });
