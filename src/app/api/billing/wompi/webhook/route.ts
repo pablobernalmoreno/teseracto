@@ -13,9 +13,11 @@ interface WompiWebhookTransaction {
 interface WompiWebhookPayload {
   event?: string;
   id?: string;
-  data?: {
-    transaction?: WompiWebhookTransaction;
-  };
+  data?:
+    | WompiWebhookTransaction
+    | {
+        transaction?: WompiWebhookTransaction;
+      };
   signature?: {
     checksum?: string;
     properties?: string[];
@@ -46,8 +48,7 @@ type RouteSuccess<T extends Record<string, unknown> = Record<string, unknown>> =
 };
 
 type RouteResult<T extends Record<string, unknown> = Record<string, unknown>> =
-  | RouteSuccess<T>
-  | RouteError;
+  RouteSuccess<T> | RouteError;
 
 const getEventSecret = () => process.env.NEXT_EVENT_WOMPI_URL;
 
@@ -138,6 +139,26 @@ const mapWompiStatusToBillingStatus = (status?: string) => {
   }
 
   return "error" as const;
+};
+
+export const getTransactionFromPayload = (
+  payload: WompiWebhookPayload
+): WompiWebhookTransaction | null => {
+  const payloadData = payload.data;
+
+  if (!payloadData || typeof payloadData !== "object") {
+    return null;
+  }
+
+  if ("transaction" in payloadData && payloadData.transaction) {
+    return payloadData.transaction;
+  }
+
+  if ("reference" in payloadData || "status" in payloadData || "id" in payloadData) {
+    return payloadData as WompiWebhookTransaction;
+  }
+
+  return null;
 };
 
 const addPlanPeriod = (baseDate: Date, planId: PaidPricingPlanId) => {
@@ -254,7 +275,7 @@ const syncPaymentFromTransaction = async (
   eventType: string | null,
   serviceRoleClient: ReturnType<typeof createServiceRoleClient>
 ): Promise<RouteResult> => {
-  const transaction = payload.data?.transaction;
+  const transaction = getTransactionFromPayload(payload);
   const reference = transaction?.reference?.trim();
   const providerTransactionId = transaction?.id?.trim() || null;
   const nextStatus = mapWompiStatusToBillingStatus(transaction?.status);
@@ -330,6 +351,7 @@ const markWebhookEventProcessed = async (
 export const POST = async (request: NextRequest) => {
   const eventSecret = getEventSecret();
   if (!eventSecret) {
+    console.error("[wompi-webhook] missing event secret configuration");
     return NextResponse.json({ error: "Missing Wompi event secret." }, { status: 500 });
   }
 
@@ -337,16 +359,25 @@ export const POST = async (request: NextRequest) => {
   const payload = parsePayload(rawBody);
 
   if (!payload) {
+    console.warn("[wompi-webhook] invalid JSON payload", {
+      bodyLength: rawBody.length,
+    });
     return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
   }
 
+  const eventType = payload.event || null;
+  const eventId = payload.id || null;
+
   if (!verifyWebhookSignature(payload, eventSecret)) {
+    console.warn("[wompi-webhook] invalid signature", {
+      eventType,
+      eventId,
+      hasSignature: Boolean(payload.signature?.checksum),
+    });
     return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
   }
 
   const eventHash = crypto.createHash("sha256").update(rawBody).digest("hex");
-  const eventType = payload.event || null;
-  const eventId = payload.id || null;
 
   const serviceRoleClient = createServiceRoleClient();
 
@@ -358,6 +389,12 @@ export const POST = async (request: NextRequest) => {
     serviceRoleClient
   );
   if (!persistResult.ok) {
+    console.error("[wompi-webhook] failed to persist event", {
+      eventType,
+      eventId,
+      status: persistResult.status,
+      message: persistResult.message,
+    });
     return NextResponse.json({ error: persistResult.message }, { status: persistResult.status });
   }
   if (persistResult.data.duplicate) {
@@ -366,11 +403,23 @@ export const POST = async (request: NextRequest) => {
 
   const syncResult = await syncPaymentFromTransaction(payload, eventType, serviceRoleClient);
   if (!syncResult.ok) {
+    console.error("[wompi-webhook] failed to sync payment", {
+      eventType,
+      eventId,
+      status: syncResult.status,
+      message: syncResult.message,
+    });
     return NextResponse.json({ error: syncResult.message }, { status: syncResult.status });
   }
 
   const processedResult = await markWebhookEventProcessed(eventHash, serviceRoleClient);
   if (!processedResult.ok) {
+    console.error("[wompi-webhook] failed to mark event processed", {
+      eventType,
+      eventId,
+      status: processedResult.status,
+      message: processedResult.message,
+    });
     return NextResponse.json(
       { error: processedResult.message },
       { status: processedResult.status }

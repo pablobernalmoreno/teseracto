@@ -51,7 +51,7 @@ export const plans: PricingPlan[] = [
   {
     id: "pro_monthly",
     name: "Pro mensual",
-    price: "$19.900",
+    price: "$1.000",
     period: "/ mes",
     description:
       "Para organizaciones que ya operan cada semana y necesitan más capacidad, control y exportación.",
@@ -91,7 +91,7 @@ export const plans: PricingPlan[] = [
 export const BILLING_PLANS: Record<PaidPricingPlanId, BillingPlanDefinition> = {
   pro_monthly: {
     id: "pro_monthly",
-    amountInCents: 1990000,
+    amountInCents: 100000,
     currency: "COP",
     wompiDescription: "Teseracto Pro mensual",
   },

@@ -1,6 +1,7 @@
 "use client";
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
 import React, { useState, useTransition } from "react";
+import AuthPasswordField from "@/app/components/auth/AuthPasswordField";
 import "../login/loginStyles.css";
 import { User } from "../login/page";
 import { signUpAction } from "@/app/actions/auth";
@@ -83,9 +84,8 @@ const Page = () => {
             />
           </Box>
           <Box className="auth_field_spacing_md">
-            <TextField
+            <AuthPasswordField
               fullWidth
-              type="password"
               name="password"
               label="Contraseña"
               variant="outlined"
@@ -97,9 +97,8 @@ const Page = () => {
             />
           </Box>
           <Box className="auth_field_spacing_md">
-            <TextField
+            <AuthPasswordField
               fullWidth
-              type="password"
               name="confirm_password"
               label="Confirmar Contraseña"
               variant="outlined"
