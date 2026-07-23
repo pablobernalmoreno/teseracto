@@ -139,6 +139,7 @@
 .login_form .MuiOutlinedInput-root {
   border-radius: 10px;
   background: rgba(var(--rgb-white), 0.94);
+  color: var(--color-text-primary);
 }
 
 .login_form .MuiInputLabel-root {
@@ -163,7 +164,30 @@
 }
 
 .login_form .MuiOutlinedInput-input {
+  color: var(--color-text-primary);
   caret-color: var(--color-focus-outline);
+}
+
+.login_form .MuiOutlinedInput-input::placeholder {
+  color: rgba(var(--rgb-border), 0.9);
+  opacity: 1;
+}
+
+.login_form .MuiIconButton-root {
+  color: var(--color-text-secondary);
+}
+
+.login_form .MuiIconButton-root:hover {
+  color: var(--color-text-primary);
+}
+
+.login_form input:-webkit-autofill,
+.login_form input:-webkit-autofill:hover,
+.login_form input:-webkit-autofill:focus,
+.login_form input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-text-primary);
+  box-shadow: 0 0 0 1000px rgba(var(--rgb-white), 0.94) inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .auth_field_spacing_lg {

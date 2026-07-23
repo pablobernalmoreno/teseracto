@@ -4,6 +4,7 @@ import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material
 import React, { useState, useTransition } from "react";
 import "./loginStyles.css";
 import { signInAction } from "@/app/actions/auth";
+import AuthPasswordField from "@/app/components/auth/AuthPasswordField";
 import { loginService } from "@/features/login/model/loginService";
 
 export interface User {
@@ -83,9 +84,8 @@ const Page = () => {
             />
           </Box>
           <Box className="auth_field_spacing_lg">
-            <TextField
+            <AuthPasswordField
               fullWidth
-              type="password"
               name="password"
               label="Contraseña"
               variant="outlined"
