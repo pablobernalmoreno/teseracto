@@ -34,8 +34,11 @@ interface BillingPaymentInsert {
 const isPaidPlanId = (value: string): value is PaidPricingPlanId => value in BILLING_PLANS;
 
 const getWompiEnv = () => {
-  const publicKey = process.env.NEXT_PUBLIC_WOMPI;
-  const integritySecret = process.env.NEXT_INTEGRITY_WOMPI_URL;
+  const publicKey = process.env.NEXT_PUBLIC_WOMPI || process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
+  const integritySecret =
+    process.env.NEXT_INTEGRITY_WOMPI_URL ||
+    process.env.NEXT_WOMPI_INTEGRITY_SECRET ||
+    process.env.WOMPI_INTEGRITY_SECRET;
 
   if (!publicKey || !integritySecret) {
     return {
@@ -121,7 +124,7 @@ export const POST = async (request: NextRequest) => {
     publicKey: env.publicKey,
     reference,
     signature,
-    redirectUrl: `${request.nextUrl.origin}/dashboard?billing=processing`,
+    redirectUrl: `${request.nextUrl.origin}/main?billing=processing&reference=${encodeURIComponent(reference)}`,
   };
 
   return NextResponse.json({ data: responseBody });
