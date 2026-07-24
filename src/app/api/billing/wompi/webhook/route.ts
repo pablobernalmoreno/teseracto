@@ -50,7 +50,11 @@ type RouteSuccess<T extends Record<string, unknown> = Record<string, unknown>> =
 type RouteResult<T extends Record<string, unknown> = Record<string, unknown>> =
   RouteSuccess<T> | RouteError;
 
-const getEventSecret = () => process.env.NEXT_EVENT_WOMPI_URL;
+const getEventSecret = () =>
+  process.env.NEXT_EVENT_WOMPI_URL ||
+  process.env.NEXT_WOMPI_EVENT_SECRET ||
+  process.env.WOMPI_EVENT_SECRET ||
+  process.env.WOMPI_EVENTS_SECRET;
 
 const parsePayload = (rawBody: string): WompiWebhookPayload | null => {
   try {
@@ -89,13 +93,15 @@ const computeWompiChecksum = (payload: WompiWebhookPayload, eventSecret: string)
     return null;
   }
 
-  const signatureSource: Record<string, unknown> = {};
+  // Support both property path styles used by providers/configs:
+  // `data.transaction.id` (full payload path) and `transaction.id` (data-rooted path).
+  const signatureSource: Record<string, unknown> = {
+    ...(payload as Record<string, unknown>),
+  };
+
   if (payload.data && typeof payload.data === "object") {
     Object.assign(signatureSource, payload.data);
   }
-  signatureSource.event = payload.event;
-  signatureSource.id = payload.id;
-  signatureSource.timestamp = payload.timestamp;
 
   const concatenatedProperties = properties
     .map((path) => getByPath(signatureSource, path))
