@@ -2,7 +2,6 @@
 
 import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material";
 import React, { useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import "./loginStyles.css";
 import { signInAction } from "@/app/actions/auth";
 import AuthPasswordField from "@/app/components/auth/AuthPasswordField";
@@ -52,9 +51,12 @@ function getServiceUnavailableHref(nextPath: string | null): string {
   return `${url.pathname}${url.search}`;
 }
 
+function getCurrentSafeNextPath(): string | null {
+  const nextPath = new URLSearchParams(globalThis.location.search).get("next");
+  return getSafeNextPath(nextPath);
+}
+
 const Page = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState<User>(initialUserState);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -78,7 +80,7 @@ const Page = () => {
     setErrorMessage("");
     setIsGooglePending(true);
 
-    const safeNextPath = getSafeNextPath(searchParams.get("next"));
+    const safeNextPath = getCurrentSafeNextPath();
 
     try {
       const serviceStatusResponse = await fetch("/api/auth/service-status", {
@@ -87,12 +89,12 @@ const Page = () => {
       });
 
       if (!serviceStatusResponse.ok) {
-        router.push(getServiceUnavailableHref(safeNextPath));
+        globalThis.location.assign(getServiceUnavailableHref(safeNextPath));
         setIsGooglePending(false);
         return;
       }
     } catch {
-      router.push(getServiceUnavailableHref(safeNextPath));
+      globalThis.location.assign(getServiceUnavailableHref(safeNextPath));
       setIsGooglePending(false);
       return;
     }
