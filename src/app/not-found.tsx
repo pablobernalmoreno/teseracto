@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import "./not-found.css";
 
-const HOME_PATH = "/";
+const HOME_PATH = "/main";
 
 export default function NotFound() {
   return (
