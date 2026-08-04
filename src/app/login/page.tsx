@@ -17,8 +17,43 @@ const initialUserState: User = {
   password: "",
 };
 
-function getOAuthRedirectUrl() {
-  return new URL("/auth/callback", globalThis.location.origin).toString();
+function getSafeNextPath(nextPath: string | null): string | null {
+  if (!nextPath) {
+    return null;
+  }
+
+  const candidate = nextPath.trim();
+  if (!candidate.startsWith("/") || candidate.startsWith("//") || candidate.includes("\\")) {
+    return null;
+  }
+
+  return candidate;
+}
+
+function getOAuthRedirectUrl(nextPath: string | null) {
+  const redirectUrl = new URL("/auth/callback", globalThis.location.origin);
+
+  if (nextPath) {
+    redirectUrl.searchParams.set("next", nextPath);
+  }
+
+  return redirectUrl.toString();
+}
+
+function getServiceUnavailableHref(nextPath: string | null): string {
+  const url = new URL("/auth/callback/error", globalThis.location.origin);
+  url.searchParams.set("reason", "service_unavailable");
+
+  if (nextPath) {
+    url.searchParams.set("next", nextPath);
+  }
+
+  return `${url.pathname}${url.search}`;
+}
+
+function getCurrentSafeNextPath(): string | null {
+  const nextPath = new URLSearchParams(globalThis.location.search).get("next");
+  return getSafeNextPath(nextPath);
 }
 
 const Page = () => {
@@ -45,7 +80,26 @@ const Page = () => {
     setErrorMessage("");
     setIsGooglePending(true);
 
-    const redirectTo = getOAuthRedirectUrl();
+    const safeNextPath = getCurrentSafeNextPath();
+
+    try {
+      const serviceStatusResponse = await fetch("/api/auth/service-status", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!serviceStatusResponse.ok) {
+        globalThis.location.assign(getServiceUnavailableHref(safeNextPath));
+        setIsGooglePending(false);
+        return;
+      }
+    } catch {
+      globalThis.location.assign(getServiceUnavailableHref(safeNextPath));
+      setIsGooglePending(false);
+      return;
+    }
+
+    const redirectTo = getOAuthRedirectUrl(safeNextPath);
     const { error } = await loginService.signInWithGoogle(redirectTo);
 
     if (error) {

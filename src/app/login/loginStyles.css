@@ -3,9 +3,15 @@
   width: 100%;
   padding: 2rem 1rem;
   background:
-    radial-gradient(circle at 14% 8%, rgba(var(--rgb-white), 0.78), transparent 32%),
-    radial-gradient(circle at 86% 18%, rgba(var(--rgb-accent), 0.1), transparent 24%),
-    linear-gradient(160deg, #eef3ef, #e6efe8 52%, #dde9df);
+    radial-gradient(circle at 14% 8%, rgba(var(--rgb-bg-glow), 0.34), transparent 34%),
+    radial-gradient(circle at 86% 18%, rgba(var(--rgb-accent), 0.12), transparent 26%),
+    linear-gradient(
+      160deg,
+      rgba(var(--rgb-white), 0.2),
+      rgba(var(--rgb-white), 0.06) 52%,
+      rgba(var(--rgb-ink), 0.06)
+    ),
+    var(--background);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -29,6 +35,7 @@
   margin: 1rem;
   padding: 2rem;
   background: rgba(var(--rgb-white), 0.9);
+  color: var(--color-text-primary);
   width: min(30rem, 94vw);
   border-radius: 18px;
   border: 1px solid rgba(var(--rgb-border), 0.22);
@@ -39,6 +46,7 @@
   margin: 1rem;
   padding: 2rem;
   background: rgba(var(--rgb-white), 0.9);
+  color: var(--color-text-primary);
   width: min(30rem, 94vw);
   border-radius: 18px;
   border: 1px solid rgba(var(--rgb-border), 0.22);
@@ -53,6 +61,7 @@
   margin: 1rem;
   padding: 2rem;
   background: rgba(var(--rgb-white), 0.9);
+  color: var(--color-text-primary);
   width: min(45rem, 94vw);
   border-radius: 18px;
   border: 1px solid rgba(var(--rgb-border), 0.22);
@@ -86,6 +95,34 @@
   text-transform: none !important;
   border-radius: 10px !important;
   font-weight: 700 !important;
+}
+
+.auth_primary_action {
+  background: linear-gradient(120deg, var(--color-focus), var(--color-accent-strong)) !important;
+  color: #ffffff !important;
+  text-transform: none !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 14px 24px rgba(var(--rgb-accent-strong), 0.24) !important;
+}
+
+.auth_primary_action:hover {
+  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-strong)) !important;
+  box-shadow: 0 16px 26px rgba(var(--rgb-accent-strong), 0.3) !important;
+}
+
+.auth_outline_action {
+  border: 1px solid rgba(var(--rgb-accent), 0.5) !important;
+  background: rgba(var(--rgb-white), 0.56) !important;
+  color: var(--color-accent-strong) !important;
+  text-transform: none !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+}
+
+.auth_outline_action:hover {
+  border-color: rgba(var(--rgb-accent-strong), 0.7) !important;
+  background: rgba(var(--rgb-accent), 0.12) !important;
 }
 
 .google_signin {
@@ -216,6 +253,32 @@
 
 .auth_text_center {
   text-align: center;
+}
+
+.login_form_container .MuiTypography-colorTextSecondary,
+.register_form_container .MuiTypography-colorTextSecondary,
+.account_confirmation_form_container .MuiTypography-colorTextSecondary {
+  color: var(--color-text-secondary) !important;
+}
+
+.auth_unavailable_message {
+  color: var(--color-text-secondary) !important;
+}
+
+.auth_unavailable_helper {
+  color: var(--color-text-secondary) !important;
+}
+
+:root[data-theme="dark"] .auth_unavailable_message,
+:root[data-theme="dark"] .auth_unavailable_helper {
+  color: var(--foreground) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .auth_unavailable_message,
+  :root:not([data-theme="light"]) .auth_unavailable_helper {
+    color: var(--foreground) !important;
+  }
 }
 
 @media (max-width: 600px) {

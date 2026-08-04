@@ -2,6 +2,48 @@ import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 import { getSafeAuthRedirectPath } from "./redirect";
 
+function buildErrorCallbackUrl(
+  requestUrl: URL,
+  reason: "missing_code" | "oauth_callback" | "service_unavailable",
+  destination: string
+): URL {
+  const url = new URL("/auth/callback/error", requestUrl.origin);
+  url.searchParams.set("reason", reason);
+  url.searchParams.set("next", destination);
+  return url;
+}
+
+function isLikelyServiceUnavailableError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeError = error as {
+    status?: number;
+    message?: string;
+    name?: string;
+    cause?: { message?: string };
+  };
+
+  if (maybeError.status === 503 || maybeError.status === 504) {
+    return true;
+  }
+
+  const combinedMessage = [maybeError.message, maybeError.name, maybeError.cause?.message]
+    .filter((value): value is string => typeof value === "string" && value.length > 0)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    combinedMessage.includes("fetch failed") ||
+    combinedMessage.includes("network") ||
+    combinedMessage.includes("timeout") ||
+    combinedMessage.includes("temporarily unavailable") ||
+    combinedMessage.includes("unavailable") ||
+    combinedMessage.includes("paused")
+  );
+}
+
 function getSupabaseServerConfig(): { supabaseUrl: string; supabaseKey: string } {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -39,9 +81,7 @@ export async function GET(request: NextRequest) {
   const destination = getSafeAuthRedirectPath(nextPath);
 
   if (!code) {
-    return NextResponse.redirect(
-      new URL("/auth/callback/error?reason=missing_code", requestUrl.origin)
-    );
+    return NextResponse.redirect(buildErrorCallbackUrl(requestUrl, "missing_code", destination));
   }
 
   const redirectResponse = NextResponse.redirect(new URL(destination, requestUrl.origin));
@@ -51,9 +91,7 @@ export async function GET(request: NextRequest) {
   try {
     ({ supabaseUrl, supabaseKey } = getSupabaseServerConfig());
   } catch {
-    return NextResponse.redirect(
-      new URL("/auth/callback/error?reason=oauth_callback", requestUrl.origin)
-    );
+    return NextResponse.redirect(buildErrorCallbackUrl(requestUrl, "oauth_callback", destination));
   }
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
@@ -72,9 +110,11 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(
-      new URL("/auth/callback/error?reason=oauth_callback", requestUrl.origin)
-    );
+    const reason = isLikelyServiceUnavailableError(error)
+      ? "service_unavailable"
+      : "oauth_callback";
+
+    return NextResponse.redirect(buildErrorCallbackUrl(requestUrl, reason, destination));
   }
 
   return redirectResponse;
