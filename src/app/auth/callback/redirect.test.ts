@@ -22,4 +22,11 @@ describe("getSafeAuthRedirectPath", () => {
   it("rejects backslash-based paths", () => {
     expect(getSafeAuthRedirectPath("/\\evil")).toBe("/main");
   });
+
+  it("rejects dangerous URL schemes and encoded forms", () => {
+    expect(getSafeAuthRedirectPath("javascript:alert(1)")).toBe("/main");
+    expect(getSafeAuthRedirectPath("data:text/html,<script>alert(1)</script>")).toBe("/main");
+    expect(getSafeAuthRedirectPath("  javascript:alert(1)")).toBe("/main");
+    expect(getSafeAuthRedirectPath("/main%0d%0ajavascript:alert(1)")).toBe("/main");
+  });
 });
