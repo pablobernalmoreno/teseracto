@@ -21,9 +21,11 @@ type ThemeMode = "system" | "light" | "dark";
 const THEME_STORAGE_KEY = "teseracto-theme-mode";
 
 function applyThemeMode(mode: ThemeMode) {
-  if (globalThis.window === undefined) return;
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return;
+  }
 
-  const root = globalThis.document.documentElement;
+  const root = document.documentElement;
   if (mode === "system") {
     delete root.dataset.theme;
   } else {
@@ -32,10 +34,19 @@ function applyThemeMode(mode: ThemeMode) {
 }
 
 function getStoredThemeMode(): ThemeMode {
-  const storedTheme = globalThis.localStorage?.getItem(THEME_STORAGE_KEY);
-  if (storedTheme === "light" || storedTheme === "dark" || storedTheme === "system") {
-    return storedTheme;
+  if (typeof window === "undefined") {
+    return "system";
   }
+
+  try {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (storedTheme === "light" || storedTheme === "dark" || storedTheme === "system") {
+      return storedTheme;
+    }
+  } catch {
+    return "system";
+  }
+
   return "system";
 }
 
@@ -185,7 +196,16 @@ export const AppBarMenu = ({
 
   useEffect(() => {
     applyThemeMode(themeMode);
-    globalThis.localStorage?.setItem(THEME_STORAGE_KEY, themeMode);
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+    } catch {
+      // Ignore storage failures in privacy-restricted or quota-limited browsers.
+    }
   }, [themeMode]);
 
   const handleLogout = async () => {
