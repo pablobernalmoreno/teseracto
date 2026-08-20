@@ -96,8 +96,8 @@ importers:
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.18)
       baseline-browser-mapping:
-        specifier: 2.11.12
-        version: 2.11.12
+        specifier: 2.11.13
+        version: 2.11.13
       eslint:
         specifier: 9.39.5
         version: 9.39.5(jiti@2.7.0)
@@ -1478,13 +1478,8 @@ packages:
     resolution: {integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==}
     engines: {node: '>= 0.6.0'}
 
-  baseline-browser-mapping@2.10.41:
-    resolution: {integrity: sha512-WwS7MHhqGHHlaVsqRZnhvCEMS0owDX+SxRlve7JkuH7My1Ara3ZriTmCQupPfYjxMZ8I/tgxtJYr2t7taHaH4A==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-
-  baseline-browser-mapping@2.11.12:
-    resolution: {integrity: sha512-r7WnVImvVCeFpf2DOXfy41aPWzeNg3H/A2X4dKmy1QL0MSyyk/e7z8ihJ3N6Nn2PsdhkVlqnEfnUE4a05P2aTA==}
+  baseline-browser-mapping@2.11.13:
+    resolution: {integrity: sha512-k9HNuUVMlqVjQ9UHzfPjIqiDbWw7WqT1AoT7GL8VwvF3r0ZfArtgiSPAlmupyNquNgOJHTuH4CKYf8ttMTWBTQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -4983,9 +4978,7 @@ snapshots:
   base64-arraybuffer@1.0.2:
     optional: true
 
-  baseline-browser-mapping@2.10.41: {}
-
-  baseline-browser-mapping@2.11.12: {}
+  baseline-browser-mapping@2.11.13: {}
 
   bmp-js@0.1.0: {}
 
@@ -5008,7 +5001,7 @@ snapshots:
 
   browserslist@4.28.4:
     dependencies:
-      baseline-browser-mapping: 2.10.41
+      baseline-browser-mapping: 2.11.13
       caniuse-lite: 1.0.30001799
       electron-to-chromium: 1.5.384
       node-releases: 2.0.50
@@ -6575,7 +6568,7 @@ snapshots:
     dependencies:
       '@next/env': 16.2.12
       '@swc/helpers': 0.5.15
-      baseline-browser-mapping: 2.10.41
+      baseline-browser-mapping: 2.11.13
       caniuse-lite: 1.0.30001799
       postcss: 8.5.23
       react: 19.2.8
