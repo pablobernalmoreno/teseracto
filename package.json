@@ -53,7 +53,7 @@
     "@types/react-dom": "19.2.4",
     "baseline-browser-mapping": "2.11.15",
     "eslint": "9.39.5",
-    "eslint-config-next": "16.3.1",
+    "eslint-config-next": "16.3.3",
     "husky": "9.1.7",
     "jest": "30.4.2",
     "lint-staged": "17.3.0",
