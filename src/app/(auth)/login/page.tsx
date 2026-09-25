@@ -31,7 +31,7 @@ function getSafeNextPath(nextPath: string | null): string | null {
 }
 
 function getOAuthRedirectUrl(nextPath: string | null) {
-  const redirectUrl = new URL("/auth/callback", globalThis.location.origin);
+  const redirectUrl = new URL("/api/auth/callback", globalThis.location.origin);
 
   if (nextPath) {
     redirectUrl.searchParams.set("next", nextPath);

@@ -18,7 +18,7 @@ const initialNewUserState: NewUser = {
 };
 
 function getOAuthRedirectUrl() {
-  return new URL("/auth/callback", globalThis.location.origin).toString();
+  return new URL("/api/auth/callback", globalThis.location.origin).toString();
 }
 
 const Page = () => {
