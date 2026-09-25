@@ -8,8 +8,9 @@ It includes selective MVP-style pieces where they provide value, rather than enf
 ### Current Pattern
 
 - **Route layer** (`src/app/**`): pages, layouts, route handlers, server actions
-- **Feature logic** (`src/features/**`): domain logic, state orchestration, and presenters
-- **UI components** (`src/app/components/**`): reusable UI building blocks
+- **Feature logic** (`src/features/**`): domain logic, state orchestration, presenters and feature-only components
+- **UI components** (`src/components/**`): global, reusable UI building blocks
+- **Infrastructure** (`src/lib/**`): Supabase clients, security helpers, shared utilities
 - **Shared types** (`src/types/**`): cross-feature type contracts
 
 ### Presenter Best Practices
@@ -31,47 +32,9 @@ Do **not** create a presenter when all it does is:
 
 If a presenter ends up empty or pass-through, prefer removing it.
 
-### Project Tree (Current)
+### Project Tree
 
-```
-.
-├── migrations/
-├── public/
-├── src/
-│   ├── app/
-│   │   ├── account_confirmation/
-│   │   ├── actions/
-│   │   ├── api/
-│   │   ├── components/
-│   │   │   ├── appBarMenu/
-│   │   │   ├── dashboard/
-│   │   │   └── dataTable/
-│   │   ├── login/
-│   │   ├── main/
-│   │   │   ├── mainStyles.css
-│   │   │   └── page.tsx
-│   │   ├── pricing/
-│   │   ├── register/
-│   │   └── utils/
-│   ├── config/
-│   ├── features/
-│   │   ├── account_confirmation/
-│   │   ├── dashboard/
-│   │   │   ├── model/
-│   │   │   │   ├── dashboardService.ts
-│   │   │   │   ├── state/
-│   │   │   │   └── useItemCardModel.ts
-│   │   │   ├── presenters/
-│   │   │   └── view/
-│   │   └── login/
-│   ├── types/
-│   └── proxy.ts
-├── eslint.config.mjs
-├── next.config.ts
-├── package.json
-├── pnpm-lock.yaml
-└── tsconfig.json
-```
+The folder layout, and the rules for where each file belongs, are in [`AGENTS.md`](AGENTS.md#project-architecture--folder-structure-mandatory).
 
 ### Decision Checklist
 

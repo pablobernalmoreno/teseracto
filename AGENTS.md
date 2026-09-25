@@ -52,8 +52,9 @@ Nothing runs `tsc` or `jest` for you — the Commit phase gate above is the only
 
 - Use MUI components and the existing CSS / CSS Modules for UI; do not add another UI kit.
 - Keep layer boundaries: route files in `src/app/**` stay thin and delegate to `src/features/**`; views do not call Supabase directly — go through the feature's `model/` services, server actions or route handlers.
-- Service-role Supabase access (`src/app/utils/supabase/serviceRole.ts`) stays server-side only.
-- Validate and rate-limit untrusted input at API boundaries using `src/app/utils/security/`.
+- Service-role Supabase access (`src/lib/supabase/serviceRole.ts`) stays server-side only.
+- Validate and rate-limit untrusted input at API boundaries using `src/lib/security/`.
+- Do not move or rename these without updating the external config that points at them: `src/app/api/auth/callback/` (Supabase Auth → URL Configuration → Redirect URLs) and `src/app/api/billing/wompi/webhook/` (Wompi dashboard events URL).
 - Only create a presenter when it adds real orchestration value (see `README.md`).
 - Interactive elements are accessible: semantic element or correct `role`, and an accessible name.
 - State in a comment whether new error handling fails **open** or **closed**, and why.
@@ -69,37 +70,59 @@ Nothing runs `tsc` or `jest` for you — the Commit phase gate above is the only
 All code must adhere to this directory layout. Do not place files outside of these designated boundaries:
 
 ```text
-teseractomy/
-├── public/                 # Static assets (images, icons)
+teseracto/
+├── migrations/                 # Dated Supabase SQL migrations
+├── public/                     # Static assets (images, icons)
 ├── src/
-│   ├── app/                # Next.js App Router (Pages, layouts, APIs)
-│   │   ├── (auth)/         # Route group for authentication pages
+│   ├── app/                    # Next.js App Router (pages, layouts, route handlers ONLY)
+│   │   ├── (auth)/             # Route group for authentication pages (no URL segment)
 │   │   │   ├── login/
-│   │   │   └── register/
-│   │   ├── api/            # Serverless API routes
-│   │   │   └── auth/callback/ # Required for Supabase OAuth/magic links
-│   │   ├── layout.tsx      # Root layout
-│   │   └── page.tsx        # Homepage
+│   │   │   ├── register/
+│   │   │   └── account_confirmation/
+│   │   ├── actions/            # Server actions
+│   │   ├── api/                # Route handlers
+│   │   │   ├── auth/callback/  # Supabase OAuth/magic-link callback
+│   │   │   └── billing/wompi/  # Wompi checkout config + webhook
+│   │   ├── auth/callback/error/ # Callback error page
+│   │   ├── layout.tsx          # Root layout
+│   │   └── page.tsx            # Homepage
 │   │
-│   ├── components/         # Reusable UI components
-│   │   ├── ui/             # Atomic components (buttons, inputs)
-│   │   └── navbar.tsx      # Global components
+│   ├── components/             # Global, reusable UI components
+│   │   ├── ui/                 # Atomic components (buttons, inputs)
+│   │   └── navbar.tsx          # Global navigation bar
 │   │
-│   ├── lib/                # Third-party configurations & utilities
-│   │   └── supabase/       # Supabase-specific logic
-│   │       ├── client.ts   # Browser client (for Client Components)
-│   │       ├── server.ts   # Server client (for Server Components/APIs)
-│   │       └── middleware.ts # Session refreshing middleware
+│   ├── features/               # Code grouped by business module
+│   │   └── <feature>/
+│   │       ├── components/     # Components exclusive to this feature
+│   │       ├── model/          # Services, state hooks, context
+│   │       ├── presenters/     # Only when they add orchestration value
+│   │       └── view/           # Feature screens composed from components
 │   │
-│   ├── types/              # TypeScript definitions
-│   │   └── database.types.ts # Auto-generated Supabase types
+│   ├── lib/                    # Third-party configurations & utilities
+│   │   ├── supabase/           # Supabase-specific logic
+│   │   │   ├── client.ts       # Browser client (for Client Components)
+│   │   │   ├── server.ts       # Server client (for Server Components/APIs)
+│   │   │   ├── serviceRole.ts  # Service-role client (server-only)
+│   │   │   └── proxy.ts        # Session refresh used by src/proxy.ts
+│   │   └── security/           # Input validation, rate limiting
 │   │
-│   └── middleware.ts       # Global Next.js middleware (calls supabase/middleware)
+│   ├── types/                  # TypeScript definitions
+│   │   └── database.types.ts   # Auto-generated Supabase types
+│   │
+│   └── proxy.ts                # Next.js proxy (Next 16 name for middleware; calls lib/supabase/proxy)
 │
-├── .env.local              # Local environment variables (SUPABASE_URL, etc.)
-├── next.config.js          # Next.js configuration
+├── .env.local                  # Local environment variables (SUPABASE_URL, etc.)
+├── next.config.ts              # Next.js configuration
 ├── package.json
 └── tsconfig.json
+```
+
+Next 16 renamed `middleware.ts` to `proxy.ts`; never add a `middleware.ts`.
+
+Regenerate `src/types/database.types.ts` after every migration:
+
+```sh
+pnpm dlx supabase gen types typescript --project-id thmibsraljsxawcogiyt > src/types/database.types.ts
 ```
 
 Tests live next to the code they cover as `*.test.ts(x)`.
