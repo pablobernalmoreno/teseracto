@@ -33,6 +33,7 @@ overrides:
   "micromatch>picomatch": "4.0.4"
 
 allowBuilds:
+  "@parcel/watcher": false
   core-js: false
   sharp: true
   tesseract.js: false
