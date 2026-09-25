@@ -1,20 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextRequest, NextResponse } from "next/server";
-
-const PUBLIC_PATHS = [
-  "/login",
-  "/register",
-  "/auth",
-  "/account_confirmation",
-  "/pricing",
-  "/api/auth",
-];
-
-function isPublicPath(pathname: string): boolean {
-  return (
-    pathname === "/" || PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))
-  );
-}
+import { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/proxy";
 
 function buildCsp(nonce: string, allowUnsafeEval: boolean): string {
   const scriptSrc = [
@@ -62,54 +47,7 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
 
-  let response = NextResponse.next({ request: { headers: requestHeaders } });
-
-  // Refresh the Supabase session so SSR pages always see a valid user
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    "";
-
-  if (!supabaseUrl || !supabaseKey) {
-    if (!isPublicPath(request.nextUrl.pathname)) {
-      return new NextResponse("Service Unavailable: auth misconfigured", { status: 503 });
-    }
-    response.headers.set("Content-Security-Policy", csp);
-    return response;
-  }
-
-  {
-    const supabase = createServerClient(supabaseUrl, supabaseKey, {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request: { headers: requestHeaders } });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
-    });
-
-    // IMPORTANT: do not add logic between createServerClient and getUser()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user && !isPublicPath(request.nextUrl.pathname)) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/login";
-      loginUrl.search = "";
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
+  const response = await updateSession(request, requestHeaders);
   response.headers.set("Content-Security-Policy", csp);
 
   return response;

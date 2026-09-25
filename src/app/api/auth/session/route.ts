@@ -1,4 +1,4 @@
-import { createClient } from "@/app/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
 import { GENERIC_REQUEST_ERROR, isJsonContentType } from "@/app/utils/security/validation";

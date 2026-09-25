@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 import { getSafeAuthRedirectPath } from "./redirect";
 
 function buildErrorCallbackUrl(
@@ -44,36 +45,6 @@ function isLikelyServiceUnavailableError(error: unknown): boolean {
   );
 }
 
-function getSupabaseServerConfig(): { supabaseUrl: string; supabaseKey: string } {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.TS_SUPA_SUPABASE_URL;
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.TS_SUPA_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    const missing: string[] = [];
-    if (!supabaseUrl) {
-      missing.push(
-        "NEXT_PUBLIC_SUPABASE_URL or TS_SUPA_NEXT_PUBLIC_SUPABASE_URL or TS_SUPA_SUPABASE_URL"
-      );
-    }
-    if (!supabaseKey) {
-      missing.push(
-        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY or TS_SUPA_NEXT_PUBLIC_SUPABASE_ANON_KEY or TS_SUPA_SUPABASE_ANON_KEY"
-      );
-    }
-
-    throw new Error(`Missing Supabase environment variables: ${missing.join(", ")}`);
-  }
-
-  return { supabaseUrl, supabaseKey };
-}
-
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
@@ -89,7 +60,7 @@ export async function GET(request: NextRequest) {
   let supabaseUrl: string;
   let supabaseKey: string;
   try {
-    ({ supabaseUrl, supabaseKey } = getSupabaseServerConfig());
+    ({ supabaseUrl, supabaseKey } = getSupabaseConfig());
   } catch {
     return NextResponse.redirect(buildErrorCallbackUrl(requestUrl, "oauth_callback", destination));
   }

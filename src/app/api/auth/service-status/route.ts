@@ -1,22 +1,5 @@
 import { NextResponse } from "next/server";
-
-function getSupabaseConfig(): { supabaseUrl: string; supabaseKey: string } {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.TS_SUPA_SUPABASE_URL;
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.TS_SUPA_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Missing Supabase environment variables");
-  }
-
-  return { supabaseUrl, supabaseKey };
-}
+import { getSupabaseConfig } from "@/lib/supabase/env";
 
 function isPausedResponse(body: string): boolean {
   const normalized = body.toLowerCase();

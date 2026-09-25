@@ -1,4 +1,4 @@
-import supabase from "@/config/supabaseClient";
+import supabase from "@/lib/supabase/client";
 
 export interface LoginCredentials {
   email: string;

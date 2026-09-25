@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { readSupabaseUrl, SUPABASE_URL_VARS } from "./env";
 
 interface SupabaseServiceConfig {
   supabaseUrl: string;
@@ -6,10 +7,7 @@ interface SupabaseServiceConfig {
 }
 
 const getSupabaseServiceConfig = (): SupabaseServiceConfig => {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.TS_SUPA_NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.TS_SUPA_SUPABASE_URL;
+  const supabaseUrl = readSupabaseUrl();
 
   const serviceRoleKey =
     process.env.NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY ||
@@ -20,9 +18,7 @@ const getSupabaseServiceConfig = (): SupabaseServiceConfig => {
     const missing: string[] = [];
 
     if (!supabaseUrl) {
-      missing.push(
-        "NEXT_PUBLIC_SUPABASE_URL or TS_SUPA_NEXT_PUBLIC_SUPABASE_URL or TS_SUPA_SUPABASE_URL"
-      );
+      missing.push(SUPABASE_URL_VARS);
     }
 
     if (!serviceRoleKey) {

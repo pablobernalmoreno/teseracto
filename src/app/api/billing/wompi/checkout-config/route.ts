@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 
 import { NextRequest, NextResponse } from "next/server";
 import { BILLING_PLANS, type PaidPricingPlanId } from "@/app/pricing/pricingData";
-import { createClient } from "@/app/utils/supabase/server";
-import { createServiceRoleClient } from "@/app/utils/supabase/serviceRole";
+import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 
 interface CheckoutConfigRequestBody {
   planId?: string;

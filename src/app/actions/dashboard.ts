@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/app/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import type { MainData } from "@/types/dashboard";

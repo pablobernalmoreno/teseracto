@@ -1,4 +1,4 @@
-import { createClient } from "@/app/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
