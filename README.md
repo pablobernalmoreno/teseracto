@@ -115,8 +115,10 @@ Auth URL checklist (Supabase Dashboard -> Authentication -> URL Configuration):
 
 - Site URL should be your deployed domain (example: `https://teseracto.vercel.app`) in production.
 - Add all required redirect URLs, including local and production callback paths:
-  - `http://localhost:3000/auth/callback`
-  - `https://teseracto.vercel.app/auth/callback`
+  - `http://localhost:3000/api/auth/callback`
+  - `https://teseracto.vercel.app/api/auth/callback`
+
+The old `/auth/callback` path only forwards to `/api/auth/callback` for links and redirect URLs that still point there; remove it once Supabase references only the new path.
 
 If Site URL is left as localhost in production, OAuth providers can redirect back to localhost.
 
