@@ -3,7 +3,7 @@
 import { Card, CardActionArea, CardContent, Typography, Box, Checkbox } from "@mui/material";
 import React from "react";
 import type { MainData } from "@/types/dashboard";
-import DataTable from "../../dataTable/DataTable";
+import DataTable from "../dataTable/DataTable";
 
 interface ViewItemCardProps {
   cardId: string | number;

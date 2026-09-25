@@ -11,10 +11,10 @@ import InsightsIcon from "@mui/icons-material/Insights";
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import "./AppBarMenuStyles.css";
+import "./navbar.css";
 import { loginService } from "@/features/login/model/loginService";
 
-type AppBarMenuVariant = "authenticated" | "public";
+type NavbarVariant = "authenticated" | "public";
 type AppBarActiveSection = "books" | "pricing" | "history";
 type ThemeMode = "system" | "light" | "dark";
 
@@ -50,8 +50,8 @@ function getStoredThemeMode(): ThemeMode {
   return "system";
 }
 
-interface AppBarMenuProps {
-  variant?: AppBarMenuVariant;
+interface NavbarProps {
+  variant?: NavbarVariant;
   onShowHistory?: () => void;
   onShowPricing?: () => void;
   onShowBooks?: () => void;
@@ -183,13 +183,13 @@ const loggedInButtons = (
   );
 };
 
-export const AppBarMenu = ({
+export const Navbar = ({
   variant = "public",
   onShowHistory,
   onShowPricing,
   onShowBooks,
   activeSection = "books",
-}: AppBarMenuProps) => {
+}: NavbarProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => getStoredThemeMode());

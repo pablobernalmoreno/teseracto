@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardActionArea, CardContent, Typography, Box, Checkbox } from "@mui/material";
-import DataTable from "../../dataTable/DataTable";
+import DataTable from "../dataTable/DataTable";
 import styles from "./NormalItemCard.module.css";
 import type { MainData } from "@/types/dashboard";
 

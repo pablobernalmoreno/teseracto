@@ -44,7 +44,8 @@ function getEntryMessageNode(
   if (isDateMismatch) {
     return (
       <Typography color="error" className={styles.messageText}>
-        {dateMismatchCount} imágenes no correspondían con la fecha elegida: {selectedDate || "No detectada"}, por lo que no serán agregadas.
+        {dateMismatchCount} imágenes no correspondían con la fecha elegida:{" "}
+        {selectedDate || "No detectada"}, por lo que no serán agregadas.
       </Typography>
     );
   }

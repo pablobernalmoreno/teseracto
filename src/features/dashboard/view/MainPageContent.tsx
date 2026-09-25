@@ -9,10 +9,10 @@ import { DashboardPricingView } from "./DashboardPricingView";
 import { Box, CircularProgress, Pagination, Paper, Typography } from "@mui/material";
 import { useMainDashboardState } from "@/features/dashboard/model/state/useMainDashboardState";
 import "./mainStyles.css";
-import { SearchNavbar } from "@/app/components/dashboard/SearchNavbar/SearchNavbar";
-import AlertMessage from "@/app/components/dashboard/Dialog/AlertMessage";
-import DeleteDialog from "@/app/components/dashboard/Dialog/DeleteDialog";
-import UnsavedChangesDialog from "@/app/components/dashboard/Dialog/UnsavedChangesDialog";
+import { SearchNavbar } from "@/features/dashboard/components/SearchNavbar/SearchNavbar";
+import AlertMessage from "@/features/dashboard/components/Dialog/AlertMessage";
+import DeleteDialog from "@/features/dashboard/components/Dialog/DeleteDialog";
+import UnsavedChangesDialog from "@/features/dashboard/components/Dialog/UnsavedChangesDialog";
 import { fetchAllBooksHistory, type BookData } from "@/app/actions/dashboard";
 
 interface MainPageContentProps {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { AppBarMenu } from "@/app/components/appBarMenu/AppBarMenu";
+import { Navbar } from "@/components/navbar";
 import { DashboardModalProvider } from "@/features/dashboard/model/state/DashboardModalContext";
 import { MainPageContent } from "./MainPageContent";
 import { type BookData } from "@/app/actions/dashboard";
@@ -24,7 +24,7 @@ const MainPageClient = ({ initialBooks, initialBooksCount }: MainPageClientProps
 
   return (
     <DashboardModalProvider>
-      <AppBarMenu
+      <Navbar
         variant="authenticated"
         activeSection={activeSection}
         onShowBooks={() => {

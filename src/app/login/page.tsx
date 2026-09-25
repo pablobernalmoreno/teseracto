@@ -4,7 +4,7 @@ import { Box, Button, Divider, Link, TextField, Typography } from "@mui/material
 import React, { useState, useTransition } from "react";
 import "./loginStyles.css";
 import { signInAction } from "@/app/actions/auth";
-import AuthPasswordField from "@/app/components/auth/AuthPasswordField";
+import AuthPasswordField from "@/components/ui/AuthPasswordField";
 import { loginService } from "@/features/login/model/loginService";
 
 export interface User {

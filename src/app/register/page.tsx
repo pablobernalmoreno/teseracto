@@ -1,7 +1,7 @@
 "use client";
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
 import React, { useState, useTransition } from "react";
-import AuthPasswordField from "@/app/components/auth/AuthPasswordField";
+import AuthPasswordField from "@/components/ui/AuthPasswordField";
 import "../login/loginStyles.css";
 import { User } from "../login/page";
 import { signUpAction } from "@/app/actions/auth";

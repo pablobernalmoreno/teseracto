@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
+import { Navbar } from "@/components/navbar";
 import { Box, Button, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import { comparisonRows, plans, type PaidPricingPlanId, type PricingPlan } from "@/lib/pricing";
@@ -30,7 +30,7 @@ const page = () => {
 
   return (
     <>
-      <AppBarMenu />
+      <Navbar />
       <Box component="main" id="main-content" className="pricing_box">
         <section className="pricing_hero">
           <Typography className="pricing_eyebrow" component="p">

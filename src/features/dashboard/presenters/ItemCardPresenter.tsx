@@ -2,8 +2,8 @@
 import React, { useRef, useState } from "react";
 import { useItemCardModel } from "../model/useItemCardModel";
 import type { BookData } from "@/app/actions/dashboard";
-import { ViewItemCard } from "@/app/components/dashboard/ItemCard/ViewItemCard";
-import { NewItemCard } from "@/app/components/dashboard/ItemCard/NewItemCard";
+import { ViewItemCard } from "@/features/dashboard/components/ItemCard/ViewItemCard";
+import { NewItemCard } from "@/features/dashboard/components/ItemCard/NewItemCard";
 import type { MainData } from "@/types/dashboard";
 
 interface ItemCardPresenterProps {

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, CardActionArea, CardContent } from "@mui/material";
-import "@/app/components/dashboard/dashboardStyles.css";
+import "@/features/dashboard/components/dashboardStyles.css";
 import styles from "./NewItemCard.module.css";
 import { InputDialog, InputDialogProps } from "../Dialog/InputDialog";
 import { CarouselValues } from "../InvalidEntryCarousel/InvalidEntryCarousel";
