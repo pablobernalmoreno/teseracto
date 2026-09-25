@@ -29,6 +29,7 @@ For every feature, bug fix, or task requested, you must strictly follow this fou
 
   ```sh
   pnpm lint
+  pnpm exec next typegen   # refresh .next/types so tsc sees moved routes
   pnpm exec tsc --noEmit
   pnpm test
   ```
@@ -104,7 +105,10 @@ teseracto/
 │   │   │   ├── server.ts       # Server client (for Server Components/APIs)
 │   │   │   ├── serviceRole.ts  # Service-role client (server-only)
 │   │   │   └── proxy.ts        # Session refresh used by src/proxy.ts
-│   │   └── security/           # Input validation, rate limiting
+│   │   ├── security/           # Input validation, rate limiting
+│   │   ├── auth/               # Safe post-login redirect paths
+│   │   ├── pricing.ts          # Pricing plans (shared by API routes and dashboard)
+│   │   └── data.ts             # Date parsing helpers
 │   │
 │   ├── types/                  # TypeScript definitions
 │   │   └── database.types.ts   # Auto-generated Supabase types
