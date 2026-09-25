@@ -126,6 +126,18 @@ Security notes:
 - Never expose the Supabase service role key to the browser.
 - Keep `.env`, `.env.local`, and other local env files untracked (already covered by `.gitignore`).
 
+### Database Migrations
+
+Every schema change is tracked in git under `migrations/` as `YYYYMMDD_description.sql`, so the repo is the record of what the Supabase database should contain.
+
+- Add a new dated file for each change; never edit a migration that has already been applied.
+- Migrations recorded after the fact start with an `-- applied as <version>` comment naming the version Supabase stored.
+- After applying a migration, regenerate the database types:
+
+  ```sh
+  pnpm dlx supabase gen types typescript --project-id thmibsraljsxawcogiyt > src/types/database.types.ts
+  ```
+
 First, run the development server:
 
 ```bash
