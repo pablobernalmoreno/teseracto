@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Box, Button, Typography } from "@mui/material";
-import "../../../login/loginStyles.css";
+import "../../../(auth)/login/loginStyles.css";
 import OAuthCallbackErrorContent from "./OAuthCallbackErrorContent";
 
 function OAuthCallbackErrorFallback() {
