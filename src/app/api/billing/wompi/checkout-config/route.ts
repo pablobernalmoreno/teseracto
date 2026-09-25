@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 
 import { NextRequest, NextResponse } from "next/server";
-import { BILLING_PLANS, type PaidPricingPlanId } from "@/app/pricing/pricingData";
+import { BILLING_PLANS, type PaidPricingPlanId } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 

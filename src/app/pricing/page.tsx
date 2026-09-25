@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AppBarMenu } from "../components/appBarMenu/AppBarMenu";
 import { Box, Button, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
-import { comparisonRows, plans, type PaidPricingPlanId, type PricingPlan } from "./pricingData";
+import { comparisonRows, plans, type PaidPricingPlanId, type PricingPlan } from "@/lib/pricing";
 import "./pricingStyles.css";
 
 export const metadata: Metadata = {

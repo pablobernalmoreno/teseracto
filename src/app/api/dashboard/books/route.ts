@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
+import { getClientIdentifier, takeRateLimit } from "@/lib/security/rateLimit";
 import {
   GENERIC_REQUEST_ERROR,
   getBearerToken,
@@ -10,7 +10,7 @@ import {
   normalizeBookIds,
   normalizeMainDataArray,
   parseTrimmedString,
-} from "@/app/utils/security/validation";
+} from "@/lib/security/validation";
 
 interface UserProfile {
   book_id: string;

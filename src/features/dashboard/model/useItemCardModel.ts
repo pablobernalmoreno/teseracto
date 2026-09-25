@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { dashboardService } from "./dashboardService";
 import type { BookData } from "@/app/actions/dashboard";
-import { extractCurrencyValues, parseDates } from "@/app/utils/data";
+import { extractCurrencyValues, parseDates } from "@/lib/data";
 import type { MainData } from "@/types/dashboard";
 
 // Format date for display as dd/mm/yyyy
@@ -197,10 +197,7 @@ function buildParsedUploadState(
 
 // Dialog state machine types
 export type DialogState =
-  | { type: "idle" }
-  | { type: "loading" }
-  | { type: "invalid_entries" }
-  | { type: "success" };
+  { type: "idle" } | { type: "loading" } | { type: "invalid_entries" } | { type: "success" };
 
 interface ItemCardModelState {
   files: File[] | undefined;

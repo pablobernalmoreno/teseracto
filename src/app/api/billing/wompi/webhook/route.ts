@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
-import type { PaidPricingPlanId } from "@/app/pricing/pricingData";
+import type { PaidPricingPlanId } from "@/lib/pricing";
 
 interface WompiWebhookTransaction {
   id?: string;

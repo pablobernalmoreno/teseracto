@@ -7,7 +7,7 @@ import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import type { MainData } from "@/types/dashboard";
-import { exportBookToPdf } from "@/app/utils/exportPdf";
+import { exportBookToPdf } from "@/features/dashboard/model/exportPdf";
 
 interface DashboardDetailPanelProps {
   bookId: string | number;

@@ -3,8 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
-import { isValidEmail, normalizeEmail } from "@/app/utils/security/validation";
+import { getClientIdentifier, takeRateLimit } from "@/lib/security/rateLimit";
+import { isValidEmail, normalizeEmail } from "@/lib/security/validation";
 
 const INVALID_CREDENTIALS_MESSAGE = "Correo o contraseña incorrectos.";
 

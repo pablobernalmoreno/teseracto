@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { dashboardService } from "@/features/dashboard/model/dashboardService";
-import { formatCurrency, formatDateDisplay } from "@/features/dashboard/model/useItemCardModel";
+import { dashboardService } from "./dashboardService";
+import { formatCurrency, formatDateDisplay } from "./useItemCardModel";
 import type { MainData } from "@/types/dashboard";
 
 export interface ExportPdfOptions {
