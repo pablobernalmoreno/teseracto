@@ -74,6 +74,7 @@ All code must adhere to this directory layout. Do not place files outside of the
 teseracto/
 ├── migrations/                 # Dated Supabase SQL migrations
 ├── public/                     # Static assets (images, icons)
+├── spec/                       # Product & system specification (SPEC.md)
 ├── src/
 │   ├── app/                    # Next.js App Router (pages, layouts, route handlers ONLY)
 │   │   ├── (auth)/             # Route group for authentication pages (no URL segment)
