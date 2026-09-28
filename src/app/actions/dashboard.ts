@@ -1,16 +1,16 @@
 "use server";
 
-import { createClient } from "@/app/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import type { MainData } from "@/types/dashboard";
-import { getClientIdentifier, takeRateLimit } from "@/app/utils/security/rateLimit";
+import { getClientIdentifier, takeRateLimit } from "@/lib/security/rateLimit";
 import {
   GENERIC_REQUEST_ERROR,
   normalizeBookIds,
   normalizeMainDataArray,
   parseTrimmedString,
-} from "@/app/utils/security/validation";
+} from "@/lib/security/validation";
 
 export interface BookData {
   id: string;

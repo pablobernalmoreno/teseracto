@@ -8,8 +8,9 @@ It includes selective MVP-style pieces where they provide value, rather than enf
 ### Current Pattern
 
 - **Route layer** (`src/app/**`): pages, layouts, route handlers, server actions
-- **Feature logic** (`src/features/**`): domain logic, state orchestration, and presenters
-- **UI components** (`src/app/components/**`): reusable UI building blocks
+- **Feature logic** (`src/features/**`): domain logic, state orchestration, presenters and feature-only components
+- **UI components** (`src/components/**`): global, reusable UI building blocks
+- **Infrastructure** (`src/lib/**`): Supabase clients, security helpers, shared utilities
 - **Shared types** (`src/types/**`): cross-feature type contracts
 
 ### Presenter Best Practices
@@ -31,47 +32,9 @@ Do **not** create a presenter when all it does is:
 
 If a presenter ends up empty or pass-through, prefer removing it.
 
-### Project Tree (Current)
+### Project Tree
 
-```
-.
-├── migrations/
-├── public/
-├── src/
-│   ├── app/
-│   │   ├── account_confirmation/
-│   │   ├── actions/
-│   │   ├── api/
-│   │   ├── components/
-│   │   │   ├── appBarMenu/
-│   │   │   ├── dashboard/
-│   │   │   └── dataTable/
-│   │   ├── login/
-│   │   ├── main/
-│   │   │   ├── mainStyles.css
-│   │   │   └── page.tsx
-│   │   ├── pricing/
-│   │   ├── register/
-│   │   └── utils/
-│   ├── config/
-│   ├── features/
-│   │   ├── account_confirmation/
-│   │   ├── dashboard/
-│   │   │   ├── model/
-│   │   │   │   ├── dashboardService.ts
-│   │   │   │   ├── state/
-│   │   │   │   └── useItemCardModel.ts
-│   │   │   ├── presenters/
-│   │   │   └── view/
-│   │   └── login/
-│   ├── types/
-│   └── proxy.ts
-├── eslint.config.mjs
-├── next.config.ts
-├── package.json
-├── pnpm-lock.yaml
-└── tsconfig.json
-```
+The folder layout, and the rules for where each file belongs, are in [`AGENTS.md`](AGENTS.md#project-architecture--folder-structure-mandatory).
 
 ### Decision Checklist
 
@@ -152,8 +115,10 @@ Auth URL checklist (Supabase Dashboard -> Authentication -> URL Configuration):
 
 - Site URL should be your deployed domain (example: `https://teseracto.vercel.app`) in production.
 - Add all required redirect URLs, including local and production callback paths:
-  - `http://localhost:3000/auth/callback`
-  - `https://teseracto.vercel.app/auth/callback`
+  - `http://localhost:3000/api/auth/callback`
+  - `https://teseracto.vercel.app/api/auth/callback`
+
+The old `/auth/callback` path only forwards to `/api/auth/callback` for links and redirect URLs that still point there; remove it once Supabase references only the new path.
 
 If Site URL is left as localhost in production, OAuth providers can redirect back to localhost.
 
@@ -162,6 +127,18 @@ Security notes:
 - Only use Supabase publishable/anon keys in `NEXT_PUBLIC_*` variables.
 - Never expose the Supabase service role key to the browser.
 - Keep `.env`, `.env.local`, and other local env files untracked (already covered by `.gitignore`).
+
+### Database Migrations
+
+Every schema change is tracked in git under `migrations/` as `YYYYMMDD_description.sql`, so the repo is the record of what the Supabase database should contain.
+
+- Add a new dated file for each change; never edit a migration that has already been applied.
+- Migrations recorded after the fact start with an `-- applied as <version>` comment naming the version Supabase stored.
+- After applying a migration, regenerate the database types:
+
+  ```sh
+  pnpm dlx supabase gen types typescript --project-id thmibsraljsxawcogiyt > src/types/database.types.ts
+  ```
 
 First, run the development server:
 

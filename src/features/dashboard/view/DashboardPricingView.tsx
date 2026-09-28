@@ -5,12 +5,7 @@ import { Box, Button, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckIcon from "@mui/icons-material/Check";
 import Link from "next/link";
-import {
-  comparisonRows,
-  plans,
-  type PaidPricingPlanId,
-  type PricingPlan,
-} from "@/app/pricing/pricingData";
+import { comparisonRows, plans, type PaidPricingPlanId, type PricingPlan } from "@/lib/pricing";
 
 interface DashboardPricingViewProps {
   onBack: () => void;

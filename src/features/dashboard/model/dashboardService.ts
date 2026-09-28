@@ -1,4 +1,4 @@
-import supabase from "@/config/supabaseClient";
+import supabase from "@/lib/supabase/client";
 import type { MainData } from "@/types/dashboard";
 
 export interface UserData {

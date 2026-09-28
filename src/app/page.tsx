@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Suspense } from "react";
-import { AppBarMenu } from "./components/appBarMenu/AppBarMenu";
+import { Navbar } from "@/components/navbar";
 import { Box, Typography } from "@mui/material";
 import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
 import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
@@ -54,7 +54,7 @@ export default function Home() {
       <Suspense fallback={null}>
         <OrganizationJsonLdScript />
       </Suspense>
-      <AppBarMenu />
+      <Navbar />
       <Box component="main" id="main-content" className="main_box">
         <section className="hero_section">
           <Box className="hero_text_block">

@@ -2,7 +2,7 @@
 
 import { Box, Button, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { getSafeAuthRedirectPath } from "../redirect";
+import { getSafeAuthRedirectPath } from "@/lib/auth/redirect";
 
 const callbackErrorMessages: Record<string, string> = {
   missing_code: "No recibimos el código de autenticación de Google.",

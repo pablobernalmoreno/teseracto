@@ -44,9 +44,6 @@ next-env.d.ts
 .agents/skills/
 skills-lock.json
 
-# local migrations
-migrations/*.sql
-
 # OS generated files
 .DS_Store
 .DS_Store?
