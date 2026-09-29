@@ -26,4 +26,4 @@
 ## 5. Gate and commits
 
 - [x] 5.1 Run `pnpm lint`, `pnpm exec next typegen`, `pnpm exec tsc --noEmit` and `pnpm test`, and verify all are green (no source changed, so failures mean unrelated breakage)
-- [ ] 5.2 Commit docs only, in separate commits doc side first (specs and `SPEC.md`, then `config.yaml` and `AGENTS.md`), with the Co-Authored-By trailer, and verify `git status` shows no unrelated files staged
+- [x] 5.2 Commit docs only, in separate commits doc side first (specs and `SPEC.md`, then `config.yaml` and `AGENTS.md`), with the Co-Authored-By trailer, and verify `git status` shows no unrelated files staged
