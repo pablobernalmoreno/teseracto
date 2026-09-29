@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Instructions for AI coding agents working on **teseracto** — a Next.js 16 (App Router) app with React 19, MUI 9, Redux Toolkit, Supabase and TypeScript, managed with pnpm.
+Instructions for AI coding agents working on **teseracto** — a Next.js 16 (App Router) app with React 19, MUI 9, Supabase and TypeScript, managed with pnpm. Redux Toolkit is installed but unused (`spec/SPEC.md` GAP-13); state lives in hooks and context.
 
 ## Development Workflow (MANDATORY)
 
@@ -73,7 +73,9 @@ All code must adhere to this directory layout. Do not place files outside of the
 ```text
 teseracto/
 ├── migrations/                 # Dated Supabase SQL migrations
+├── openspec/                   # OpenSpec workflow: specs/ (requirements per capability), changes/
 ├── public/                     # Static assets (images, icons)
+├── spec/                       # Index, data model, API contracts, gaps (SPEC.md); requirements are in openspec/specs/
 ├── src/
 │   ├── app/                    # Next.js App Router (pages, layouts, route handlers ONLY)
 │   │   ├── (auth)/             # Route group for authentication pages (no URL segment)
@@ -84,7 +86,9 @@ teseracto/
 │   │   ├── api/                # Route handlers
 │   │   │   ├── auth/callback/  # Supabase OAuth/magic-link callback
 │   │   │   └── billing/wompi/  # Wompi checkout config + webhook
-│   │   ├── auth/callback/error/ # Callback error page
+│   │   ├── auth/callback/      # Legacy: forwards to /api/auth/callback; error/ is the callback error page
+│   │   ├── main/               # Authenticated dashboard page
+│   │   ├── pricing/            # Public plan comparison
 │   │   ├── layout.tsx          # Root layout
 │   │   └── page.tsx            # Homepage
 │   │
@@ -93,7 +97,7 @@ teseracto/
 │   │   └── navbar.tsx          # Global navigation bar
 │   │
 │   ├── features/               # Code grouped by business module
-│   │   └── <feature>/
+│   │   └── <feature>/          # Today: dashboard/, login/
 │   │       ├── components/     # Components exclusive to this feature
 │   │       ├── model/          # Services, state hooks, context
 │   │       ├── presenters/     # Only when they add orchestration value
@@ -111,6 +115,7 @@ teseracto/
 │   │   └── data.ts             # Date parsing helpers
 │   │
 │   ├── types/                  # TypeScript definitions
+│   │   ├── dashboard.ts        # Ledger entry type (MainData)
 │   │   └── database.types.ts   # Auto-generated Supabase types
 │   │
 │   └── proxy.ts                # Next.js proxy (Next 16 name for middleware; calls lib/supabase/proxy)

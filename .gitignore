@@ -53,3 +53,10 @@ skills-lock.json
 ehthumbs.db
 Thumbs.db
 .env*
+
+# AI agent tooling (local, not part of the app)
+.claude/
+.github/agents/
+.github/prompts/
+.github/skills/
+.github/workflows/copilot-setup-steps.yml

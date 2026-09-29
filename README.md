@@ -36,6 +36,10 @@ If a presenter ends up empty or pass-through, prefer removing it.
 
 The folder layout, and the rules for where each file belongs, are in [`AGENTS.md`](AGENTS.md#project-architecture--folder-structure-mandatory).
 
+### Specification
+
+What the product does, its API and data contracts, and the known gaps between the two are in [`spec/SPEC.md`](spec/SPEC.md).
+
 ### Decision Checklist
 
 Before adding a new layer/file, ask:

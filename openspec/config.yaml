@@ -1,0 +1,30 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: true
+
+# Project context
+# This is shown to AI when creating artifacts.
+context: |
+  Teseracto: Spanish-language web app for lightweight financial ledgers (books of dated entries, browser OCR of receipts, Pro plan sold via Wompi in COP).
+  Stack: Next.js 16 App Router, React 19, MUI 9, Supabase (auth, Postgres with RLS), TypeScript, pnpm, Jest.
+  Layers: src/app (thin routes, actions, route handlers) -> src/features/<feature> (model, view, components) -> src/lib. Views never call Supabase directly.
+  Specs: requirements live in openspec/specs/<capability>/spec.md. spec/SPEC.md is an index plus data model, API contracts, known gaps and open questions.
+  Schema changes go in new dated files under migrations/. Full working rules are in AGENTS.md.
+
+# Per-artifact rules
+rules:
+  specs:
+    - Cite the implementing code as file:line for as-built requirements, and verify the citation against the code first.
+    - Known gaps are not requirements; describe only behavior that holds today.
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
