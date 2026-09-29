@@ -4,8 +4,10 @@
 something the code does not do, the gap is listed in [§10 Known gaps](#10-known-gaps) rather than
 written as a requirement.
 
-Every requirement cites the code that implements it as `file:line`. When code changes, update the
-requirement and its citation in the same change.
+Requirements live in [`openspec/specs/`](../openspec/specs/), one capability per folder (see §4 and §8).
+Each requirement there cites the code that implements it as `file:line`. When code changes, update the
+requirement and its citation in the same change. This file keeps the cross-cutting reference material:
+overview, routes, plans, data model, API contracts, configuration, known gaps and open questions.
 
 ## 1. Overview
 
@@ -66,55 +68,15 @@ export, plan purchase.
 
 ## 4. Functional requirements
 
-### 4.1 Authentication (AUTH)
+Requirements are normative in the capability specs below; this table is only an index.
 
-- **AUTH-1** A user can sign up with email and password. Email is trimmed and lower-cased; the password must be at least 8 characters and match its confirmation. On success the user is sent to `/account_confirmation` (`src/app/actions/auth.ts:53-89`).
-- **AUTH-2** A user can sign in with email and password and is sent to `/main`. Every failure, including an invalid email, returns the same message, "Correo o contraseña incorrectos.", so the response does not reveal whether an account exists (`src/app/actions/auth.ts:9`, `:21-51`).
-- **AUTH-3** A user can sign in with Google OAuth (`src/features/login/model/loginService.ts:20-22`).
-- **AUTH-4** OAuth and email links return to `/api/auth/callback`, which exchanges `code` for a session and redirects to `next`. `next` is sanitised: only same-site relative paths are allowed; anything else falls back to `/main` (`src/app/api/auth/callback/route.ts:48-92`, `src/lib/auth/redirect.ts:12-44`).
-- **AUTH-5** A failed callback redirects to `/auth/callback/error?reason=…` with `missing_code`, `oauth_callback` or `service_unavailable`. `service_unavailable` is chosen for 503/504 responses and network, timeout or "paused" errors (`src/app/api/auth/callback/route.ts:6-46`, `:83-89`).
-- **AUTH-6** Signing out clears the session and redirects to `/login` (`src/app/actions/auth.ts:91-96`).
-- **AUTH-7** On sign-up the database creates a `user_profile` row, with a name taken from the provider metadata or the email local part and a fresh `book_id` (`migrations/20260617_assign_book_id_on_profile_creation.sql:2-23`). It also creates a `free`/`active` `user_memberships` row (`migrations/20260601_user_memberships.sql:78-97`).
-- **AUTH-8** If a profile somehow lacks a `book_id`, `/api/dashboard/profile/current` and `/api/dashboard/profile/initialize` assign one (`src/app/api/dashboard/profile/current/route.ts:27-54`, `src/app/api/dashboard/profile/initialize/route.ts:41-75`).
-
-### 4.2 Books (BOOK)
-
-- **BOOK-1** A user sees only their own books, newest first by `creationTime` then `id` (`src/app/actions/dashboard.ts:140-145`). Postgres RLS enforces the same thing by matching `owner_id` to the caller's `user_profile.book_id` (`migrations/20260721_rls_initplan_tuning.sql:37-94`).
-- **BOOK-2** The book list is paginated. Page size defaults to 5 and is clamped to 1–100; negative or non-numeric pages become 0 (`src/app/actions/dashboard.ts:55-63`).
-- **BOOK-3** The book list can be searched by title, case-insensitively and as a substring. `%` and `_` are escaped in the fallback query (`src/app/actions/dashboard.ts:146-149`). A trigram index backs the search (`migrations/20260405_dashboard_query_indexes.sql:9-10`).
-- **BOOK-4** List results carry only the first 3 entries of each book as a preview, both from the RPC and from the fallback query (`migrations/20260405_dashboard_books_preview_rpc.sql:33-37`, `src/app/actions/dashboard.ts:37-42`). The full content is loaded on demand (`src/app/actions/dashboard.ts:164-184`, `:228-240`).
-- **BOOK-5** A user can create a book. The title is trimmed and at most 180 characters, defaulting to "Libro sin título"; `creationTime` is an optional `YYYY-MM-DD` date that defaults to today (`src/app/actions/dashboard.ts:287-377`).
-- **BOOK-6** A user can update a book's content, and optionally its title and date, through the same action by passing `bookId` (`src/app/actions/dashboard.ts:323-346`).
-- **BOOK-7** A user can delete several books at once, up to 100 ids per request, with duplicates removed (`src/app/actions/dashboard.ts:251-285`, `src/lib/security/validation.ts:42-49`).
-- **BOOK-8** Every entry must be `{ id: integer, date: string, money: string }`, and a book holds at most 500 entries. Anything else rejects the whole payload (`src/lib/security/validation.ts:51-80`).
-
-### 4.3 Receipt OCR (OCR)
-
-- **OCR-1** A user can select one or more images. Each is read in the browser by a tesseract.js worker that is loaded on demand and terminated afterwards (`src/features/dashboard/model/useItemCardModel.ts:261-330`).
-- **OCR-2** The date is extracted from text as `d de <mes> de 20yy`, `d <mes> 20yy` (Spanish month names or abbreviations) or `dd/mm/20yy`, and normalised to `dd/MM/yyyy` (`src/lib/data.ts:4-32`).
-- **OCR-3** The amount is the largest number of at least 1.000 and at most 9 digits, read in Colombian format (`.` for thousands, `,` for decimals) and re-formatted as `es-CO` (`src/lib/data.ts:34-67`).
-- **OCR-4** One upload is one day: the first date found becomes the reference date. An image showing a different date is excluded, with a message naming both dates (`src/features/dashboard/model/useItemCardModel.ts:128-150`).
-- **OCR-5** An image with no readable amount is flagged so the user can type the amount in (`src/features/dashboard/model/useItemCardModel.ts:155-163`).
-- **OCR-6** If no date is found in any image, or the OCR worker fails, every image is flagged for manual entry of both date and amount. The OCR failure path fails open to manual entry: the user can still save (`src/features/dashboard/model/useItemCardModel.ts:175-185`, `:311-326`).
-
-### 4.4 Dashboard (DASH)
-
-- **DASH-1** `/main` renders the first page of books on the server, then hands off to the client (`src/app/main/page.tsx:35-48`).
-- **DASH-2** Summary tiles show the number of books, the rows in view (edited rows while a book is open, otherwise filtered results), the number selected for deletion, and the page count (`src/features/dashboard/view/DashboardSummaryStats.tsx:28-54`).
-- **DASH-3** A detail panel shows and edits a book's entries, and can export the book to PDF (`src/features/dashboard/view/DashboardDetailPanel.tsx:48`).
-- **DASH-4** The history view sums amounts per day across **all** of the user's books and plots them. It can be filtered to all time, the last 30 days or the last 7 days (`src/features/dashboard/view/DashboardHistoryView.tsx:112-138`). Dates are accepted as ISO, `dd/MM/yyyy`, `d/M/yyyy`, `yyyy/MM/dd`, `dd-MM-yyyy` or `d-M-yyyy`; entries with unparseable dates are skipped (`:34-58`, `:84-91`).
-- **DASH-5** A PDF export is an A4 portrait table of a book's entries with a total. If the rows aren't already loaded, they are fetched first (`src/features/dashboard/model/exportPdf.ts:39-60`).
-- **DASH-6** Unsaved edits are guarded by a confirmation dialog (`src/features/dashboard/components/Dialog/UnsavedChangesDialog.tsx`).
-
-### 4.5 Billing (BILL)
-
-- **BILL-1** The plans are Free ($0), Pro monthly (3.000 COP) and Pro annual (199.000 COP). Amounts are held in cents in `BILLING_PLANS` (`src/lib/pricing.ts:32-104`).
-- **BILL-2** Choosing a paid plan calls `POST /api/billing/wompi/checkout-config`. This requires a signed-in user, inserts a `pending` row in `billing_payments` with a unique reference, and returns the Wompi public key, amount, reference, a SHA-256 integrity signature and a return URL of `/main?billing=processing&reference=…` (`src/app/api/billing/wompi/checkout-config/route.ts:57-130`).
-- **BILL-3** The client opens the Wompi Widget Checkout from `checkout.wompi.co/widget.js` (`src/features/dashboard/view/DashboardPricingView.tsx:53`, `:153-187`).
-- **BILL-4** The webhook rejects a request with no configured event secret (500), invalid JSON (400) or a bad checksum (401). The checksum is compared in constant time (`src/app/api/billing/wompi/webhook/route.ts:121-130`, `:225-234`, `:357-384`).
-- **BILL-5** Each event is stored in `billing_webhook_events`, keyed by the SHA-256 of the raw body. A redelivered event that was already processed is acknowledged without being applied again (`src/app/api/billing/wompi/webhook/route.ts:236-277`, `:386-408`).
-- **BILL-6** Wompi statuses map to `APPROVED → approved`, `DECLINED → declined`, `VOIDED → voided`, and anything else `→ error` (`src/app/api/billing/wompi/webhook/route.ts:132-148`).
-- **BILL-7** An approved payment sets the membership to `tier: member`, `status: active`, with `ends_at` extended by one month or one year. The extension counts from the later of now and the current `ends_at`, so buying early stacks the periods (`src/app/api/billing/wompi/webhook/route.ts:170-223`).
+| Capability                                             | Requirement IDs  | Covers                                                                    |
+| ------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------- |
+| [`auth`](../openspec/specs/auth/spec.md)               | AUTH-1 to AUTH-8 | Sign-up, sign-in, Google OAuth, callback, sign-out, profile on sign-up    |
+| [`books`](../openspec/specs/books/spec.md)             | BOOK-1 to BOOK-8 | Ownership, list, pagination, search, create, update, delete, entry limits |
+| [`receipt-ocr`](../openspec/specs/receipt-ocr/spec.md) | OCR-1 to OCR-6   | In-browser receipt reading, date and amount extraction, manual fallback   |
+| [`dashboard`](../openspec/specs/dashboard/spec.md)     | DASH-1 to DASH-6 | Dashboard, summary, detail panel, history chart, PDF export               |
+| [`billing`](../openspec/specs/billing/spec.md)         | BILL-1 to BILL-7 | Plans, checkout config, webhook, membership extension                     |
 
 ## 5. Plans and entitlements
 
@@ -182,41 +144,15 @@ Server actions (`src/app/actions/`): `signInAction`, `signUpAction`, `signOutAct
 
 ## 8. Non-functional requirements
 
-### 8.1 Security
+All non-functional requirements are in [`security`](../openspec/specs/security/spec.md):
 
-- **SEC-1** Every page response carries a per-request nonce-based Content-Security-Policy. It allows scripts only from self, the nonce, `blob:`, `cdn.jsdelivr.net` (tesseract assets) and `checkout.wompi.co`, and sets `frame-ancestors 'none'` (`src/proxy.ts:4-54`). API routes are excluded from the proxy (`src/proxy.ts:56-58`).
-- **SEC-2** The service-role Supabase client is used only in server route handlers for billing (`src/app/api/billing/wompi/checkout-config/route.ts:6`, `src/app/api/billing/wompi/webhook/route.ts:4`).
-- **SEC-3** Writes and auth attempts are rate-limited with fixed windows per client IP:
-
-  | Operation                                      | Limit       | Source                                                                                                                 |
-  | ---------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------- |
-  | Sign in (per IP + email)                       | 5 / 15 min  | `src/app/actions/auth.ts:25-30`                                                                                        |
-  | Sign up (per IP + email)                       | 5 / 60 min  | `src/app/actions/auth.ts:56-61`                                                                                        |
-  | Resend confirmation (per IP + email)           | 3 / 60 min  | `src/app/actions/auth.ts:100-105`                                                                                      |
-  | Book create / delete (actions)                 | 30 / 5 min  | `src/app/actions/dashboard.ts:67-75`                                                                                   |
-  | Book `POST` / `DELETE` / content `PATCH` (API) | 30 / 5 min  | `src/app/api/dashboard/books/route.ts:136-140`, `:190-194`; `src/app/api/dashboard/books/[id]/content/route.ts:97-101` |
-  | Session `POST`                                 | 10 / 5 min  | `src/app/api/auth/session/route.ts:12-16`                                                                              |
-  | Profile initialize                             | 10 / 15 min | `src/app/api/dashboard/profile/initialize/route.ts:8-12`                                                               |
-
-- **SEC-4** Every query that touches books filters by `owner_id` in application code, and RLS enforces the same rule underneath (§6).
-- **SEC-5** Secrets live only in environment variables. Only the Supabase URL, the publishable/anon key, the site URL and the Wompi public key are `NEXT_PUBLIC_*` (`README.md`, `src/app/api/billing/wompi/checkout-config/route.ts:36-55`).
-
-### 8.2 Caching
-
-- **PERF-1** Dashboard reads use `'use cache: private'` with `cacheLife('minutes')`, tagged `dashboard-books`, `dashboard-books:{ownerBookId}` and `dashboard-book:{bookId}` (`src/app/actions/dashboard.ts:99-212`).
-- **PERF-2** Server-action writes invalidate with `updateTag`, so the writer sees fresh data straight away (`src/app/actions/dashboard.ts:278-282`, `:367-374`). Route-handler writes use `revalidateTag(…, "max")` (`src/app/api/dashboard/books/route.ts:180-184`, `:254-255`).
-
-### 8.3 Localisation
-
-- **L10N-1** All user-facing text is Spanish. Money is formatted `es-CO`, dates `dd/MM/yyyy`, and billing is in COP only (`src/lib/data.ts:37-42`; `migrations/20260721_wompi_billing_backend.sql:29`).
-
-### 8.4 Accessibility
-
-- **A11Y-1** Interactive controls use semantic MUI components and carry accessible names, for example the history filter toggles and back buttons (`src/features/dashboard/view/DashboardHistoryView.tsx:203-225`, `src/features/dashboard/view/DashboardPricingView.tsx:210`).
-
-### 8.5 SEO
-
-- **SEO-1** Public pages set metadata and a canonical URL, and the landing page emits Organization JSON-LD with a nonce (`src/app/page.tsx:13-57`). `/main` is `noindex, nofollow` (`src/app/main/page.tsx:9-19`).
+| Requirement IDs | Covers                                                             |
+| --------------- | ------------------------------------------------------------------ |
+| SEC-1 to SEC-5  | CSP, service-role isolation, rate limits, owner filtering, secrets |
+| PERF-1, PERF-2  | Dashboard read caching and write invalidation                      |
+| L10N-1          | Spanish text, `es-CO` formats, COP billing                         |
+| A11Y-1          | Accessible controls                                                |
+| SEO-1           | Metadata, canonical URLs, JSON-LD, `noindex` on `/main`            |
 
 ## 9. Configuration
 
