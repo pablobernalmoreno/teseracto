@@ -62,7 +62,7 @@ Dashboard reads SHALL use private caching with a minutes-long lifetime, tagged `
 
 ### Requirement: PERF-2 Write invalidation
 
-Server-action writes SHALL invalidate with `updateTag`, so the writer sees fresh data straight away. Route-handler writes SHALL use `revalidateTag(…, "max")`. (`src/app/actions/dashboard.ts:278-282`, `:367-374`, `src/app/api/dashboard/books/route.ts:180-184`, `:254-255`)
+Server-action writes SHALL invalidate with `updateTag`, so the writer sees fresh data straight away. Route-handler writes SHALL use `revalidateTag(…, "max")`. (`src/app/actions/dashboard.ts:278-282`, `:367-374`, `src/app/api/dashboard/books/route.ts:181-184`, `:264-265`)
 
 #### Scenario: Create then list
 

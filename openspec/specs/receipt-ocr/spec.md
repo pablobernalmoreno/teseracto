@@ -8,7 +8,7 @@ Lets a user turn photographed receipts into ledger entries by reading dates and 
 
 ### Requirement: OCR-1 In-browser image reading
 
-A user SHALL be able to select one or more images. Each SHALL be read in the browser by an OCR worker that is loaded on demand and terminated afterwards. Images SHALL NOT leave the browser. (`src/features/dashboard/model/useItemCardModel.ts:261-330`)
+A user SHALL be able to select one or more images. Each SHALL be read in the browser by an OCR worker that is loaded on demand and terminated afterwards. Images SHALL NOT leave the browser. (`src/features/dashboard/model/useItemCardModel.ts:221-267`)
 
 #### Scenario: Multiple images
 

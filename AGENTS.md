@@ -72,10 +72,12 @@ All code must adhere to this directory layout. Do not place files outside of the
 
 ```text
 teseracto/
+├── cypress/                    # Cypress component tests, support and synthetic receipt fixtures
 ├── migrations/                 # Dated Supabase SQL migrations
 ├── openspec/                   # OpenSpec workflow: specs/ (requirements per capability), changes/
 ├── public/                     # Static assets (images, icons)
 ├── spec/                       # Index, data model, API contracts, gaps (SPEC.md); requirements are in openspec/specs/
+├── test-support/               # Test-only helpers (filename oracle, OCR accuracy suite); never imported from src/
 ├── src/
 │   ├── app/                    # Next.js App Router (pages, layouts, route handlers ONLY)
 │   │   ├── (auth)/             # Route group for authentication pages (no URL segment)
