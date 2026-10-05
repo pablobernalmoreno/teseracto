@@ -78,3 +78,33 @@ export function normalizeMainDataArray(value: unknown, maxItems = 500): MainData
     money: entry.money.trim(),
   }));
 }
+
+const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * Returns the trimmed value when it is a real `YYYY-MM-DD` calendar date, otherwise null.
+ * Fails closed: anything that is not a string, or not a real date, is rejected.
+ */
+export function parseIsoDate(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  const match = ISO_DATE_PATTERN.exec(trimmed);
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  // Date rolls an impossible day over (31 Feb becomes 3 Mar), so compare the parts back.
+  const candidate = new Date(Date.UTC(year, month - 1, day));
+  const isRealDate =
+    candidate.getUTCFullYear() === year &&
+    candidate.getUTCMonth() === month - 1 &&
+    candidate.getUTCDate() === day;
+
+  return isRealDate ? trimmed : null;
+}

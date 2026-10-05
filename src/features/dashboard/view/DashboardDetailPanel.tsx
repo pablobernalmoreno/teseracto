@@ -5,9 +5,9 @@ import { Box, Button, CircularProgress, Paper, TextField, Typography } from "@mu
 import DataTable from "@/features/dashboard/components/dataTable/DataTable";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
-import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import type { MainData } from "@/types/dashboard";
-import { exportBookToPdf } from "@/features/dashboard/model/exportPdf";
+import { exportBookToCsv } from "@/features/dashboard/model/exportCsv";
 
 interface DashboardDetailPanelProps {
   bookId: string | number;
@@ -41,11 +41,11 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
     const saveAndExitLabel = hasUnsavedChanges ? "Guardar y salir *" : "Guardar y salir";
 
     const [exporting, setExporting] = useState(false);
-    const handleExportPdf = async () => {
+    const handleExportCsv = async () => {
       if (exporting) return;
       setExporting(true);
       try {
-        await exportBookToPdf({ bookId, bookTitle: title, rows: editedRows });
+        await exportBookToCsv({ bookId, bookTitle: title, rows: editedRows });
       } catch {
         // silently fail
       } finally {
@@ -83,15 +83,15 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
             </Button>
             <Button
               className="dashboard_button dashboard_button--ghost"
-              onClick={handleExportPdf}
+              onClick={handleExportCsv}
               disabled={exporting || isPending}
             >
               {exporting ? (
                 <CircularProgress size={14} sx={{ color: "inherit" }} />
               ) : (
-                <PictureAsPdfOutlinedIcon fontSize="small" />
+                <FileDownloadOutlinedIcon fontSize="small" />
               )}
-              {exporting ? "Exportando…" : "Exportar a PDF"}
+              {exporting ? "Exportando…" : "Exportar a CSV"}
             </Button>
             <Button
               className="dashboard_button dashboard_button--soft"

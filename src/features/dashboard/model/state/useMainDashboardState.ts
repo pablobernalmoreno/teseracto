@@ -3,6 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { deleteBooks as deleteBooksFn, type BookData } from "@/app/actions/dashboard";
 import type { MainData } from "@/types/dashboard";
+import {
+  earliestRowDate,
+  fillMissingDates,
+  rowsRangeTitle,
+  shiftRowDates,
+} from "@/lib/receipts/bookDates";
 import { useDashboardBooksData } from "./useDashboardBooksData";
 import { useDashboardUiState } from "./useDashboardUiState";
 import { useDashboardModals } from "./DashboardModalContext";
@@ -196,15 +202,23 @@ export const useMainDashboardState = ({
   };
 
   const handleDetailDateChange = (date: string) => {
+    const previousDate = detailCardDate;
     setDetailCardDate(date);
+    // Cleared date: nothing to move the rows to, so they keep their own dates (fails closed).
+    if (!date) return;
+
+    // The rows move together by the same offset, so a multi-day book keeps its shape (BOOK-10).
+    const previousRows = uiState.editedRows;
+    const nextRows = shiftRowDates(previousRows, previousDate, date);
+    uiState.setEditedRows(nextRows);
     setDetailCardTitle((prevTitle) => {
-      const autoTitle = computeTitleFromDate(detailCardDate);
-      if (prevTitle === autoTitle || prevTitle === "") {
-        return computeTitleFromDate(date);
+      // Only an automatic title follows the dates; a title the user wrote stays.
+      const autoTitles = [computeTitleFromDate(previousDate), rowsRangeTitle(previousRows)];
+      if (prevTitle === "" || autoTitles.includes(prevTitle)) {
+        return rowsRangeTitle(nextRows) || computeTitleFromDate(date);
       }
       return prevTitle;
     });
-    uiState.setEditedRows((prevRows) => prevRows.map((row) => ({ ...row, date })));
   };
 
   const handleDetailTitleChange = (title: string) => {
@@ -227,10 +241,10 @@ export const useMainDashboardState = ({
   const saveDetailInternal = async (exitAfterSave: boolean): Promise<boolean> => {
     if (!uiState.selectedCardId) return false;
     const bookId = uiState.selectedCardId;
-    const cardDate = detailCardDate;
-    const rowsToSave = cardDate
-      ? uiState.editedRows.map((row) => ({ ...row, date: cardDate }))
-      : uiState.editedRows;
+    // Each row keeps its own date; the book is dated by the lowest one (BOOK-10). Only rows
+    // without a date take the book date.
+    const cardDate = earliestRowDate(uiState.editedRows) || detailCardDate;
+    const rowsToSave = fillMissingDates(uiState.editedRows, cardDate);
 
     const result = await booksData.saveDetailRows(
       bookId,
@@ -258,6 +272,7 @@ export const useMainDashboardState = ({
     }
 
     uiState.setEditedRows(rowsToSave);
+    setDetailCardDate(cardDate);
     setInitialDetailDate(cardDate);
     setInitialDetailTitle(detailCardTitle);
     setInitialDetailRows(rowsToSave);

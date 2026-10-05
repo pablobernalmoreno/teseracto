@@ -106,10 +106,17 @@
   border-radius: 8px;
   border: 1px solid rgba(var(--rgb-border), 0.42);
   background-color: var(--color-surface);
+  /* Not centred with justify-content/align-items: that makes the top and left of an overflowing
+     image unreachable by scrolling. The image centres itself with margin: auto instead, which
+     never pushes content past the scrollable start. */
   display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 1rem;
+  cursor: grab;
+}
+
+.zoomViewportDragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .zoomImage {
@@ -117,6 +124,9 @@
   max-width: none;
   height: auto;
   display: block;
+  flex: none;
+  margin: auto;
+  -webkit-user-drag: none;
   transition: width 0.15s ease-out;
 }
 

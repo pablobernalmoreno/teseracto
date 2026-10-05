@@ -9,6 +9,7 @@ import {
   isJsonContentType,
   normalizeBookIds,
   normalizeMainDataArray,
+  parseIsoDate,
   parseTrimmedString,
 } from "@/lib/security/validation";
 
@@ -216,6 +217,7 @@ export async function POST(request: NextRequest) {
     title?: unknown;
     content?: unknown;
     bookId?: unknown;
+    creationTime?: unknown;
   } | null;
 
   const title = parseTrimmedString(body?.title, 180);
@@ -230,6 +232,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "content must be an array" }, { status: 400 });
   }
 
+  // Optional: a book made from an upload is dated by its lowest entry date. Absent keeps the
+  // current timestamp; present but not a real YYYY-MM-DD date is rejected (fails closed).
+  const creationDate =
+    body?.creationTime === undefined ? undefined : parseIsoDate(body.creationTime);
+  if (creationDate === null) {
+    return NextResponse.json({ error: "Invalid creation date" }, { status: 400 });
+  }
+
   const bookId = requestedBookId || crypto.randomUUID();
 
   const { data, error } = await supabase
@@ -240,7 +250,7 @@ export async function POST(request: NextRequest) {
         owner_id: ownerId,
         title,
         content,
-        creationTime: new Date().toISOString(),
+        creationTime: creationDate ?? new Date().toISOString(),
       },
     ])
     .select("id, title, content, owner_id, creationTime")

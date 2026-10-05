@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { DialogState } from "@/features/dashboard/model/useItemCardModel";
+import type { EntryIssues } from "@/features/dashboard/model/reviewEntries";
 import type { MainData } from "@/types/dashboard";
-import { CarouselValues, InvalidEntryCarousel } from "../InvalidEntryCarousel/InvalidEntryCarousel";
+import { InvalidEntryCarousel } from "../InvalidEntryCarousel/InvalidEntryCarousel";
 import {
   Box,
   Button,
@@ -22,41 +23,42 @@ import styles from "./InputDialog.module.css";
 export interface InputDialogProps {
   open: boolean;
   dialogState: DialogState;
-  invalidEntries: MainData[];
+  // The entries to review, with their current date and amount.
+  attentionEntries: MainData[];
+  entryIssues: Record<number, EntryIssues>;
   sources: string[];
-  carouselValues: CarouselValues;
-  selectedDate: string;
-  excludedEntryIds: Set<number>;
-  dateMismatchEntryIds: Set<number>;
-  entryMessages: Record<number, string>;
+  // Title the book will get from the dates as they stand now.
+  rangeTitle: string;
+  canSave: boolean;
+  activeEntryId: number | null;
   onClose: () => void;
   onSave: () => Promise<void> | void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onDateChange: (value: string) => void;
+  onActiveEntryChange: (entryId: number) => void;
+  onDateChange: (entryId: number, value: string) => void;
   onMoneyChange: (entryId: number, value: string) => void;
+  onConfirmDate: (entryId: number) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 export const InputDialog: React.FC<InputDialogProps> = ({
   open,
   dialogState,
-  invalidEntries,
+  attentionEntries,
+  entryIssues,
   sources,
-  carouselValues,
-  selectedDate,
-  excludedEntryIds,
-  dateMismatchEntryIds,
-  entryMessages,
+  rangeTitle,
+  canSave,
+  activeEntryId,
   onClose,
   onSave,
   onFileChange,
+  onActiveEntryChange,
   onDateChange,
   onMoneyChange,
+  onConfirmDate,
   inputRef,
 }) => {
-  const excludedSet = excludedEntryIds;
-  const dateMismatchSet = dateMismatchEntryIds;
-  const [groupedCarouselIndex, setGroupedCarouselIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveClick = async () => {
@@ -80,30 +82,11 @@ export const InputDialog: React.FC<InputDialogProps> = ({
     onClose();
   };
 
-  const groupedInvalidEntries = useMemo(() => {
-    const firstDateMismatchId = invalidEntries.find((entry) => dateMismatchSet.has(entry.id))?.id;
-
-    return invalidEntries.filter((entry) => {
-      const isDateMismatchEntry = dateMismatchSet.has(entry.id);
-      if (!isDateMismatchEntry) {
-        return true;
-      }
-
-      return entry.id === firstDateMismatchId;
-    });
-  }, [invalidEntries, dateMismatchSet]);
-
-  const maxGroupedIndex = Math.max(groupedInvalidEntries.length - 1, 0);
-  const currentGroupedIndex = Math.min(groupedCarouselIndex, maxGroupedIndex);
-
-  const dateMismatchCount = dateMismatchEntryIds.size;
-  const activeInvalidEntry = groupedInvalidEntries[currentGroupedIndex];
-
-  const allInvalidEntriesFilled = invalidEntries.every((entry) => {
-    if (excludedSet.has(entry.id)) return true;
-    const v = carouselValues[entry.id] || { money: "" };
-    return Boolean(v.money);
-  });
+  // Follow the active entry by id; an id that is gone (or none yet) falls back to the first entry.
+  const currentIndex = Math.max(
+    attentionEntries.findIndex((entry) => entry.id === activeEntryId),
+    0
+  );
 
   // Render content based on current state
   const renderContent = () => {
@@ -119,21 +102,23 @@ export const InputDialog: React.FC<InputDialogProps> = ({
         return (
           <Box className={styles.invalidEntriesContainer}>
             <InvalidEntryCarousel
-              invalidEntries={groupedInvalidEntries}
+              entries={attentionEntries}
               sources={sources}
-              currentIndex={currentGroupedIndex}
-              carouselValues={carouselValues}
-              selectedDate={selectedDate}
-              isEntryExcluded={excludedSet.has(activeInvalidEntry?.id)}
-              isDateMismatch={dateMismatchSet.has(activeInvalidEntry?.id)}
-              dateMismatchCount={dateMismatchCount}
-              entryMessage={entryMessages[activeInvalidEntry?.id]}
+              currentIndex={currentIndex}
+              entryIssues={entryIssues}
+              rangeTitle={rangeTitle}
               onDateChange={onDateChange}
-              onPrev={() => setGroupedCarouselIndex(Math.max(0, currentGroupedIndex - 1))}
-              onNext={() =>
-                setGroupedCarouselIndex(Math.min(maxGroupedIndex, currentGroupedIndex + 1))
-              }
               onMoneyChange={onMoneyChange}
+              onConfirmDate={onConfirmDate}
+              onPrev={() => {
+                const previous = attentionEntries[Math.max(0, currentIndex - 1)];
+                if (previous) onActiveEntryChange(previous.id);
+              }}
+              onNext={() => {
+                const next =
+                  attentionEntries[Math.min(attentionEntries.length - 1, currentIndex + 1)];
+                if (next) onActiveEntryChange(next.id);
+              }}
             />
           </Box>
         );
@@ -218,12 +203,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
           className="dashboard-dialog-button dashboard-dialog-button--primary"
           onClick={handleSaveClick}
           autoFocus
-          disabled={
-            isSaving ||
-            (dialogState.type !== "invalid_entries" && dialogState.type !== "success") ||
-            (dialogState.type === "invalid_entries" && !selectedDate.trim()) ||
-            !allInvalidEntriesFilled
-          }
+          disabled={isSaving || !canSave}
         >
           {isSaving ? "Guardando..." : "Guardar"}
         </Button>

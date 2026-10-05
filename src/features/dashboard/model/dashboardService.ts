@@ -230,14 +230,14 @@ export const dashboardService = {
     }
   },
 
-  async insertBookData(title: string, content: MainData[], bookId?: string) {
+  async insertBookData(title: string, content: MainData[], bookId?: string, creationTime?: string) {
     try {
       const response = await authenticatedFetch("/api/dashboard/books", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title, content, bookId }),
+        body: JSON.stringify({ title, content, bookId, creationTime }),
       });
 
       if (!response.ok) {

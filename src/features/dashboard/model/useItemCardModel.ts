@@ -1,8 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { dashboardService } from "./dashboardService";
 import type { BookData } from "@/app/actions/dashboard";
-import { extractCurrencyValues, parseDates } from "@/lib/data";
+import { browserCodec } from "@/lib/receipts/browserCodec";
+import { createTreatments } from "@/lib/receipts/imageTreatments";
+import { dateRangeTitle, isoToDisplay } from "@/lib/receipts/dates";
+import { buildReadPasses, type PageMode } from "@/lib/receipts/readPasses";
+import { readReceipt, type ReceiptRead } from "@/lib/receipts/readReceipt";
 import type { MainData } from "@/types/dashboard";
+import {
+  attentionEntries,
+  buildBookFromEntries,
+  canSaveEntries,
+  entriesFromReads,
+  getEntryIssues,
+  needsAttention,
+  unreadableEntries,
+  type EntryIssues,
+} from "./reviewEntries";
 
 // Format date for display as dd/mm/yyyy
 export const formatDateDisplay = (dateStr: string): string => {
@@ -84,133 +98,42 @@ export const formatCurrency = (raw: string | number): string => {
   return parts.fracPart ? `${intFormatted}.${parts.fracPart}` : intFormatted;
 };
 
-interface ParsedUploadState {
-  pathData: MainData[];
-  invalidEntries: MainData[];
-  editedValues: Map<number, { money: string }>;
-  excludedIds: Set<number>;
-  dateMismatchIds: Set<number>;
-  messages: Map<number, string>;
-  selectedDate: string;
-}
-
-function buildUnreadableUploadState(totalEntries: number, message: string): ParsedUploadState {
-  const pathData: MainData[] = [];
-  const invalidEntries: MainData[] = [];
-  const editedValues = new Map<number, { money: string }>();
-  const excludedIds = new Set<number>();
-  const dateMismatchIds = new Set<number>();
-  const messages = new Map<number, string>();
-
-  for (let i = 0; i < totalEntries; i += 1) {
-    pathData.push({ id: i, date: "", money: "N/A" });
-    invalidEntries.push({ id: i, date: "", money: "N/A" });
-    editedValues.set(i, { money: "" });
-    messages.set(i, message);
-  }
-
-  return {
-    pathData,
-    invalidEntries,
-    editedValues,
-    excludedIds,
-    dateMismatchIds,
-    messages,
-    selectedDate: "",
-  };
-}
-
-function buildParsedUploadState(
-  expectedDatesArray: (string | null)[],
-  expectedCurrencyArray: string[],
-  totalEntries: number
-): ParsedUploadState {
-  const referenceDate = expectedDatesArray.find(Boolean) ?? null;
-  const pathData: MainData[] = [];
-  const invalidEntries: MainData[] = [];
-  const editedValues = new Map<number, { money: string }>();
-  const excludedIds = new Set<number>();
-  const dateMismatchIds = new Set<number>();
-  const messages = new Map<number, string>();
-
-  if (referenceDate) {
-    for (let i = 0; i < totalEntries; i += 1) {
-      const detectedDate = expectedDatesArray[i];
-      const money = expectedCurrencyArray[i] || "N/A";
-      const normalizedEntry: MainData = { id: i, date: referenceDate, money };
-      pathData.push(normalizedEntry);
-
-      const isDifferentDate = Boolean(detectedDate && detectedDate !== referenceDate);
-      if (isDifferentDate) {
-        invalidEntries.push(normalizedEntry);
-        excludedIds.add(i);
-        dateMismatchIds.add(i);
-        messages.set(
-          i,
-          `Imagen con fecha ${detectedDate}. Solo se guardan datos del dia ${referenceDate}.`
-        );
-        continue;
-      }
-
-      if (!money || money === "N/A") {
-        invalidEntries.push(normalizedEntry);
-        editedValues.set(i, { money: "" });
-        messages.set(
-          i,
-          "No pudimos leer bien el valor en esta imagen. Suele pasar cuando la foto esta borrosa, oscura o cortada. Revisa la imagen e ingresa el valor manualmente."
-        );
-      }
-    }
-
-    return {
-      pathData,
-      invalidEntries,
-      editedValues,
-      excludedIds,
-      dateMismatchIds,
-      messages,
-      selectedDate: referenceDate,
-    };
-  }
-
-  for (let i = 0; i < totalEntries; i += 1) {
-    const money = expectedCurrencyArray[i] || "N/A";
-    pathData.push({ id: i, date: "", money });
-    invalidEntries.push({ id: i, date: "", money });
-    editedValues.set(i, { money: money === "N/A" ? "" : money });
-    messages.set(
-      i,
-      "No pudimos leer bien esta imagen. Suele pasar cuando la foto esta borrosa, oscura o cortada. Revisa la imagen y completa la fecha y el valor manualmente."
-    );
-  }
-
-  return {
-    pathData,
-    invalidEntries,
-    editedValues,
-    excludedIds,
-    dateMismatchIds,
-    messages,
-    selectedDate: "",
-  };
-}
-
 // Dialog state machine types
 export type DialogState =
   { type: "idle" } | { type: "loading" } | { type: "invalid_entries" } | { type: "success" };
 
+const OCR_FAILED_LOG = "OCR worker failed:";
+
+// Returns the same array when nothing changes, so a no-op edit does not re-render.
+function updateEntry(
+  entries: MainData[],
+  entryId: number,
+  patch: Partial<Pick<MainData, "date" | "money">>
+): MainData[] {
+  const index = entries.findIndex((entry) => entry.id === entryId);
+  if (index === -1) return entries;
+
+  const current = entries[index];
+  const next = { ...current, ...patch };
+  if (next.date === current.date && next.money === current.money) return entries;
+
+  return entries.map((entry, position) => (position === index ? next : entry));
+}
+
 interface ItemCardModelState {
   files: File[] | undefined;
   dialogState: DialogState;
-  pathData: MainData[];
+  // One entry per image with its current date and amount ("" when missing).
+  entries: MainData[];
   sources: string[];
-  invalidEntries: MainData[];
-  carouselIndex: number;
-  editedValues: Map<number, { money: string }>;
-  selectedDate: string;
-  excludedEntryIds: Set<number>;
-  dateMismatchEntryIds: Set<number>;
-  entryMessages: Map<number, string>;
+  // The entries the carousel lists, and what is wrong with each of them.
+  attentionEntries: MainData[];
+  entryIssues: Map<number, EntryIssues>;
+  // Title the book will get: the range from the lowest to the highest entry date.
+  rangeTitle: string;
+  canSave: boolean;
+  // The carousel follows an entry by id, so it stays put when the listed entries change.
+  activeEntryId: number | null;
 }
 
 interface ItemCardModelActions {
@@ -219,23 +142,34 @@ interface ItemCardModelActions {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   getImageText: (selectedFiles: File[]) => Promise<void>;
   handleSave: () => Promise<BookData | null>;
-  setCarouselIndex: (index: number) => void;
+  setActiveEntryId: (entryId: number | null) => void;
   onMoneyChange: (entryId: number, value: string) => void;
-  onSelectedDateChange: (value: string) => void;
+  // `value` is the `yyyy-MM-dd` value of a date input; an incomplete or invalid one clears the date.
+  onDateChange: (entryId: number, value: string) => void;
+  onConfirmDate: (entryId: number) => void;
 }
 
 export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] => {
   const [files, setFiles] = useState<File[]>();
   const [dialogState, setDialogState] = useState<DialogState>({ type: "idle" });
-  const [pathData, setPathData] = useState<MainData[]>([]);
+  const [entries, setEntries] = useState<MainData[]>([]);
   const [sources, setSources] = useState<string[]>([]);
-  const [invalidEntries, setInvalidEntries] = useState<MainData[]>([]);
-  const [carouselIndex, setCarouselIndex] = useState<number>(0);
-  const [editedValues, setEditedValues] = useState<Map<number, { money: string }>>(new Map());
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [excludedEntryIds, setExcludedEntryIds] = useState<Set<number>>(new Set());
-  const [dateMismatchEntryIds, setDateMismatchEntryIds] = useState<Set<number>>(new Set());
-  const [entryMessages, setEntryMessages] = useState<Map<number, string>>(new Map());
+  const [activeEntryId, setActiveEntryId] = useState<number | null>(null);
+  const [initialAttention, setInitialAttention] = useState<Set<number>>(new Set());
+  // id -> the date the user confirmed; stale as soon as that entry's date changes.
+  const [confirmedDates, setConfirmedDates] = useState<Map<number, string>>(new Map());
+
+  const entryIssues = useMemo(
+    () => getEntryIssues(entries, confirmedDates),
+    [entries, confirmedDates]
+  );
+  const listedEntries = useMemo(
+    () => attentionEntries(entries, entryIssues, initialAttention),
+    [entries, entryIssues, initialAttention]
+  );
+  const rangeTitle = useMemo(() => dateRangeTitle(entries.map((entry) => entry.date)), [entries]);
+  const isReviewable = dialogState.type === "invalid_entries" || dialogState.type === "success";
+  const canSave = isReviewable && canSaveEntries(entries, entryIssues);
 
   useEffect(() => {
     return () => {
@@ -249,13 +183,29 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     setDialogState({ type: "idle" });
     setFiles(undefined);
     setSources([]);
-    setInvalidEntries([]);
-    setCarouselIndex(0);
-    setEditedValues(new Map());
-    setSelectedDate("");
-    setExcludedEntryIds(new Set());
-    setDateMismatchEntryIds(new Set());
-    setEntryMessages(new Map());
+    setEntries([]);
+    setActiveEntryId(null);
+    setInitialAttention(new Set());
+    setConfirmedDates(new Map());
+  };
+
+  const showReview = (reviewEntries: MainData[], reviewSources: string[]) => {
+    const issues = getEntryIssues(reviewEntries, new Map());
+    const flagged = new Set(
+      reviewEntries
+        .filter((entry) => {
+          const entryIssuesAtRead = issues.get(entry.id);
+          return entryIssuesAtRead ? needsAttention(entryIssuesAtRead) : false;
+        })
+        .map((entry) => entry.id)
+    );
+
+    setSources(reviewSources);
+    setEntries(reviewEntries);
+    setActiveEntryId(null);
+    setInitialAttention(flagged);
+    setConfirmedDates(new Map());
+    setDialogState(flagged.size ? { type: "invalid_entries" } : { type: "success" });
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -275,142 +225,45 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
 
     try {
       setDialogState({ type: "loading" });
-      const { createWorker } = await import("tesseract.js");
-      worker = await createWorker("eng");
+      const { createWorker, PSM } = await import("tesseract.js");
+      // Receipts are in Spanish (labels, accented month names), so read with the Spanish model.
+      const recognizer = await createWorker("spa");
+      worker = recognizer;
+      const segmentation: Record<PageMode, (typeof PSM)[keyof typeof PSM]> = {
+        block: PSM.SINGLE_BLOCK,
+        auto: PSM.AUTO,
+        sparse: PSM.SPARSE_TEXT,
+      };
+      // The mode is set on every pass, so a pass never inherits the previous one's.
+      const recognize = async (image: File | Blob, mode: PageMode) => {
+        await recognizer.setParameters({ tessedit_pageseg_mode: segmentation[mode] });
+        return (await recognizer.recognize(image)).data.text;
+      };
 
-      const paths: string[] = [];
+      const reads: ReceiptRead[] = [];
       const newSources: string[] = [];
 
       for (const file of selectedFiles) {
-        const ret = await worker.recognize(file);
-        const ocrText = ret.data.text;
+        reads.push(
+          await readReceipt(buildReadPasses(file, recognize, createTreatments(file, browserCodec)))
+        );
         newSources.push(URL.createObjectURL(file));
-        paths.push(ocrText);
       }
 
-      const expectedDatesArray = parseDates(paths);
-      const expectedCurrencyArray = extractCurrencyValues(paths);
-      const parsedUploadState = buildParsedUploadState(
-        expectedDatesArray,
-        expectedCurrencyArray,
-        paths.length
-      );
-
-      setSources(newSources);
-      setPathData(parsedUploadState.pathData);
-      setInvalidEntries(parsedUploadState.invalidEntries);
-      setEditedValues(parsedUploadState.editedValues);
-      setExcludedEntryIds(parsedUploadState.excludedIds);
-      setDateMismatchEntryIds(parsedUploadState.dateMismatchIds);
-      setEntryMessages(parsedUploadState.messages);
-      setSelectedDate(parsedUploadState.selectedDate);
-      setDialogState(
-        parsedUploadState.invalidEntries.length ? { type: "invalid_entries" } : { type: "success" }
-      );
+      showReview(entriesFromReads(reads), newSources);
     } catch (error) {
-      console.error("OCR worker failed:", error);
-      const unreadableUploadState = buildUnreadableUploadState(
-        selectedFiles.length,
-        "No pudimos leer bien esta imagen. Suele pasar cuando la foto esta borrosa, oscura o cortada. Revisa la imagen y completa la fecha y el valor manualmente."
+      // Fails open to manual entry (OCR-6): every image is flagged for a typed date and amount and
+      // the user can still save.
+      console.error(OCR_FAILED_LOG, error);
+      showReview(
+        unreadableEntries(selectedFiles.length),
+        selectedFiles.map((file) => URL.createObjectURL(file))
       );
-      setSources(selectedFiles.map((file) => URL.createObjectURL(file)));
-      setPathData(unreadableUploadState.pathData);
-      setInvalidEntries(unreadableUploadState.invalidEntries);
-      setEditedValues(unreadableUploadState.editedValues);
-      setExcludedEntryIds(unreadableUploadState.excludedIds);
-      setDateMismatchEntryIds(unreadableUploadState.dateMismatchIds);
-      setEntryMessages(unreadableUploadState.messages);
-      setSelectedDate(unreadableUploadState.selectedDate);
-      setDialogState({ type: "invalid_entries" });
     } finally {
       if (worker) {
         await worker.terminate();
       }
     }
-  };
-
-  const formatUpdatedPathData = (
-    originalPathData: MainData[],
-    edits: Map<number, { money: string }>
-  ): MainData[] => {
-    const updated = [...originalPathData];
-    const parseNumberFromString = (s: string | number): number => {
-      if (typeof s === "number") return s;
-      const str = String(s || "").trim();
-      if (!str) return 0;
-      const cleaned = str.replaceAll(/[^0-9.,-]/g, "");
-      if (!cleaned) return 0;
-
-      const lastComma = cleaned.lastIndexOf(",");
-      const lastDot = cleaned.lastIndexOf(".");
-
-      if (lastComma === -1 && lastDot === -1) return Number(cleaned) || 0;
-
-      if (lastComma > -1 && lastDot === -1) {
-        const decimalsLen = cleaned.length - lastComma - 1;
-        if (decimalsLen === 3) {
-          return Number(cleaned.replaceAll(",", "")) || 0;
-        }
-        return Number(cleaned.replaceAll(",", ".")) || 0;
-      }
-
-      if (lastDot > -1 && lastComma === -1) {
-        const decimalsLen = cleaned.length - lastDot - 1;
-        if (decimalsLen === 3) {
-          return Number(cleaned.replaceAll(".", "")) || 0;
-        }
-        return Number(cleaned) || 0;
-      }
-
-      if (lastComma > lastDot) {
-        const normalized = cleaned.replaceAll(".", "").replaceAll(",", ".");
-        return Number(normalized) || 0;
-      } else {
-        const normalized = cleaned.replaceAll(",", "");
-        return Number(normalized) || 0;
-      }
-    };
-    edits.forEach((value, entryId) => {
-      if (entryId !== undefined) {
-        const formattedMoney = value.money
-          ? parseNumberFromString(value.money).toLocaleString("es-CO", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 2,
-            })
-          : updated[entryId].money;
-
-        updated[entryId] = {
-          ...updated[entryId],
-          money: formattedMoney,
-        };
-      }
-    });
-    return updated;
-  };
-
-  const computeTitleFromDate = (date: string): string => {
-    if (!date) return "Dia sin fecha";
-    return `Dia ${date}`;
-  };
-
-  const validateRequiredMoney = (updatedPathData: MainData[]): boolean => {
-    const missingMoney = updatedPathData.filter(
-      (entry) => !excludedEntryIds.has(entry.id) && (!entry.money || entry.money === "N/A")
-    );
-
-    if (missingMoney.length) {
-      setInvalidEntries((previous) => {
-        const existingById = new Map(previous.map((item) => [item.id, item]));
-        for (const item of missingMoney) {
-          existingById.set(item.id, item);
-        }
-        return Array.from(existingById.values());
-      });
-      return false;
-    }
-
-    setInvalidEntries((previous) => previous.filter((entry) => excludedEntryIds.has(entry.id)));
-    return true;
   };
 
   const validateCurrentProfile = async (): Promise<void> => {
@@ -421,34 +274,23 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   };
 
   const handleSave = async () => {
+    // Complement of a saveable upload: the dialog stays open and nothing is written. The Save
+    // button is disabled in this state, so this only guards against a stray call.
+    const book = canSave ? buildBookFromEntries(entries) : null;
+    if (!book) return null;
+
     try {
-      const normalizedSelectedDate = selectedDate.trim();
-      const updatedPathData = formatUpdatedPathData(pathData, editedValues);
-      setPathData(updatedPathData);
-
-      if (!normalizedSelectedDate) {
-        return null;
-      }
-
-      if (!validateRequiredMoney(updatedPathData)) {
-        return null;
-      }
-
-      const saveableEntries = updatedPathData.filter(
-        (entry) => !excludedEntryIds.has(entry.id) && entry.money && entry.money !== "N/A"
-      );
-
-      if (!saveableEntries.length) {
-        return null;
-      }
-
       await validateCurrentProfile();
       const bookId = globalThis.crypto?.randomUUID
         ? globalThis.crypto.randomUUID()
         : String(Date.now());
-      const title = computeTitleFromDate(selectedDate);
 
-      const result = await dashboardService.insertBookData(title, saveableEntries, bookId);
+      const result = await dashboardService.insertBookData(
+        book.title,
+        book.content,
+        bookId,
+        book.creationTime
+      );
       return result.data && result.data.length > 0 ? result.data[0] : null;
     } catch (error) {
       console.error("Error saving book data:", error);
@@ -459,39 +301,32 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   };
 
   const onMoneyChange = (entryId: number, value: string) => {
-    const newEdited = new Map(editedValues);
-    newEdited.set(entryId, {
-      money: value,
-    });
-    setEditedValues(newEdited);
+    setEntries((previous) => updateEntry(previous, entryId, { money: value }));
   };
 
-  const onSelectedDateChange = (value: string) => {
-    setSelectedDate(value);
-    setPathData((previous) =>
-      previous.map((entry) =>
-        dateMismatchEntryIds.has(entry.id)
-          ? entry
-          : {
-              ...entry,
-              date: value,
-            }
-      )
+  const onDateChange = (entryId: number, value: string) => {
+    setEntries((previous) => updateEntry(previous, entryId, { date: isoToDisplay(value) }));
+  };
+
+  const onConfirmDate = (entryId: number) => {
+    const entry = entries.find((item) => item.id === entryId);
+    if (!entry || !entryIssues.get(entryId)?.dateOutlier) return;
+
+    setConfirmedDates((previous) =>
+      previous.get(entryId) === entry.date ? previous : new Map(previous).set(entryId, entry.date)
     );
   };
 
   const state: ItemCardModelState = {
     files,
     dialogState,
-    pathData,
+    entries,
     sources,
-    invalidEntries,
-    carouselIndex,
-    editedValues,
-    selectedDate,
-    excludedEntryIds,
-    dateMismatchEntryIds,
-    entryMessages,
+    attentionEntries: listedEntries,
+    entryIssues,
+    rangeTitle,
+    canSave,
+    activeEntryId,
   };
 
   const actions: ItemCardModelActions = {
@@ -500,9 +335,10 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     onFileChange,
     getImageText,
     handleSave,
-    setCarouselIndex,
+    setActiveEntryId,
     onMoneyChange,
-    onSelectedDateChange,
+    onDateChange,
+    onConfirmDate,
   };
 
   return [state, actions];

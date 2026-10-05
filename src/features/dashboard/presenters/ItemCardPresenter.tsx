@@ -47,28 +47,15 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
   const isCreateVariant = cardId === "new-item";
 
   if (isCreateVariant) {
-    const carouselValues: {
-      [entryId: number]: { money: string };
-    } = {};
-    state.editedValues.forEach((value, entryId) => {
-      carouselValues[entryId] = value;
-    });
-
-    const entryMessages: Record<number, string> = {};
-    state.entryMessages.forEach((message, entryId) => {
-      entryMessages[entryId] = message;
-    });
-
     const dialogProps = {
       open,
       dialogState: state.dialogState,
-      invalidEntries: state.invalidEntries,
+      attentionEntries: state.attentionEntries,
+      entryIssues: Object.fromEntries(state.entryIssues),
       sources: state.sources,
-      carouselValues,
-      selectedDate: state.selectedDate,
-      excludedEntryIds: state.excludedEntryIds,
-      dateMismatchEntryIds: state.dateMismatchEntryIds,
-      entryMessages,
+      rangeTitle: state.rangeTitle,
+      canSave: state.canSave,
+      activeEntryId: state.activeEntryId,
       onClose: handleInputDialogClose,
       onSave: async () => {
         try {
@@ -85,8 +72,10 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
         }
       },
       onFileChange: actions.onFileChange,
-      onDateChange: actions.onSelectedDateChange,
+      onActiveEntryChange: actions.setActiveEntryId,
+      onDateChange: actions.onDateChange,
       onMoneyChange: actions.onMoneyChange,
+      onConfirmDate: actions.onConfirmDate,
       inputRef,
     };
 
