@@ -82,7 +82,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
     const columns = useMemo(() => groupRowsByDate(rows, fixedDate), [rows, fixedDate]);
     const lineCount = Math.max(0, ...columns.map((column) => column.rows.length));
     const totalGanancias = sumMoney(rows);
-    // Header cells: one per date column, plus Ganancias, plus the delete column when editing.
+    // Header cells: one per date column, plus Ganancias.
     const columnCount = columns.length + 1;
 
     const handleMoneyChange = useCallback(

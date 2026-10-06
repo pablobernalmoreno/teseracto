@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Box, Button, CircularProgress, Paper, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
 import DataTable from "@/features/dashboard/components/dataTable/DataTable";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
@@ -41,13 +50,17 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
     const saveAndExitLabel = hasUnsavedChanges ? "Guardar y salir *" : "Guardar y salir";
 
     const [exporting, setExporting] = useState(false);
+    const [exportFailed, setExportFailed] = useState(false);
     const handleExportCsv = async () => {
       if (exporting) return;
       setExporting(true);
+      setExportFailed(false);
       try {
-        await exportBookToCsv({ bookId, bookTitle: title, rows: editedRows });
+        await exportBookToCsv({ bookId, bookTitle: title, rows: editedRows, bookDate });
       } catch {
-        // silently fail
+        // Fails closed (DASH-5): exportBookToCsv throws before downloading anything, so no partial
+        // file exists; the user is told and can press the button again.
+        setExportFailed(true);
       } finally {
         setExporting(false);
       }
@@ -121,6 +134,16 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
             onRowsChange={onRowsChange}
           />
         </Box>
+        <Snackbar
+          open={exportFailed}
+          autoHideDuration={6000}
+          onClose={() => setExportFailed(false)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity="error" variant="filled" onClose={() => setExportFailed(false)}>
+            No se pudo exportar el libro. Intenta de nuevo.
+          </Alert>
+        </Snackbar>
       </Paper>
     );
   }

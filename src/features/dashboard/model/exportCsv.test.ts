@@ -89,6 +89,22 @@ describe("exportBookToCsv", () => {
     expect(document.querySelector("a[download]")).toBeNull();
   });
 
+  it("puts undated entries under the book date, as the table does", async () => {
+    const rows = [
+      { id: 1, date: "23/09/2026", money: "5.000" },
+      { id: 2, date: "", money: "7.000" },
+    ];
+
+    await exportBookToCsv({ bookId: "b1", bookTitle: "Dia", rows, bookDate: "2026-09-23" });
+
+    expect(String(blobs[0][0]).split("\r\n")).toEqual([
+      "﻿23/09/2026;Ganancias",
+      "5000;",
+      "7000;",
+      "12000;12000",
+    ]);
+  });
+
   it("falls back to the name 'libro' when the title has no usable characters", async () => {
     await exportBookToCsv({ bookId: "b1", bookTitle: "///", rows: week });
 

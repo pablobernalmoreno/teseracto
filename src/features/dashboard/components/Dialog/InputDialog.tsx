@@ -8,6 +8,7 @@ import type { EntryIssues } from "@/features/dashboard/model/reviewEntries";
 import type { MainData } from "@/types/dashboard";
 import { InvalidEntryCarousel } from "../InvalidEntryCarousel/InvalidEntryCarousel";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -31,6 +32,8 @@ export interface InputDialogProps {
   rangeTitle: string;
   canSave: boolean;
   activeEntryId: number | null;
+  // Why the last save failed; the review stays open so the user can retry.
+  saveError?: string | null;
   onClose: () => void;
   onSave: () => Promise<void> | void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -50,6 +53,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   rangeTitle,
   canSave,
   activeEntryId,
+  saveError,
   onClose,
   onSave,
   onFileChange,
@@ -191,6 +195,11 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       >
         {renderContent()}
       </DialogContent>
+      {saveError && (
+        <Alert severity="error" sx={{ mx: 3 }}>
+          {saveError}
+        </Alert>
+      )}
       <DialogActions className={styles.dialogActions}>
         <Button
           className="dashboard-dialog-button dashboard-dialog-button--secondary"

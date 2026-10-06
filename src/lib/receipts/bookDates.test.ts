@@ -7,6 +7,7 @@ import {
   nextFreeDate,
   rowsRangeTitle,
   shiftRowDates,
+  storedDateToIso,
 } from "./bookDates";
 
 const rows = [
@@ -117,5 +118,34 @@ describe("nextFreeDate", () => {
   it("is the day after the latest date, or '' with no dates", () => {
     expect(nextFreeDate(rows)).toBe("2026-09-26");
     expect(nextFreeDate([{ id: 1, date: "", money: "1" }])).toBe("");
+  });
+});
+
+describe("storedDateToIso", () => {
+  const originalTz = process.env.TZ;
+  beforeAll(() => {
+    process.env.TZ = "America/Bogota"; // UTC-5, where UTC midnight is the evening before
+  });
+  afterAll(() => {
+    if (originalTz === undefined) delete process.env.TZ;
+    else process.env.TZ = originalTz;
+  });
+
+  it("keeps the stored day for a date-only value and for UTC midnight", () => {
+    expect(storedDateToIso("2026-03-01")).toBe("2026-03-01");
+    expect(storedDateToIso("2026-03-01 00:00:00+00")).toBe("2026-03-01");
+    expect(storedDateToIso("2026-03-01T00:00:00+00:00")).toBe("2026-03-01");
+    expect(storedDateToIso("2026-03-01T00:00:00.000Z")).toBe("2026-03-01");
+  });
+
+  it("reads any other timestamp in the local timezone, as books saved before did", () => {
+    // 2026-03-01 03:00 UTC is 2026-02-28 22:00 in Bogota
+    expect(storedDateToIso("2026-03-01T03:00:00.000Z")).toBe("2026-02-28");
+    expect(storedDateToIso("2026-03-01 15:30:00+00")).toBe("2026-03-01");
+  });
+
+  it("returns '' for a missing or unreadable value", () => {
+    expect(storedDateToIso(undefined)).toBe("");
+    expect(storedDateToIso("not a date")).toBe("");
   });
 });

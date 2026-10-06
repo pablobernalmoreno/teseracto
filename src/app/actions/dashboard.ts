@@ -9,6 +9,7 @@ import {
   GENERIC_REQUEST_ERROR,
   normalizeBookIds,
   normalizeMainDataArray,
+  parseIsoDate,
   parseTrimmedString,
 } from "@/lib/security/validation";
 
@@ -302,13 +303,15 @@ export async function createBook(
 
   const normalizedTitle = title.trim();
   const normalizedContent = normalizeMainDataArray(content);
-  const normalizedCreationTime = creationTime?.trim();
+  // Same check as the route handler: a real calendar date, not just the YYYY-MM-DD shape.
+  const normalizedCreationTime =
+    creationTime === undefined ? undefined : parseIsoDate(creationTime);
   const trimmedBookId = bookId?.trim();
   if (bookId !== undefined && !trimmedBookId) {
     return { data: null, error: "Invalid book id" };
   }
 
-  if (normalizedCreationTime && !/^\d{4}-\d{2}-\d{2}$/.test(normalizedCreationTime)) {
+  if (normalizedCreationTime === null) {
     return { data: null, error: "Invalid creation date" };
   }
 

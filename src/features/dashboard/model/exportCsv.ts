@@ -11,6 +11,8 @@ export interface ExportCsvOptions {
   bookTitle: string;
   /** Pre-loaded rows. If omitted, they will be fetched from the API. */
   rows?: MainData[];
+  /** `yyyy-MM-dd` date of the book: where entries without a date go, as in the table. */
+  bookDate?: string;
 }
 
 // Semicolon separator and decimal comma: what Spanish-locale Excel splits and sums correctly.
@@ -59,7 +61,7 @@ export function buildBookCsv(rows: readonly MainData[], bookDate = ""): string {
 }
 
 export async function exportBookToCsv(options: ExportCsvOptions): Promise<void> {
-  const { bookId, bookTitle } = options;
+  const { bookId, bookTitle, bookDate } = options;
 
   let rows = options.rows;
 
@@ -72,7 +74,7 @@ export async function exportBookToCsv(options: ExportCsvOptions): Promise<void> 
     rows = result.data.content ?? [];
   }
 
-  const blob = new Blob([BOM + buildBookCsv(rows)], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob([BOM + buildBookCsv(rows, bookDate)], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const safeName = bookTitle.replaceAll(/[^a-zA-Z0-9_\-À-ɏ ]/g, "").trim();
 

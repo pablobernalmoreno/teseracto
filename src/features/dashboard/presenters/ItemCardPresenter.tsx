@@ -57,18 +57,23 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
       canSave: state.canSave,
       activeEntryId: state.activeEntryId,
       onClose: handleInputDialogClose,
+      saveError: state.saveError,
       onSave: async () => {
+        let newBook: BookData | null;
         try {
-          const newBook = await actions.handleSave();
-          // Close promptly to avoid a visible gap while list refresh completes.
-          setOpen(false);
+          newBook = await actions.handleSave();
+        } catch {
+          // Fails closed: nothing was saved, so the dialog stays open on the review. The model has
+          // already logged the error and exposes it as `saveError` for the dialog to show.
+          return;
+        }
 
-          // Keep save flow pending until the parent post-save workflow finishes.
-          if (onBookCreated) {
-            await onBookCreated(newBook);
-          }
-        } finally {
-          setOpen(false);
+        // Close promptly to avoid a visible gap while list refresh completes.
+        setOpen(false);
+
+        // Keep save flow pending until the parent post-save workflow finishes.
+        if (onBookCreated) {
+          await onBookCreated(newBook);
         }
       },
       onFileChange: actions.onFileChange,

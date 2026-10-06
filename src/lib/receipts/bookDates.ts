@@ -21,6 +21,33 @@ export function anyDateToIso(date: string | undefined): string {
   return `${year}-${month}-${day}`;
 }
 
+// A `timestamptz` read back as text: "2026-03-01 00:00:00+00" (Postgres) or an ISO string.
+const UTC_MIDNIGHT = /^(\d{4}-\d{2}-\d{2})[T ]00:00:00(?:\.0+)?(?:Z|\+00(?::?00)?)$/;
+const PG_DATE_TIME_GAP = /^(\d{4}-\d{2}-\d{2}) /;
+const PG_SHORT_OFFSET = /([+-]\d{2})$/;
+
+/**
+ * The `yyyy-MM-dd` day of a stored book date (BOOK-5). A book is saved with a date-only value,
+ * which the database keeps as UTC midnight, so that instant is read by its UTC day: reading it in
+ * a timezone west of UTC would show the day before. Any other timestamp (books saved before the
+ * date-only write) keeps being read in the local timezone. "" when it is not a date.
+ */
+export function storedDateToIso(stored: string | undefined): string {
+  const value = (stored ?? "").trim();
+  if (ISO_DATE.test(value)) return value;
+
+  const midnight = UTC_MIDNIGHT.exec(value);
+  if (midnight) return midnight[1];
+
+  // Postgres writes a space and a bare "+00" offset, which not every browser parses.
+  const parsed = new Date(value.replace(PG_DATE_TIME_GAP, "$1T").replace(PG_SHORT_OFFSET, "$1:00"));
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${parsed.getFullYear()}-${month}-${day}`;
+}
+
 const rowDisplayDates = (rows: readonly DatedRow[]) =>
   rows.map((row) => isoToDisplay(anyDateToIso(row.date)));
 
@@ -84,7 +111,9 @@ export function groupRowsByDate<T extends DatedRow>(
   const columns = new Map<string, T[]>();
   for (const row of rows) {
     const iso = anyDateToIso(row.date) || anyDateToIso(fallbackIso);
-    columns.set(iso, [...(columns.get(iso) ?? []), row]);
+    const column = columns.get(iso);
+    if (column) column.push(row);
+    else columns.set(iso, [row]);
   }
 
   return [...columns.entries()]

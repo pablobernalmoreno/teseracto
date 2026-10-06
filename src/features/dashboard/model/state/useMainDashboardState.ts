@@ -8,6 +8,7 @@ import {
   fillMissingDates,
   rowsRangeTitle,
   shiftRowDates,
+  storedDateToIso,
 } from "@/lib/receipts/bookDates";
 import { useDashboardBooksData } from "./useDashboardBooksData";
 import { useDashboardUiState } from "./useDashboardUiState";
@@ -69,21 +70,6 @@ interface DashboardActions {
 interface UseMainDashboardStateResult {
   state: DashboardState;
   actions: DashboardActions;
-}
-
-function normalizeCardDate(creationTime?: string): string {
-  if (!creationTime) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(creationTime)) return creationTime;
-
-  const parsed = new Date(creationTime);
-  if (Number.isNaN(parsed.getTime())) {
-    return "";
-  }
-
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, "0");
-  const day = String(parsed.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
 }
 
 function computeTitleFromDate(date: string): string {
@@ -188,7 +174,7 @@ export const useMainDashboardState = ({
 
   const openDetailInternal = async (bookId: string | number) => {
     const selectedBook = currentItems.find((item) => item.id === bookId);
-    const cardDate = normalizeCardDate(selectedBook?.creationTime);
+    const cardDate = storedDateToIso(selectedBook?.creationTime);
     // Fetch data before updating UI to avoid waterfall
     const rows = await booksData.fetchDetailRows(bookId, cardDate);
     // Set both states together (they're independent)

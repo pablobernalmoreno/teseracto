@@ -366,17 +366,39 @@ describe("useItemCardModel", () => {
       expect(result.current[0].dialogState).toEqual({ type: "invalid_entries" });
     });
 
-    it("rethrows a save failure and still closes the dialog", async () => {
+    it("fails closed on a save failure: rethrows, keeps the reviewed entries and the dialog, and reports the error", async () => {
       scriptOcr({ "a.png": receiptText("23 sept 2026", "15.000") });
       fetchCurrentUserProfile.mockResolvedValue({ data: null, error: { message: "nope" } });
       const { result } = renderHook(() => useItemCardModel());
       await readFiles(result, ["a.png"]);
+      const reviewed = result.current[0].entries;
 
       await act(async () => {
         await expect(result.current[1].handleSave()).rejects.toThrow("User profile not found");
       });
 
       expect(insertBookData).not.toHaveBeenCalled();
+      expect(result.current[0].dialogState).not.toEqual({ type: "idle" });
+      expect(result.current[0].entries).toBe(reviewed);
+      expect(result.current[0].saveError).toMatch(/No se pudo guardar/);
+    });
+
+    it("lets the user retry after a failed save, and clears the error once it succeeds", async () => {
+      scriptOcr({ "a.png": receiptText("23 sept 2026", "15.000") });
+      fetchCurrentUserProfile.mockResolvedValueOnce({ data: null, error: { message: "nope" } });
+      const { result } = renderHook(() => useItemCardModel());
+      await readFiles(result, ["a.png"]);
+
+      await act(async () => {
+        await expect(result.current[1].handleSave()).rejects.toThrow();
+      });
+      fetchCurrentUserProfile.mockResolvedValue({ data: { book_id: "owner-1" }, error: null });
+      await act(async () => {
+        await result.current[1].handleSave();
+      });
+
+      expect(insertBookData).toHaveBeenCalledTimes(1);
+      expect(result.current[0].saveError).toBeNull();
       expect(result.current[0].dialogState).toEqual({ type: "idle" });
     });
   });

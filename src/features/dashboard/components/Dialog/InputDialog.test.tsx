@@ -258,3 +258,18 @@ describe("InputDialog other states", () => {
     expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
   });
 });
+
+describe("InputDialog save error", () => {
+  it("shows why the save failed without leaving the review", () => {
+    renderDialog({ saveError: "No se pudo guardar el libro." });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo guardar el libro.");
+    expect(screen.getByLabelText("Fecha")).toBeInTheDocument();
+  });
+
+  it("shows no alert when the last save did not fail", () => {
+    renderDialog({ saveError: null });
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});

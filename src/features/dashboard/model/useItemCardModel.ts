@@ -103,6 +103,7 @@ export type DialogState =
   { type: "idle" } | { type: "loading" } | { type: "invalid_entries" } | { type: "success" };
 
 const OCR_FAILED_LOG = "OCR worker failed:";
+const SAVE_FAILED_MESSAGE = "No se pudo guardar el libro. Tus datos siguen aquí: intenta de nuevo.";
 
 // Returns the same array when nothing changes, so a no-op edit does not re-render.
 function updateEntry(
@@ -132,6 +133,8 @@ interface ItemCardModelState {
   // Title the book will get: the range from the lowest to the highest entry date.
   rangeTitle: string;
   canSave: boolean;
+  // Set when the last save failed; the review stays open so nothing the user fixed is lost.
+  saveError: string | null;
   // The carousel follows an entry by id, so it stays put when the listed entries change.
   activeEntryId: number | null;
 }
@@ -155,6 +158,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
   const [entries, setEntries] = useState<MainData[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [activeEntryId, setActiveEntryId] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [initialAttention, setInitialAttention] = useState<Set<number>>(new Set());
   // id -> the date the user confirmed; stale as soon as that entry's date changes.
   const [confirmedDates, setConfirmedDates] = useState<Map<number, string>>(new Map());
@@ -187,6 +191,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     setActiveEntryId(null);
     setInitialAttention(new Set());
     setConfirmedDates(new Map());
+    setSaveError(null);
   };
 
   const showReview = (reviewEntries: MainData[], reviewSources: string[]) => {
@@ -279,6 +284,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     const book = canSave ? buildBookFromEntries(entries) : null;
     if (!book) return null;
 
+    setSaveError(null);
     try {
       await validateCurrentProfile();
       const bookId = globalThis.crypto?.randomUUID
@@ -291,12 +297,15 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
         bookId,
         book.creationTime
       );
+      // Only a saved book closes the review; the complement is the catch below.
+      handleDialogClose();
       return result.data && result.data.length > 0 ? result.data[0] : null;
     } catch (error) {
+      // Fails closed: nothing was saved, and the entries, sources and confirmations are kept so the
+      // user can retry without re-uploading and re-reading every image.
       console.error("Error saving book data:", error);
+      setSaveError(SAVE_FAILED_MESSAGE);
       throw error;
-    } finally {
-      handleDialogClose();
     }
   };
 
@@ -326,6 +335,7 @@ export const useItemCardModel = (): [ItemCardModelState, ItemCardModelActions] =
     entryIssues,
     rangeTitle,
     canSave,
+    saveError,
     activeEntryId,
   };
 
