@@ -31,6 +31,11 @@ A user SHALL be able to create a book. The title SHALL be trimmed and at most 18
 - **WHEN** a second upload is saved with dates already covered by an earlier book
 - **THEN** a new book is created and the earlier book is unchanged
 
+#### Scenario: Date in a timezone west of UTC
+
+- **WHEN** a book saved with date 2026-03-01 is opened by a user whose timezone is UTC-5
+- **THEN** its date is still 2026-03-01, not 2026-02-28
+
 ## ADDED Requirements
 
 ### Requirement: BOOK-9 Entries ordered by date

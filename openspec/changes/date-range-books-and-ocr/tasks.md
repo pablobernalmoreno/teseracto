@@ -78,3 +78,16 @@
 ## 13. Export to CSV (`DASH-3`, `DASH-5`)
 
 - [x] 13.1 Replace the PDF export with a CSV export laid out like the book table (`exportCsv.ts`, `DashboardDetailPanel.tsx`), remove `jspdf`, `jspdf-autotable` and the now unused `dompurify` overrides, rename the Pro feature copy in `src/lib/pricing.ts`, and update `spec/SPEC.md` (GAP-2, GAP-12 citations); verify `exportCsv.test.ts` and `pnpm build`.
+
+## 14. Review follow-ups (PR 196)
+
+Docs side first: update the spec deltas named below in a docs-only commit, then the code commits. Write each failing test first; if production code would have to change to make a test pass, stop and report.
+
+- [ ] 14.1 Book date is the stored day in every timezone (`BOOK-5`): `creationTime` is `timestamptz` (verified against the live column) and is read back as `2026-03-01 00:00:00+00`, so `normalizeCardDate` in `useMainDashboardState.ts` turns it into the previous day for users west of UTC. Read side only, writes stay date-only: parse a date-only value or a zero-time UTC timestamp by its UTC date, and any other timestamp as before. Add a scenario to the `BOOK-5` delta; verify a test under `TZ=America/Bogota` that `2026-03-01 00:00:00+00` gives `2026-03-01`.
+- [ ] 14.2 CSV groups like the table (`DASH-5`): pass the book date from `DashboardDetailPanel.tsx` through `ExportCsvOptions` to `buildBookCsv`, so undated entries sit under the book date as on screen. Fix the `DASH-5` delta, which says undated entries go under "Sin fecha" (it is only the case when the book has no date); verify a test that the CSV columns equal the `groupRowsByDate(rows, bookDate)` columns for a book with undated rows.
+- [ ] 14.3 A failed save keeps the review (`OCR-6`): in `handleSave` in `useItemCardModel.ts`, close the dialog only after a successful save; on failure keep entries, sources and confirmations, show the error, and let the user retry. Comment that it fails closed (nothing is lost, nothing is written); verify a test that a rejected `insertBookData` leaves `entries` and `dialogState` unchanged.
+- [ ] 14.4 Same date validation at both entry points (`BOOK-5`): use `parseIsoDate` in `createBook` in `src/app/actions/dashboard.ts` instead of the regex; verify `2026-02-31` is rejected there as it is by `route.ts`.
+- [ ] 14.5 Export errors reach the user (`DASH-5`): in `DashboardDetailPanel.tsx` show a Snackbar when `exportBookToCsv` throws, with a comment that it fails closed (no file is downloaded, which `DASH-5` already requires); verify a test that a failed fetch shows the message.
+- [ ] 14.6 Linear grouping: push onto the existing array in `groupRowsByDate` in `bookDates.ts`; verify `bookDates.test.ts` still passes unchanged.
+- [ ] 14.7 Fix the stale `columnCount` comment in `DataTable.tsx` (the delete column is gone).
+- [ ] 14.8 Run the gate in order (`pnpm lint`, `pnpm exec next typegen`, `pnpm exec tsc --noEmit`, `pnpm test`), then `openspec validate "date-range-books-and-ocr" --strict`; deferred to the follow-up change `ocr-cancel-table-keys-shared-formatters`: OCR cancel and URL leaks, stable table column keys and draft date input, shared money and date formatter module.
