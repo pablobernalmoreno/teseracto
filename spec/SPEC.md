@@ -76,7 +76,7 @@ Requirements are normative in the capability specs below; this table is only an 
 | [`books`](../openspec/specs/books/spec.md)             | BOOK-1 to BOOK-8 | Ownership, list, pagination, search, create, update, delete, entry limits |
 | [`receipt-ocr`](../openspec/specs/receipt-ocr/spec.md) | OCR-1 to OCR-6   | In-browser receipt reading, date and amount extraction, manual fallback   |
 | [`dashboard`](../openspec/specs/dashboard/spec.md)     | DASH-1 to DASH-6 | Dashboard, summary, detail panel, history chart, CSV export               |
-| [`billing`](../openspec/specs/billing/spec.md)         | BILL-1 to BILL-7 | Plans, checkout config, webhook, membership extension                     |
+| [`billing`](../openspec/specs/billing/spec.md)         | BILL-1 to BILL-8 | Plans, checkout config, webhook, membership extension and expiry          |
 
 ## 5. Plans and entitlements
 
@@ -101,7 +101,7 @@ All tables are in `public` and have RLS enabled and forced
 | ------------------------ | --------------------------------------- | ------------------------------------------ | ------------------------------------- |
 | `user_profile`           | `id` = auth user id                     | Sign-up trigger; profile routes            | select/insert/update own row          |
 | `user_books`             | `id`; `owner_id → user_profile.book_id` | Server actions; books routes               | select/insert/update/delete own books |
-| `user_memberships`       | `user_id` = auth user id                | Sign-up trigger; webhook (service role)    | select own row                        |
+| `user_memberships`       | `user_id` = auth user id                | Sign-up trigger; webhook; expiry job       | select own row                        |
 | `billing_payments`       | `id`; unique `provider_reference`       | Checkout config and webhook (service role) | select own rows                       |
 | `billing_webhook_events` | `id`; unique `event_hash`               | Webhook (service role)                     | none (`with check (false)`)           |
 
@@ -138,7 +138,11 @@ Request bodies must be `application/json`, otherwise the handler returns 415. Er
 | `POST /api/billing/wompi/webhook`         | Wompi event                                  | `{ ok: true, duplicate? }`             | 400, 401, 404, 500           |
 
 When a user has no membership row, the profile endpoints return a default `free`/`active`
-membership (`src/app/api/dashboard/profile/route.ts:60-69`).
+membership (`src/app/api/dashboard/profile/route.ts:61-70`). A `member` membership that is `active` or
+`trialing` and whose `ends_at` has passed is reported as `expired`/`free` by both endpoints
+(`src/lib/membership.ts:20-32`, `src/app/api/dashboard/profile/route.ts:61`,
+`src/app/api/dashboard/profile/current/route.ts:102`), and an hourly `pg_cron` job stores that state
+(`migrations/20261006_expire_user_memberships.sql:7-30`, `:39-43`).
 
 Server actions (`src/app/actions/`): `signInAction`, `signUpAction`, `signOutAction`,
 `resendConfirmationEmailAction`, `fetchBooksPage`, `fetchBookContent`, `fetchAllBooksHistory`,
@@ -180,7 +184,7 @@ Each one is a candidate for its own task.
 - **GAP-2 CSV export is not restricted by plan.** It is advertised as Pro-only, but `exportBookToCsv` is called with no tier check (`src/features/dashboard/view/DashboardDetailPanel.tsx:48`).
 - **GAP-3 No OCR quota.** Both plans advertise a monthly limit on receipt reading, but OCR runs entirely in the browser and nothing counts it (`src/features/dashboard/model/useItemCardModel.ts:221-267`).
 - **GAP-4 OCR model (resolved).** The reader now uses the Spanish model, `createWorker("spa")` (`src/features/dashboard/model/useItemCardModel.ts:230`). On the 24 sample receipts the full read pipeline got 18 dates and 22 amounts right with `spa` and 19 and 22 with `eng` (`pnpm test:ocr`, `test-support/receipts/accuracy.ocr.ts`); the one extra date was a "25" read as "28".
-- **GAP-5 Memberships never expire.** `ends_at` is set on purchase, but nothing moves `status` to `expired` or `tier` back to `free` when it passes.
+- **GAP-5 Memberships never expire (resolved).** A lapsed `member` is now reported as `expired`/`free` by the profile endpoints (`src/lib/membership.ts:20-32`, `src/app/api/dashboard/profile/route.ts:61`, `src/app/api/dashboard/profile/current/route.ts:102`), and the database stores it within an hour through `public.expire_user_memberships()` scheduled with `pg_cron` (`migrations/20261006_expire_user_memberships.sql:7-30`, `:39-43`). The stored row stays `active` until that migration is applied to the project, and `past_due`, `canceled` and `suspended` are not expired (nothing sets them yet).
 - **GAP-6 Webhook replay can extend a membership twice.** If membership sync succeeds but marking the event processed fails, the route returns 500 (`src/app/api/billing/wompi/webhook/route.ts:421-433`). Wompi then redelivers the event, it is treated as unprocessed (`:272-276`), and `ends_at` is extended again (`:199-209`).
 - **GAP-7 Non-final Wompi statuses become `error`.** For example, `PENDING` maps to `error` rather than staying `pending` (`src/app/api/billing/wompi/webhook/route.ts:132-148`).
 - **GAP-8 Checkout return is not handled.** `/main?billing=processing&reference=…` is the return URL (`src/app/api/billing/wompi/checkout-config/route.ts:127`), but no dashboard code reads those query parameters.
