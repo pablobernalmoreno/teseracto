@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { GENERIC_REQUEST_ERROR, getBearerToken } from "@/lib/security/validation";
+import { expireMembership } from "@/lib/membership";
 
 interface UserProfile {
   id: string;
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
   const responseData: DashboardProfileResponse | null = profile
     ? {
         ...profile,
-        membership: membership ?? {
+        membership: (membership && expireMembership(membership)) ?? {
           tier: "free",
           status: "active",
           starts_at: new Date().toISOString(),

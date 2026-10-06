@@ -189,6 +189,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      expire_user_memberships: { Args: never; Returns: number };
       get_user_books_page_preview: {
         Args: { p_from: number; p_search_query?: string; p_to: number };
         Returns: {
