@@ -47,46 +47,40 @@ const ItemCardPresenterComponent: React.FC<ItemCardPresenterProps> = ({
   const isCreateVariant = cardId === "new-item";
 
   if (isCreateVariant) {
-    const carouselValues: {
-      [entryId: number]: { money: string };
-    } = {};
-    state.editedValues.forEach((value, entryId) => {
-      carouselValues[entryId] = value;
-    });
-
-    const entryMessages: Record<number, string> = {};
-    state.entryMessages.forEach((message, entryId) => {
-      entryMessages[entryId] = message;
-    });
-
     const dialogProps = {
       open,
       dialogState: state.dialogState,
-      invalidEntries: state.invalidEntries,
+      attentionEntries: state.attentionEntries,
+      entryIssues: Object.fromEntries(state.entryIssues),
       sources: state.sources,
-      carouselValues,
-      selectedDate: state.selectedDate,
-      excludedEntryIds: state.excludedEntryIds,
-      dateMismatchEntryIds: state.dateMismatchEntryIds,
-      entryMessages,
+      rangeTitle: state.rangeTitle,
+      canSave: state.canSave,
+      activeEntryId: state.activeEntryId,
       onClose: handleInputDialogClose,
+      saveError: state.saveError,
       onSave: async () => {
+        let newBook: BookData | null;
         try {
-          const newBook = await actions.handleSave();
-          // Close promptly to avoid a visible gap while list refresh completes.
-          setOpen(false);
+          newBook = await actions.handleSave();
+        } catch {
+          // Fails closed: nothing was saved, so the dialog stays open on the review. The model has
+          // already logged the error and exposes it as `saveError` for the dialog to show.
+          return;
+        }
 
-          // Keep save flow pending until the parent post-save workflow finishes.
-          if (onBookCreated) {
-            await onBookCreated(newBook);
-          }
-        } finally {
-          setOpen(false);
+        // Close promptly to avoid a visible gap while list refresh completes.
+        setOpen(false);
+
+        // Keep save flow pending until the parent post-save workflow finishes.
+        if (onBookCreated) {
+          await onBookCreated(newBook);
         }
       },
       onFileChange: actions.onFileChange,
-      onDateChange: actions.onSelectedDateChange,
+      onActiveEntryChange: actions.setActiveEntryId,
+      onDateChange: actions.onDateChange,
       onMoneyChange: actions.onMoneyChange,
+      onConfirmDate: actions.onConfirmDate,
       inputRef,
     };
 

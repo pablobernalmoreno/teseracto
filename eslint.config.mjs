@@ -18,6 +18,25 @@ const eslintConfig = [
     },
   },
   {
+    // OCR-10: the app must never derive dates or amounts from file names. The filename oracle
+    // lives in test-support/ and is only for tests.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/test-support", "**/test-support/**"],
+              message: "test-support is for tests only; app code must not read file names (OCR-10).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ["src/modules/dashboard/model/useDashboardPageModel.ts"],
     rules: {
       "@next/next/no-side-effects-in-dependencies": "off",

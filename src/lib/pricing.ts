@@ -63,7 +63,7 @@ export const plans: PricingPlan[] = [
       "Hasta 500 movimientos por libro",
       "Lectura automática ampliada para uso frecuente",
       "Historial y análisis completos",
-      "Exportación a PDF y soporte por correo",
+      "Exportación a CSV y soporte por correo",
     ],
   },
   {
@@ -125,7 +125,7 @@ export const comparisonRows: PricingComparisonRow[] = [
     pro: "Completo",
   },
   {
-    label: "Exportación PDF",
+    label: "Exportación CSV",
     free: "No incluida",
     pro: "Incluida",
   },

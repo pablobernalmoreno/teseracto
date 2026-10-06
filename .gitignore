@@ -60,3 +60,7 @@ Thumbs.db
 .github/prompts/
 .github/skills/
 .github/workflows/copilot-setup-steps.yml
+
+# Real receipt samples used only by the local OCR accuracy suite (names and account numbers).
+# Point RECEIPT_SAMPLES_DIR at them; never commit them.
+/test-support/receipts/private/

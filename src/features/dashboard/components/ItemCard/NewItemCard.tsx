@@ -5,14 +5,10 @@ import { Card, CardActionArea, CardContent } from "@mui/material";
 import "@/features/dashboard/components/dashboardStyles.css";
 import styles from "./NewItemCard.module.css";
 import { InputDialog, InputDialogProps } from "../Dialog/InputDialog";
-import { CarouselValues } from "../InvalidEntryCarousel/InvalidEntryCarousel";
 
 interface NewItemCardProps {
   onAddClick: () => void;
-  dialogProps: Omit<InputDialogProps, "carouselValues" | "onMoneyChange"> & {
-    carouselValues: CarouselValues;
-    onMoneyChange: (entryId: number, value: string) => void;
-  };
+  dialogProps: InputDialogProps;
 }
 
 export const NewItemCard: React.FC<NewItemCardProps> = ({ onAddClick, dialogProps }) => {
