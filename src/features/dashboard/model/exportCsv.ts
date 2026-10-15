@@ -1,5 +1,5 @@
 // CSV export of a book (DASH-5). Same layout as the book table: one column per date with that
-// day's amounts below, then Ganancias, and a last row with each day's total and the grand total.
+// day's amounts below, then Ingresos, and a last row with each day's total and the grand total.
 import { groupRowsByDate } from "@/lib/receipts/bookDates";
 import { dashboardService } from "./dashboardService";
 import { parseMoneyToNumber } from "./reviewEntries";
@@ -43,7 +43,7 @@ export function buildBookCsv(rows: readonly MainData[], bookDate = ""): string {
 
   const header = [
     ...columns.map((column) => (column.iso ? formatDateDisplay(column.iso) : "Sin fecha")),
-    "Ganancias",
+    "Ingresos",
   ];
   const body = Array.from({ length: lineCount }, (_, line) => [
     ...columns.map((column) => {
@@ -69,7 +69,7 @@ export async function exportBookToCsv(options: ExportCsvOptions): Promise<void> 
   if (!rows || rows.length === 0) {
     const result = await dashboardService.fetchBookContent(bookId);
     if (result.error || !result.data) {
-      throw new Error(result.error?.message ?? "No se pudo cargar el contenido del libro.");
+      throw new Error(result.error?.message ?? "No se pudo cargar el contenido de la planilla.");
     }
     rows = result.data.content ?? [];
   }
@@ -80,7 +80,7 @@ export async function exportBookToCsv(options: ExportCsvOptions): Promise<void> 
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${safeName || "libro"}.csv`;
+  link.download = `${safeName || "planilla"}.csv`;
   document.body.append(link);
   link.click();
   link.remove();

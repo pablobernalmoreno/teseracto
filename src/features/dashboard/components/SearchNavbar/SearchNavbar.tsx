@@ -31,13 +31,19 @@ export const SearchNavbar: React.FC<SearchNavbarProps> = ({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           label="Buscar"
-          placeholder="Buscar por título o descripción"
-          aria-label="Buscar tarjetas por título o descripción"
+          placeholder="Buscar por título"
+          aria-label="Buscar planillas por título"
         />
-        <Tooltip title={isDeleteDisabled ? "Select cards to delete" : "Delete selected cards"}>
+        <Tooltip
+          title={
+            isDeleteDisabled
+              ? "Selecciona planillas para eliminar"
+              : "Eliminar planillas seleccionadas"
+          }
+        >
           <span>
             <IconButton
-              aria-label={`Borrar ${selectedCount} tarjetas seleccionadas`}
+              aria-label={`Eliminar ${selectedCount} planillas seleccionadas`}
               color="error"
               onClick={onDeleteClick}
               disabled={isDeleteDisabled}
@@ -50,7 +56,7 @@ export const SearchNavbar: React.FC<SearchNavbarProps> = ({
         </Tooltip>
       </Box>
       <Typography variant="body2" className="search_navbar_count" aria-live="polite">
-        {matchCount} result{matchCount === 1 ? "" : "s"}
+        {matchCount} resultado{matchCount === 1 ? "" : "s"}
       </Typography>
     </Box>
   );

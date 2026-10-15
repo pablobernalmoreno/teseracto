@@ -28,6 +28,7 @@ interface DashboardDetailPanelProps {
   onBack: () => void;
   onSave: () => void;
   onSaveAndExit: () => void;
+  onTitleChange: (title: string) => void;
   onBookDateChange: (date: string) => void;
   onRowsChange: (rows: MainData[]) => void;
 }
@@ -43,6 +44,7 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
     onBack,
     onSave,
     onSaveAndExit,
+    onTitleChange,
     onBookDateChange,
     onRowsChange,
   }) => {
@@ -71,17 +73,24 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
         <Box className="dashboard_detail_header">
           <Box className="dashboard_detail_intro">
             <Typography className="dashboard_detail_eyebrow" component="p">
-              Cuaderno de edición
+              Editar planilla
             </Typography>
-            <Typography className="dashboard_detail_title" component="h2" variant="h4">
-              {title}
-            </Typography>
+            <TextField
+              className="dashboard_detail_title_input"
+              label="Nombre de la planilla"
+              placeholder="Detalle de la planilla"
+              size="small"
+              fullWidth
+              value={title}
+              onChange={(event) => onTitleChange(event.target.value)}
+              slotProps={{ htmlInput: { maxLength: 180 }, inputLabel: { shrink: true } }}
+            />
             <Typography className="dashboard_detail_description" variant="body1">
-              {"Ajusta fechas y ganancias con una vista limpia pensada para revisión rápida."}
+              {"Ajusta fechas e ingresos con una vista limpia, pensada para revisar rápido."}
             </Typography>
             <TextField
               className="dashboard_detail_date_input"
-              label="Fecha del libro"
+              label="Fecha de la planilla"
               type="date"
               size="small"
               value={bookDate || ""}
@@ -92,7 +101,7 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
           <Box className="dashboard_detail_actions">
             <Button className="dashboard_button dashboard_button--ghost" onClick={onBack}>
               <ArrowBackRoundedIcon fontSize="small" />
-              Volver al catálogo
+              Volver a mis planillas
             </Button>
             <Button
               className="dashboard_button dashboard_button--ghost"
@@ -141,7 +150,7 @@ export const DashboardDetailPanel: React.FC<DashboardDetailPanelProps> = React.m
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert severity="error" variant="filled" onClose={() => setExportFailed(false)}>
-            No se pudo exportar el libro. Intenta de nuevo.
+            No se pudo exportar la planilla. Intenta de nuevo.
           </Alert>
         </Snackbar>
       </Paper>

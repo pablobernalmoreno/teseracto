@@ -70,7 +70,7 @@ const parseMoneyToNumber = (value: string | number): number => {
 const sumMoney = (rows: readonly MainData[]) =>
   rows.reduce((sum, row) => sum + parseMoneyToNumber(row.money), 0);
 
-// One column per date, then Ganancias (BOOK-11). The data stays one `{ id, date, money }` entry per
+// One column per date, then Ingresos (BOOK-11). The data stays one `{ id, date, money }` entry per
 // receipt; the columns are only how the entries are laid out.
 export const DataTable: React.FC<DataTableProps> = React.memo(
   ({ rows, mode = "view", fixedDate, onRowsChange }) => {
@@ -81,8 +81,8 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
 
     const columns = useMemo(() => groupRowsByDate(rows, fixedDate), [rows, fixedDate]);
     const lineCount = Math.max(0, ...columns.map((column) => column.rows.length));
-    const totalGanancias = sumMoney(rows);
-    // Header cells: one per date column, plus Ganancias.
+    const totalIngresos = sumMoney(rows);
+    // Header cells: one per date column, plus Ingresos.
     const columnCount = columns.length + 1;
 
     const handleMoneyChange = useCallback(
@@ -201,7 +201,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
               htmlInput: {
                 inputMode: "decimal",
                 pattern: "[0-9.,]*",
-                "aria-label": `Ganancias del ${columnLabel(column)}`,
+                "aria-label": `Ingresos del ${columnLabel(column)}`,
               },
               input: {
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -231,7 +231,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
             <TableRow>
               {columns.map(renderHeaderCell)}
               <TableCell align="right" className="data-table-total-col">
-                Ganancias
+                Ingresos
               </TableCell>
             </TableRow>
           </TableHead>
@@ -301,7 +301,7 @@ export const DataTable: React.FC<DataTableProps> = React.memo(
                 </TableCell>
               ))}
               <TableCell align="right" className="data-table-total-cell data-table-total-col">
-                Total: {formatCurrency(totalGanancias)}
+                Total: {formatCurrency(totalIngresos)}
               </TableCell>
             </TableRow>
           </TableBody>

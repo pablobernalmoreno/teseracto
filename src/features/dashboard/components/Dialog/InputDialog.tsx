@@ -150,7 +150,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
               startIcon={<CloudUploadIcon />}
               onClick={(e) => e.stopPropagation()}
             >
-              <span>Subir Archivos</span>
+              <span>Subir archivos</span>
               <input
                 ref={inputRef}
                 type="file"
@@ -175,7 +175,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       aria-describedby="upload-dialog-description"
       className="dashboard-dialog"
     >
-      <DialogTitle id="alert-dialog-title">Subir Archivo</DialogTitle>
+      <DialogTitle id="alert-dialog-title">Subir comprobantes</DialogTitle>
       <DialogContent
         className={`file_upload_container ${styles.dialogContent} ${
           dialogState.type === "idle" ? styles.dialogContentClickable : ""

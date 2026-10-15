@@ -38,7 +38,7 @@ const UnsavedChangesDialog = ({
       <DialogTitle id="unsaved-changes-dialog-title">Cambios sin guardar</DialogTitle>
       <DialogContent>
         <Typography id="unsaved-changes-dialog-description">
-          Tienes cambios sin guardar. ¿Deseas guardarlos antes de salir?
+          Tienes cambios sin guardar. ¿Quieres guardarlos antes de salir?
         </Typography>
       </DialogContent>
       <DialogActions>

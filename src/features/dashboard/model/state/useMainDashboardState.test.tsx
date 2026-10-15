@@ -89,4 +89,29 @@ describe("useMainDashboardState detail view of a multi-day book (BOOK-10)", () =
 
     expect(result.current.state.activeCardTitle).toBe("Semana de la feria");
   });
+
+  it("saves a typed title and keeps showing it (BOOK-12)", async () => {
+    const { result } = await openWeekBook();
+
+    act(() => result.current.actions.handleDetailTitleChange("semana 3"));
+    await act(async () => {
+      result.current.actions.handleSaveDetail();
+    });
+
+    expect(mockSaveDetailRows.mock.calls[0][3]).toBe("semana 3");
+    expect(result.current.state.activeCardTitle).toBe("semana 3");
+    expect(result.current.state.hasUnsavedChanges).toBe(false);
+  });
+
+  it("does not save an empty title: the book keeps the one it was opened with (BOOK-12)", async () => {
+    const { result } = await openWeekBook();
+
+    act(() => result.current.actions.handleDetailTitleChange("   "));
+    await act(async () => {
+      result.current.actions.handleSaveDetail();
+    });
+
+    expect(mockSaveDetailRows.mock.calls[0][3]).toBe("23/09/2026 - 25/09/2026");
+    expect(result.current.state.activeCardTitle).toBe("23/09/2026 - 25/09/2026");
+  });
 });

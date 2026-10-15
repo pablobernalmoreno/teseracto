@@ -9,7 +9,7 @@ import "./pricingStyles.css";
 
 export const metadata: Metadata = {
   title: "Planes",
-  description: "Conoce los planes de Teseracto para gestionar tu biblioteca financiera.",
+  description: "Conoce los planes de Teseracto para llevar tus cuentas al día.",
   alternates: {
     canonical: "/pricing",
   },
@@ -42,8 +42,8 @@ const page = () => {
             <span className="pricing_title_accent">escala cuando lo necesites.</span>
           </Typography>
           <Typography className="pricing_subtitle">
-            El plan gratis te deja trabajar con hasta 10 libros y leer imágenes con un cupo mensual.
-            Los planes Pro desbloquean más capacidad, exportación y análisis avanzados.
+            El plan gratis te deja trabajar con hasta 10 planillas y leer imágenes con un cupo
+            mensual. Los planes Pro desbloquean más capacidad, exportación y análisis avanzados.
           </Typography>
         </section>
 

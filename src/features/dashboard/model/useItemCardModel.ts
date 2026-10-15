@@ -103,7 +103,8 @@ export type DialogState =
   { type: "idle" } | { type: "loading" } | { type: "invalid_entries" } | { type: "success" };
 
 const OCR_FAILED_LOG = "OCR worker failed:";
-const SAVE_FAILED_MESSAGE = "No se pudo guardar el libro. Tus datos siguen aquí: intenta de nuevo.";
+const SAVE_FAILED_MESSAGE =
+  "No se pudo guardar la planilla. Tus datos siguen aquí: intenta de nuevo.";
 
 // Returns the same array when nothing changes, so a no-op edit does not re-render.
 function updateEntry(

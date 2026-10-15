@@ -14,7 +14,7 @@ const receipt = (name: string) => `${FIXTURES}/${name}`;
 
 function openDialogWith(files: Parameters<Cypress.Chainable["selectFile"]>[0]) {
   mount(<ItemCardPresenter cardId="new-item" name="" />);
-  cy.get('[aria-label="Agregar un nuevo libro"]').click();
+  cy.get('[aria-label="Agregar una nueva planilla"]').click();
   cy.get('input[type="file"]').selectFile(files, { force: true });
 }
 

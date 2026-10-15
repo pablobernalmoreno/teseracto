@@ -16,7 +16,7 @@ export const NewItemCard: React.FC<NewItemCardProps> = ({ onAddClick, dialogProp
     <>
       <Card className={`dashboard-create-card-root ${styles.cardRoot}`}>
         <CardActionArea
-          aria-label="Agregar un nuevo libro"
+          aria-label="Agregar una nueva planilla"
           onClick={onAddClick}
           className={styles.cardActionArea}
         >
@@ -35,9 +35,9 @@ export const NewItemCard: React.FC<NewItemCardProps> = ({ onAddClick, dialogProp
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            <span className={styles.cardTitle}>Nuevo volumen</span>
+            <span className={styles.cardTitle}>Nueva planilla</span>
             <span className={styles.cardDescription}>
-              Incorpora otro libro al archivo y continúa catalogando.
+              Crea otra planilla y sigue registrando tus movimientos.
             </span>
           </CardContent>
         </CardActionArea>

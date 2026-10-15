@@ -21,10 +21,10 @@ const Page = () => {
       const result = await resendConfirmationEmailAction(resendEmail);
       if (result.success) {
         setTimeLeft(60);
-        setSuccessMessage("Email reenviado correctamente");
+        setSuccessMessage("Correo reenviado correctamente");
         setErrorMessage("");
       } else {
-        setErrorMessage(result.error || "Error al reenviar el email");
+        setErrorMessage(result.error || "No se pudo reenviar el correo");
       }
     });
   };
@@ -43,10 +43,10 @@ const Page = () => {
       <Box className="account_confirmation_form_container">
         <MarkEmailReadIcon aria-hidden="true" className={styles.confirmationIcon} />
         <Typography className="account_confirmation_title" component="h1" variant="h4">
-          Confirmación de Cuenta
+          Confirmación de cuenta
         </Typography>
         <Typography className="account_confirmation_subtitle" variant="h6">
-          Hemos enviado un email de confirmación para verificar tu cuenta. Por favor, revisa tu
+          Te enviamos un correo de confirmación para verificar tu cuenta. Por favor, revisa tu
           bandeja de entrada y sigue las instrucciones proporcionadas. Una vez que hayas confirmado
           tu cuenta, podrás{" "}
           <Link href="/login" underline="hover">
@@ -73,7 +73,7 @@ const Page = () => {
           <TextField
             size="small"
             type="email"
-            label="Ingresa tu email"
+            label="Escribe tu correo"
             value={resendEmail}
             onChange={(e) => setResendEmail(e.target.value)}
             variant="outlined"

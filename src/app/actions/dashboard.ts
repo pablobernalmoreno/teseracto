@@ -353,7 +353,8 @@ export async function createBook(
         .from("user_books")
         .insert({
           title:
-            parseTrimmedString(normalizedTitle || "Libro sin título", 180) || "Libro sin título",
+            parseTrimmedString(normalizedTitle || "Planilla sin título", 180) ||
+            "Planilla sin título",
           content: normalizedContent,
           owner_id: context.ownerBookId,
           creationTime: normalizedCreationTime ?? new Date().toISOString().slice(0, 10),

@@ -76,7 +76,7 @@ export const ViewItemCard: React.FC<ViewItemCardProps> = ({
             {name}
           </Typography>
           <Typography variant="body2" sx={{ color: "#60706a", lineHeight: 1.6 }}>
-            Ajusta fechas y ganancias con una vista limpia pensada para revisión rápida.
+            Ajusta fechas e ingresos con una vista limpia, pensada para revisar rápido.
           </Typography>
         </CardContent>
         <Box

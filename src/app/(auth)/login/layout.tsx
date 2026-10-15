@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Iniciar Sesion",
-  description: "Accede a tu cuenta de Teseracto para revisar y editar tus libros financieros.",
+  description: "Accede a tu cuenta de Teseracto para revisar y editar tus planillas.",
   robots: {
     index: false,
     follow: false,
