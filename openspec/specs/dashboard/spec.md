@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the authenticated dashboard where a user reviews books, edits entries, sees a history chart and exports PDFs.
+Defines the authenticated dashboard where a user reviews books, edits entries, sees a history chart and exports CSV files.
 
 ## Requirements
 
