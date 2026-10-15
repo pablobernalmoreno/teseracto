@@ -74,7 +74,7 @@ interface UseMainDashboardStateResult {
 
 function computeTitleFromDate(date: string): string {
   if (!date) {
-    return "Dia sin fecha";
+    return "Día sin fecha";
   }
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -231,12 +231,15 @@ export const useMainDashboardState = ({
     // without a date take the book date.
     const cardDate = earliestRowDate(uiState.editedRows) || detailCardDate;
     const rowsToSave = fillMissingDates(uiState.editedRows, cardDate);
+    // A blank title is never saved: the update action ignores it, so the book would keep its old
+    // title while the field stayed empty (BOOK-12). Fall back to the title it was opened with.
+    const titleToSave = detailCardTitle.trim() || initialDetailTitle;
 
     const result = await booksData.saveDetailRows(
       bookId,
       rowsToSave,
       cardDate || undefined,
-      detailCardTitle
+      titleToSave
     );
     if (result.error) {
       modals.showToast("Error al guardar", "error");
@@ -260,7 +263,8 @@ export const useMainDashboardState = ({
     uiState.setEditedRows(rowsToSave);
     setDetailCardDate(cardDate);
     setInitialDetailDate(cardDate);
-    setInitialDetailTitle(detailCardTitle);
+    setDetailCardTitle(titleToSave);
+    setInitialDetailTitle(titleToSave);
     setInitialDetailRows(rowsToSave);
     return true;
   };
@@ -333,7 +337,7 @@ export const useMainDashboardState = ({
         modals.showToast(result.error, "error");
       } else {
         uiState.clearCardSelection();
-        modals.showToast("Elementos eliminados correctamente", "success");
+        modals.showToast("Planillas eliminadas correctamente", "success");
         void booksData.refreshCurrentPage();
       }
     })();

@@ -19,28 +19,27 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: siteName,
   title: {
-    default: `${siteName} | Biblioteca Financiera`,
+    default: `${siteName} | Tus cuentas claras`,
     template: `%s | ${siteName}`,
   },
   description:
-    "Teseracto te ayuda a organizar libros financieros, registrar movimientos y entender patrones con claridad.",
+    "Teseracto te ayuda a organizar tus planillas, registrar movimientos y ver con claridad cómo se mueve tu plata.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: `${siteName} | Biblioteca Financiera`,
-    description:
-      "Organiza tus registros financieros y revisa tus libros con una experiencia clara y enfocada en productividad.",
+    title: `${siteName} | Tus cuentas claras`,
+    description: "Organiza tus ingresos y revisa tus planillas de forma clara, ágil y sin enredos.",
     url: "/",
     siteName,
-    locale: "es_ES",
+    locale: "es_CO",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteName} | Biblioteca Financiera`,
+    title: `${siteName} | Tus cuentas claras`,
     description:
-      "Organiza movimientos, revisa libros y descubre patrones financieros sin friccion.",
+      "Organiza movimientos, revisa planillas y entiende tus finanzas sin complicaciones.",
   },
   robots: {
     index: true,

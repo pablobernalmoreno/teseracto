@@ -8,7 +8,7 @@ import { Box, CircularProgress } from "@mui/material";
 
 export const metadata: Metadata = {
   title: "Panel",
-  description: "Panel privado de gestion de libros financieros.",
+  description: "Panel privado para gestionar tus planillas.",
   robots: {
     index: false,
     follow: false,

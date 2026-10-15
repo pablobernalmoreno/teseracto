@@ -114,13 +114,11 @@ export const DashboardHistoryView: React.FC<DashboardHistoryViewProps> = ({
 
     const sorted = Array.from(dateMap.entries()).sort(([a], [b]) => a.localeCompare(b));
 
-    return sorted.map(
-      ([date, total]): ChartDataPoint => ({
-        isoDate: date,
-        date: format(parseISO(date), "dd MMM yy", { locale: es }),
-        total,
-      })
-    );
+    return sorted.map(([date, total]): ChartDataPoint => ({
+      isoDate: date,
+      date: format(parseISO(date), "dd MMM yy", { locale: es }),
+      total,
+    }));
   }, [books]);
 
   const filteredChartData = useMemo(() => {
@@ -149,7 +147,7 @@ export const DashboardHistoryView: React.FC<DashboardHistoryViewProps> = ({
     chartContent = (
       <Box className="dashboard_history_empty">
         <Typography variant="body1" color="text.secondary">
-          Cargando historial de todos los libros...
+          Cargando el historial de todas las planillas...
         </Typography>
       </Box>
     );
@@ -180,7 +178,7 @@ export const DashboardHistoryView: React.FC<DashboardHistoryViewProps> = ({
           <Line
             type="monotone"
             dataKey="total"
-            name="Total de todos los libros"
+            name="Total de todas las planillas"
             stroke="#216f2e"
             strokeWidth={2.5}
             dot={false}
@@ -200,12 +198,12 @@ export const DashboardHistoryView: React.FC<DashboardHistoryViewProps> = ({
             className="appbar_buttons"
             startIcon={<ArrowBackIcon />}
             onClick={onBack}
-            aria-label="Volver a las tablas"
+            aria-label="Volver a mis planillas"
           >
             Volver
           </Button>
           <Typography variant="h5" component="h2" className="dashboard_history_title">
-            Historial general de libros
+            Historial general de planillas
           </Typography>
         </Box>
         <ToggleButtonGroup
@@ -219,10 +217,10 @@ export const DashboardHistoryView: React.FC<DashboardHistoryViewProps> = ({
           <ToggleButton value="all" aria-label="Mostrar todo">
             Todo
           </ToggleButton>
-          <ToggleButton value="month" aria-label="Mostrar ultimo mes">
+          <ToggleButton value="month" aria-label="Mostrar el último mes">
             Mes
           </ToggleButton>
-          <ToggleButton value="week" aria-label="Mostrar ultima semana">
+          <ToggleButton value="week" aria-label="Mostrar la última semana">
             Semana
           </ToggleButton>
         </ToggleButtonGroup>

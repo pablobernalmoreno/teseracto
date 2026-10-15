@@ -120,12 +120,12 @@ const loggedInButtons = (
         </Tooltip>
       </Box>
       <Box className="appbar_actions">
-        <Tooltip title="Ver libros" arrow>
+        <Tooltip title="Ver planillas" arrow>
           {onShowBooks ? (
             <Button
               className={`appbar_buttons ${activeSection === "books" ? "appbar_buttons_active" : ""}`}
               onClick={onShowBooks}
-              aria-label="Libros"
+              aria-label="Planillas"
               aria-pressed={activeSection === "books"}
             >
               <BookIcon aria-hidden="true" />
@@ -135,7 +135,7 @@ const loggedInButtons = (
               className={`appbar_buttons ${activeSection === "books" ? "appbar_buttons_active" : ""}`}
               component={Link}
               href="/main"
-              aria-label="Libros"
+              aria-label="Planillas"
               aria-pressed={activeSection === "books"}
             >
               <BookIcon aria-hidden="true" />

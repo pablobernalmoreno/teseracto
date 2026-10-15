@@ -100,7 +100,7 @@ const Page = () => {
             <AuthPasswordField
               fullWidth
               name="confirm_password"
-              label="Confirmar Contraseña"
+              label="Confirmar contraseña"
               variant="outlined"
               onChange={handleInputChange}
               value={user.confirm_password}

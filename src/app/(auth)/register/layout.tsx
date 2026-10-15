@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Crear Cuenta",
-  description: "Crea tu cuenta en Teseracto para comenzar a organizar tu biblioteca financiera.",
+  description: "Crea tu cuenta en Teseracto para empezar a organizar tus planillas.",
   robots: {
     index: false,
     follow: false,

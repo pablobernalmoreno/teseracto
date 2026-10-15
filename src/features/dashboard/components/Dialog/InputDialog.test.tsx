@@ -73,14 +73,14 @@ describe("InputDialog review", () => {
     renderDialog();
 
     expect(
-      screen.getByText("El libro se guardará como: 23/09/2026 - 25/09/2026")
+      screen.getByText("La planilla se guardará como: 23/09/2026 - 25/09/2026")
     ).toBeInTheDocument();
   });
 
   it("says the book has no date yet when there is no range", () => {
     renderDialog({ rangeTitle: "" });
 
-    expect(screen.getByText("El libro aún no tiene fecha")).toBeInTheDocument();
+    expect(screen.getByText("La planilla aún no tiene fecha")).toBeInTheDocument();
   });
 
   describe("date outlier", () => {
@@ -243,7 +243,7 @@ describe("InputDialog other states", () => {
   it("offers the file picker when idle", () => {
     renderDialog({ dialogState: { type: "idle" }, attentionEntries: [], entryIssues: {} });
 
-    expect(screen.getByText("Subir Archivos")).toBeInTheDocument();
+    expect(screen.getByText("Subir archivos")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
   });
 
@@ -261,9 +261,9 @@ describe("InputDialog other states", () => {
 
 describe("InputDialog save error", () => {
   it("shows why the save failed without leaving the review", () => {
-    renderDialog({ saveError: "No se pudo guardar el libro." });
+    renderDialog({ saveError: "No se pudo guardar la planilla." });
 
-    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo guardar el libro.");
+    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo guardar la planilla.");
     expect(screen.getByLabelText("Fecha")).toBeInTheDocument();
   });
 

@@ -28,28 +28,30 @@ export const DashboardSummaryStats: React.FC<DashboardSummaryStatsProps> = React
     const summaryItems = useMemo(
       () => [
         {
-          label: "Archivo",
+          label: "Planillas",
           value: libraryCount,
           icon: <AutoStoriesRoundedIcon fontSize="inherit" />,
-          tone: "Tus libros listos para revisar.",
+          tone: "Tus planillas listas para revisar.",
         },
         {
-          label: "En vista",
+          label: "En pantalla",
           value: selectedCardId ? editedRowsLength : filteredCount,
           icon: <GridViewRoundedIcon fontSize="inherit" />,
-          tone: selectedCardId ? "Filas cargadas en edición." : "Resultados disponibles ahora.",
+          tone: selectedCardId
+            ? "Movimientos en edición."
+            : "Planillas que coinciden con tu búsqueda.",
         },
         {
           label: "Selección",
           value: selectedDeleteCount,
           icon: <PlaylistAddCheckCircleRoundedIcon fontSize="inherit" />,
-          tone: "Elementos listos para acción masiva.",
+          tone: "Planillas marcadas para eliminar.",
         },
         {
           label: "Páginas",
           value: totalPages,
           icon: <LayersRoundedIcon fontSize="inherit" />,
-          tone: "Recorrido paginado de la colección.",
+          tone: "Páginas para recorrer tus planillas.",
         },
       ],
       [
@@ -63,7 +65,7 @@ export const DashboardSummaryStats: React.FC<DashboardSummaryStatsProps> = React
     );
 
     return (
-      <Box className="dashboard_hero_stats" aria-label="Resumen del dashboard">
+      <Box className="dashboard_hero_stats" aria-label="Resumen del panel">
         {summaryItems.map((item) => (
           <Paper key={item.label} elevation={0} className="dashboard_stat_card">
             <Box className="dashboard_stat_icon" aria-hidden="true">

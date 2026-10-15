@@ -20,10 +20,10 @@ const headerCells = () =>
     .map((cell) => cell.textContent);
 
 describe("DataTable with one column per date (BOOK-11)", () => {
-  it("shows a column for every distinct date in order, then Ganancias", () => {
+  it("shows a column for every distinct date in order, then Ingresos", () => {
     render(<DataTable rows={week} mode="view" />);
 
-    expect(headerCells()).toEqual(["23/09/2026", "24/09/2026", "25/09/2026", "Ganancias"]);
+    expect(headerCells()).toEqual(["23/09/2026", "24/09/2026", "25/09/2026", "Ingresos"]);
   });
 
   it("stacks a day's amounts in its column and totals each day and the whole", () => {
@@ -38,16 +38,16 @@ describe("DataTable with one column per date (BOOK-11)", () => {
     expect(screen.getByText("Total: 92,400")).toBeInTheDocument();
   });
 
-  it("has a single date column plus Ganancias for a one-day book", () => {
+  it("has a single date column plus Ingresos for a one-day book", () => {
     render(<DataTable rows={[week[0]]} mode="view" />);
 
-    expect(headerCells()).toEqual(["23/09/2026", "Ganancias"]);
+    expect(headerCells()).toEqual(["23/09/2026", "Ingresos"]);
   });
 
   it("puts entries without a date under the book date when there is one", () => {
     render(<DataTable rows={[{ id: 9, date: "", money: "5.000" }]} fixedDate="2026-09-23" />);
 
-    expect(headerCells()).toEqual(["23/09/2026", "Ganancias"]);
+    expect(headerCells()).toEqual(["23/09/2026", "Ingresos"]);
   });
 
   it("says there is no data for no entries", () => {
@@ -66,7 +66,7 @@ describe("DataTable with one column per date (BOOK-11)", () => {
     it("edits an amount and keeps its date", async () => {
       const onRowsChange = setup();
 
-      await userEvent.type(screen.getAllByLabelText("Ganancias del 24/09/2026")[0], "0");
+      await userEvent.type(screen.getAllByLabelText("Ingresos del 24/09/2026")[0], "0");
 
       const next = onRowsChange.mock.calls.at(-1)?.[0] as MainData[];
       expect(next.find((row) => row.id === 3)).toEqual({

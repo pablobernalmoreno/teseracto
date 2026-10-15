@@ -57,7 +57,6 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
     allItems,
     selectedDeleteCount,
     selectedCardTitle,
-    activeItem,
     activeCardDate,
     activeCardTitle,
     libraryCount,
@@ -111,7 +110,7 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
   const dashboardContent = selectedCardId ? (
     <DashboardDetailPanel
       bookId={selectedCardId}
-      title={activeCardTitle || activeItem?.title || "Detalle del libro"}
+      title={activeCardTitle}
       bookDate={activeCardDate}
       hasUnsavedChanges={hasUnsavedChanges}
       editedRows={editedRows}
@@ -119,6 +118,7 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
       onBack={actions.handleBackFromDetail}
       onSave={actions.handleSaveDetail}
       onSaveAndExit={actions.handleSaveAndExitDetail}
+      onTitleChange={actions.handleDetailTitleChange}
       onBookDateChange={actions.handleDetailDateChange}
       onRowsChange={actions.setEditedRows}
     />
@@ -166,7 +166,7 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
             <Paper elevation={0} className="dashboard_loading_panel">
               <CircularProgress size={88} />
               <Typography className="dashboard_loading_text" variant="body1">
-                Preparando el archivo y ordenando tus registros.
+                Preparando tus planillas y ordenando tus movimientos.
               </Typography>
             </Paper>
           ) : (
@@ -196,14 +196,14 @@ export const MainPageContent: React.FC<MainPageContentProps> = ({
         <Box className="dashboard_hero">
           <Box className="dashboard_hero_copy">
             <Typography className="dashboard_hero_eyebrow" component="p">
-              Archivo vivo de tu biblioteca
+              Tus planillas al día
             </Typography>
             <Typography className="dashboard_hero_title" component="h1" variant="h2">
-              Un tablero con pulso editorial para revisar, ordenar y corregir cada libro.
+              Un panel claro para revisar, ordenar y corregir cada planilla.
             </Typography>
             <Typography className="dashboard_hero_body" variant="body1">
-              La colección se presenta como una mesa de trabajo cálida, con foco en lectura rápida,
-              selección masiva y edición sin ruido visual.
+              Tus planillas en una mesa de trabajo ordenada: encuentra lo que buscas rápido, elimina
+              varias a la vez y edita sin distracciones.
             </Typography>
           </Box>
 

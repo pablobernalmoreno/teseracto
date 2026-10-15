@@ -20,9 +20,9 @@ const week = [
 ];
 
 describe("buildBookCsv", () => {
-  it("has a column per date, the amounts stacked, then Ganancias and a totals row", () => {
+  it("has a column per date, the amounts stacked, then Ingresos and a totals row", () => {
     expect(buildBookCsv(week).split("\r\n")).toEqual([
-      "23/09/2026;24/09/2026;25/09/2026;Ganancias",
+      "23/09/2026;24/09/2026;25/09/2026;Ingresos",
       "15000;38100;21500;",
       "17800;;;",
       "32800;38100;21500;92400",
@@ -32,14 +32,14 @@ describe("buildBookCsv", () => {
   it("sorts columns by date whatever the order of the entries and mixes both stored formats", () => {
     const [header] = buildBookCsv([week[3], week[2], week[0]]).split("\r\n");
 
-    expect(header).toBe("23/09/2026;24/09/2026;25/09/2026;Ganancias");
+    expect(header).toBe("23/09/2026;24/09/2026;25/09/2026;Ingresos");
   });
 
   it("puts entries without a date in a Sin fecha column, or under the book date when given", () => {
     const rows = [...week.slice(0, 1), { id: 9, date: "", money: "5.000" }];
 
-    expect(buildBookCsv(rows).split("\r\n")[0]).toBe("23/09/2026;Sin fecha;Ganancias");
-    expect(buildBookCsv(rows, "2026-09-23").split("\r\n")[0]).toBe("23/09/2026;Ganancias");
+    expect(buildBookCsv(rows).split("\r\n")[0]).toBe("23/09/2026;Sin fecha;Ingresos");
+    expect(buildBookCsv(rows, "2026-09-23").split("\r\n")[0]).toBe("23/09/2026;Ingresos");
   });
 
   it("uses a decimal comma and leaves an entry without an amount empty", () => {
@@ -48,11 +48,11 @@ describe("buildBookCsv", () => {
       { id: 2, date: "23/09/2026", money: "" },
     ]);
 
-    expect(csv.split("\r\n")).toEqual(["23/09/2026;Ganancias", "1234,5;", ";", "1234,5;1234,5"]);
+    expect(csv.split("\r\n")).toEqual(["23/09/2026;Ingresos", "1234,5;", ";", "1234,5;1234,5"]);
   });
 
   it("is just a header and a zero total for an empty book", () => {
-    expect(buildBookCsv([])).toBe("Ganancias\r\n0");
+    expect(buildBookCsv([])).toBe("Ingresos\r\n0");
   });
 });
 
@@ -84,9 +84,21 @@ describe("exportBookToCsv", () => {
     await exportBookToCsv({ bookId: "b1", bookTitle: "23/09/2026 - 25/09/2026", rows: week });
 
     expect(downloads).toEqual(["23092026 - 25092026.csv"]);
-    expect(blobs[0][0]).toMatch(/^﻿23\/09\/2026;24\/09\/2026;25\/09\/2026;Ganancias/);
+    expect(blobs[0][0]).toMatch(/^﻿23\/09\/2026;24\/09\/2026;25\/09\/2026;Ingresos/);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:csv");
     expect(document.querySelector("a[download]")).toBeNull();
+  });
+
+  it("names the file after the renamed planilla, keeping its spaces", async () => {
+    await exportBookToCsv({ bookId: "b1", bookTitle: "semana 3", rows: week });
+
+    expect(downloads).toEqual(["semana 3.csv"]);
+  });
+
+  it("removes the characters a file name cannot hold", async () => {
+    await exportBookToCsv({ bookId: "b1", bookTitle: "Gastos: 1/2 (marzo)", rows: week });
+
+    expect(downloads).toEqual(["Gastos 12 marzo.csv"]);
   });
 
   it("puts undated entries under the book date, as the table does", async () => {
@@ -98,17 +110,17 @@ describe("exportBookToCsv", () => {
     await exportBookToCsv({ bookId: "b1", bookTitle: "Dia", rows, bookDate: "2026-09-23" });
 
     expect(String(blobs[0][0]).split("\r\n")).toEqual([
-      "﻿23/09/2026;Ganancias",
+      "﻿23/09/2026;Ingresos",
       "5000;",
       "7000;",
       "12000;12000",
     ]);
   });
 
-  it("falls back to the name 'libro' when the title has no usable characters", async () => {
+  it("falls back to the name 'planilla' when the title has no usable characters", async () => {
     await exportBookToCsv({ bookId: "b1", bookTitle: "///", rows: week });
 
-    expect(downloads).toEqual(["libro.csv"]);
+    expect(downloads).toEqual(["planilla.csv"]);
   });
 
   it("fetches the rows when none are loaded", async () => {

@@ -13,7 +13,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   title: "Inicio",
   description:
-    "Organiza tus libros financieros, registra movimientos y visualiza patrones de forma simple con Teseracto.",
+    "Organiza tus planillas, registra movimientos y mira cómo se mueve tu plata de forma simple con Teseracto.",
   alternates: {
     canonical: "/",
   },
@@ -59,13 +59,13 @@ export default function Home() {
         <section className="hero_section">
           <Box className="hero_text_block">
             <Typography className="title" component="h1" variant="h2">
-              Lecciones e insights
+              Tus cuentas claras
               <br />
-              <span className="title_accent">de tus finanzas en minutos</span>
+              <span className="title_accent">en pocos minutos</span>
             </Typography>
             <Typography variant="h6" className="description">
-              Crea libros, registra movimientos y visualiza patrones de forma limpia. Todo en una
-              experiencia ligera, clara y pensada para equipos modernos.
+              Crea planillas, registra movimientos y mira cómo se mueve tu plata. Una herramienta
+              ligera y clara para tu equipo.
             </Typography>
           </Box>
           <Box className="hero_visual" aria-hidden="true">
@@ -82,9 +82,9 @@ export default function Home() {
 
         <section className="segments_section" aria-label="Tipos de organizaciones">
           <Typography className="section_title" component="h2" variant="h4">
-            Gestiona toda tu comunidad
+            Lleva las cuentas de toda tu comunidad
           </Typography>
-          <Typography className="section_subtitle">en un sistema simple y potente</Typography>
+          <Typography className="section_subtitle">en un solo lugar, fácil y completo</Typography>
           <Box className="segment_cards">
             <article className="segment_card">
               <Groups2OutlinedIcon className="segment_icon" />
@@ -94,7 +94,7 @@ export default function Home() {
                 comunitarias
               </Typography>
               <Typography className="segment_text">
-                Consolida movimientos y reportes con un panel operativo central.
+                Reúne movimientos y reportes en un solo panel.
               </Typography>
             </article>
             <article className="segment_card">
@@ -105,7 +105,7 @@ export default function Home() {
                 nacionales
               </Typography>
               <Typography className="segment_text">
-                Estandariza el seguimiento por regiones y comparte métricas clave.
+                Lleva el control por regiones y comparte las cifras que importan.
               </Typography>
             </article>
             <article className="segment_card">
@@ -116,7 +116,7 @@ export default function Home() {
                 locales
               </Typography>
               <Typography className="segment_text">
-                Visualiza desempeño y detecta cambios en el momento correcto.
+                Mira cómo van tus cuentas y detecta los cambios a tiempo.
               </Typography>
             </article>
           </Box>

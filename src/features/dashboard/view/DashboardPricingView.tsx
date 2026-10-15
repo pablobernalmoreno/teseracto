@@ -70,7 +70,7 @@ const waitForWidgetCheckout = (): Promise<void> => {
       if (Date.now() >= timeoutAt) {
         reject(
           new Error(
-            "No se pudo cargar Wompi Checkout. Revisa tu conexion, desactiva bloqueadores de contenido y permite checkout.wompi.co."
+            "No se pudo cargar Wompi Checkout. Revisa tu conexión, desactiva bloqueadores de contenido y permite checkout.wompi.co."
           )
         );
         return;
@@ -110,7 +110,7 @@ const loadWompiWidgetScript = (): Promise<void> => {
         () =>
           reject(
             new Error(
-              "No se pudo descargar el script de Wompi. Revisa red/firewall y que checkout.wompi.co no este bloqueado."
+              "No se pudo descargar el script de Wompi. Revisa tu red o firewall y que checkout.wompi.co no esté bloqueado."
             )
           ),
         { once: true }
@@ -134,7 +134,7 @@ const loadWompiWidgetScript = (): Promise<void> => {
     script.onerror = () =>
       reject(
         new Error(
-          "No se pudo descargar el script de Wompi. Revisa red/firewall y que checkout.wompi.co no este bloqueado."
+          "No se pudo descargar el script de Wompi. Revisa tu red o firewall y que checkout.wompi.co no esté bloqueado."
         )
       );
     document.body.appendChild(script);
@@ -207,7 +207,7 @@ export const DashboardPricingView: React.FC<DashboardPricingViewProps> = ({ onBa
             className="appbar_buttons"
             startIcon={<ArrowBackIcon />}
             onClick={onBack}
-            aria-label="Volver al tablero"
+            aria-label="Volver al panel"
           >
             Volver
           </Button>

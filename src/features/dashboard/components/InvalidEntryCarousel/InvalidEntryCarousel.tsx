@@ -136,7 +136,9 @@ export const InvalidEntryCarousel: React.FC<InvalidEntryCarouselProps> = ({
         Entrada {currentIndex + 1} de {entries.length}
       </Typography>
       <Typography variant="body2" color="text.secondary" className={styles.selectedDate}>
-        {rangeTitle ? `El libro se guardará como: ${rangeTitle}` : "El libro aún no tiene fecha"}
+        {rangeTitle
+          ? `La planilla se guardará como: ${rangeTitle}`
+          : "La planilla aún no tiene fecha"}
       </Typography>
       <Fade in={true} timeout={500}>
         <div className={styles.content}>

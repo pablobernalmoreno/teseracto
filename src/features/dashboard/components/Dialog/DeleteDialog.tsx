@@ -27,8 +27,8 @@ const DeleteDialog = ({
 }: DeleteDialogProps) => {
   const dialogDescription =
     selectedDeleteCount === 1
-      ? `¿Estás seguro de que deseas borrar el elemento ${selectedCardTitle}?`
-      : `¿Estás seguro de que deseas borrar los ${selectedDeleteCount} elementos?`;
+      ? `¿Seguro que quieres eliminar la planilla ${selectedCardTitle}?`
+      : `¿Seguro que quieres eliminar las ${selectedDeleteCount} planillas?`;
 
   return (
     <Dialog
@@ -38,7 +38,7 @@ const DeleteDialog = ({
       aria-labelledby="delete-items-dialog-title"
       aria-describedby="delete-items-dialog-description"
     >
-      <DialogTitle id="delete-items-dialog-title">Borrar elementos</DialogTitle>
+      <DialogTitle id="delete-items-dialog-title">Eliminar planillas</DialogTitle>
       <DialogContent>
         <Typography id="delete-items-dialog-description">{dialogDescription}</Typography>
       </DialogContent>
@@ -52,7 +52,7 @@ const DeleteDialog = ({
           variant="contained"
           onClick={onDelete}
         >
-          Borrar
+          Eliminar
         </Button>
       </DialogActions>
     </Dialog>

@@ -41,8 +41,8 @@ export const plans: PricingPlan[] = [
     ctaClassName: "pricing_btn_secondary",
     href: "/register",
     features: [
-      "Hasta 10 libros",
-      "Hasta 100 movimientos por libro",
+      "Hasta 10 planillas",
+      "Hasta 100 movimientos por planilla",
       "Panel básico de estadísticas",
       "Lectura automática de imágenes con cupo mensual limitado",
       "Carga de imágenes",
@@ -59,8 +59,8 @@ export const plans: PricingPlan[] = [
     ctaClassName: "pricing_btn_secondary",
     href: "/register",
     features: [
-      "Libros ilimitados",
-      "Hasta 500 movimientos por libro",
+      "Planillas ilimitadas",
+      "Hasta 500 movimientos por planilla",
       "Lectura automática ampliada para uso frecuente",
       "Historial y análisis completos",
       "Exportación a CSV y soporte por correo",
@@ -105,12 +105,12 @@ export const BILLING_PLANS: Record<PaidPricingPlanId, BillingPlanDefinition> = {
 
 export const comparisonRows: PricingComparisonRow[] = [
   {
-    label: "Libros",
+    label: "Planillas",
     free: "10",
-    pro: "Ilimitados",
+    pro: "Ilimitadas",
   },
   {
-    label: "Movimientos por libro",
+    label: "Movimientos por planilla",
     free: "100",
     pro: "500",
   },
