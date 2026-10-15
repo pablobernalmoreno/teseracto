@@ -57,7 +57,7 @@ The table of a book SHALL show one column per distinct entry date, in ascending 
 
 ### Requirement: BOOK-12 Rename a book while editing
 
-The detail view of a book SHALL show its title in an editable field, labeled for the planilla's name and limited to 180 characters. Changing the title SHALL mark the book as having unsaved changes, and saving SHALL store the new title through the update action of BOOK-6. A title the user typed SHALL NOT be replaced by one computed from the dates, as BOOK-10 already provides. An empty title SHALL NOT be saved: the book SHALL keep its previous title, as the update action already does for a blank title, and the field SHALL show that title again after saving. (`src/features/dashboard/view/DashboardDetailPanel.tsx`, `src/features/dashboard/model/state/useMainDashboardState.ts:144`, `:200-212`, `:239`)
+The detail view of a book SHALL show its title in an editable field, labeled for the planilla's name and limited to 180 characters. Changing the title SHALL mark the book as having unsaved changes, and saving SHALL store the new title through the update action of BOOK-6. A title the user typed SHALL NOT be replaced by one computed from the dates, as BOOK-10 already provides. An empty title SHALL NOT be saved: the book SHALL keep its previous title, as the update action already does for a blank title, and the field SHALL show that title again after saving. (`src/features/dashboard/view/DashboardDetailPanel.tsx:78-87`, `src/features/dashboard/model/state/useMainDashboardState.ts:144`, `:200-212`, `:236-242`, `:266-267`)
 
 #### Scenario: Rename and save
 

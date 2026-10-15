@@ -43,4 +43,4 @@
 
 - [x] 6.1 Run the gate: `pnpm lint`, `pnpm exec next typegen`, `pnpm exec tsc --noEmit`, `pnpm test`; all green before any commit
 - [ ] 6.2 Check the UI by eye on landing, login, panel, planilla detail, history and pricing; confirm gender agreement everywhere
-- [ ] 6.3 Commit docs/specs and code separately, docs first (per AGENTS.md)
+- [x] 6.3 Commit docs/specs and code separately, docs first (per AGENTS.md)
