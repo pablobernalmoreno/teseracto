@@ -39,7 +39,7 @@
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.3",
     "date-fns": "4.4.0",
-    "next": "16.3.8",
+    "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "recharts": "3.10.1",
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.7",
-    "@napi-rs/canvas": "1.0.9",
+    "@napi-rs/canvas": "1.0.10",
     "@tailwindcss/postcss": "4.3.1",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
